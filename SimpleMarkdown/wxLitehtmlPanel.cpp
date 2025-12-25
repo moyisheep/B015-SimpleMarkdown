@@ -8,13 +8,19 @@
 #include <wx/fontenum.h>
 #include <algorithm>
 
-wxLitehtmlPanel::wxLitehtmlPanel(wxFrame* parent) : wxPanel(parent), m_parent(parent)
+//wxLitehtmlPanel::wxLitehtmlPanel(wxFrame* parent) : wxPanel(parent), m_parent(parent)
+//{
+//    SetBackgroundStyle(wxBG_STYLE_PAINT);
+//    Bind(wxEVT_PAINT, &wxLitehtmlPanel::OnPaint, this);
+//    Bind(wxEVT_SIZE, [this](wxSizeEvent&) { Refresh(); });
+//}
+wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
+    : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
 {
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
-    Bind(wxEVT_PAINT, &wxLitehtmlPanel::OnPaint, this);
-    Bind(wxEVT_SIZE, [this](wxSizeEvent&) { Refresh(); });
+    m_totalHeight = 0;
+    m_scrollPos = 0;
+    SetScrollRate(0, 20); // 设置垂直滚动步长
 }
-
 wxLitehtmlPanel::~wxLitehtmlPanel()
 {
     if (m_doc)
@@ -27,11 +33,12 @@ void wxLitehtmlPanel::set_html(const std::string& html)
 {
 
 
-    m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, this);
+    m_doc = litehtml::document::createFromString(html.c_str() , this);
     if (m_doc)
     {
         int width = GetClientSize().GetWidth();
         m_doc->render(width);
+        SetupScrollbars(); // 添加这行
     }
     Refresh();
 }
@@ -400,9 +407,84 @@ void wxLitehtmlPanel::on_mouse_event(const litehtml::element::ptr& el, litehtml:
     // Not implemented in this basic version
 }
 
+
+
+
+bool wxLitehtmlPanel::open_html(const wxString& file_path)
+{
+    // Check if file exists
+    if (!wxFileExists(file_path)) {
+        wxLogError("HTML file not found: %s", file_path);
+        return false;
+    }
+
+    // Read the file content
+    wxFile file(file_path);
+    if (!file.IsOpened()) {
+        wxLogError("Failed to open HTML file: %s", file_path);
+        return false;
+    }
+
+    wxString html_content;
+    if (!file.ReadAll(&html_content, wxConvAuto())) {
+        wxLogError("Failed to read HTML file: %s", file_path);
+        return false;
+    }
+    file.Close();
+
+    // Set base URL to file's directory for relative paths
+    wxFileName fn(file_path);
+    fn.MakeAbsolute();
+    std::string base_url = fn.GetPath(wxPATH_GET_SEPARATOR | wxPATH_GET_VOLUME).ToStdString();
+    this->set_base_url(base_url.c_str());
+
+    // Set the HTML content
+    this->set_html(html_content.ToUTF8().data());
+    return true;
+}
+
+
+
+
+
+
+void wxLitehtmlPanel::SetupScrollbars()
+{
+    if (!m_doc) return;
+
+    int clientHeight = GetClientSize().GetHeight();
+    m_totalHeight = m_doc->height();
+
+    SetVirtualSize(-1, m_totalHeight);
+    SetScrollRate(0, 20);
+
+    int scrollRange = m_totalHeight - clientHeight;
+    if (scrollRange > 0) {
+        EnableScrolling(false, true);
+        SetScrollbars(0, 20, 0, scrollRange / 20 + 1, 0, m_scrollPos / 20);
+    }
+    else {
+        EnableScrolling(false, false);
+    }
+}
+
+void wxLitehtmlPanel::ScrollToPosition(int pos)
+{
+    m_scrollPos = pos;
+    SetScrollPos(wxVERTICAL, pos);
+    Refresh();
+}
+
+int wxLitehtmlPanel::GetScrollPosition() const
+{
+    return m_scrollPos;
+}
+
 void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
+    DoPrepareDC(dc); // 处理滚动偏移
+
     dc.Clear();
 
     if (m_doc)
@@ -411,10 +493,93 @@ void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
         get_viewport(pos);
 
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
-        m_doc->draw(hdc, 0, 0, &pos);
+        m_doc->draw(hdc, 0, -m_scrollPos, &pos);
     }
 }
 
-wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxPanel)
+void wxLitehtmlPanel::OnScroll(wxScrollWinEvent& event)
+{
+    int newPos = GetScrollPos(wxVERTICAL);
+    if (newPos != m_scrollPos)
+    {
+        m_scrollPos = newPos;
+        Refresh();
+    }
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnMouseWheel(wxMouseEvent& event)
+{
+    int rotation = event.GetWheelRotation();
+    int delta = event.GetWheelDelta();
+    int lines = rotation / delta;
+
+    int newPos = m_scrollPos - lines * 20; // 20是滚动步长
+    newPos = wxMax(0, wxMin(newPos, m_totalHeight - GetClientSize().GetHeight()));
+
+    if (newPos != m_scrollPos)
+    {
+        ScrollToPosition(newPos);
+    }
+}
+
+void wxLitehtmlPanel::OnSize(wxSizeEvent& event)
+{
+    if (m_doc)
+    {
+        int width = GetClientSize().GetWidth();
+        m_doc->render(width);
+        SetupScrollbars();
+    }
+    event.Skip();
+}
+
+
+void wxLitehtmlPanel::EnableDragAndDrop(bool enable)
+{
+    if (enable)
+    {
+        DragAcceptFiles(true);
+    }
+    else
+    {
+        DragAcceptFiles(false);
+    }
+}
+
+bool wxLitehtmlPanel::CanOpenFile(const wxString& file_path)
+{
+    //wxString ext = wxFileName(file_path).GetExt().Lower();
+    //return ext == "html" || ext == "htm";
+    return true;
+}
+
+void wxLitehtmlPanel::OnDropFiles(wxDropFilesEvent& event)
+{
+    if (event.GetNumberOfFiles() > 0)
+    {
+        wxString* dropped = event.GetFiles();
+        wxString file_path = dropped[0];
+
+        if (CanOpenFile(file_path))
+        {
+            if (!open_html(file_path))
+            {
+                wxMessageBox("Failed to load HTML file", "Error", wxICON_ERROR);
+            }
+        }
+        else
+        {
+            wxMessageBox("Only HTML files (.html, .htm) are supported", "Error", wxICON_WARNING);
+        }
+    }
+}
+
+
+wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxScrolled<wxPanel>)
 EVT_PAINT(wxLitehtmlPanel::OnPaint)
+EVT_SCROLLWIN(wxLitehtmlPanel::OnScroll)
+EVT_MOUSEWHEEL(wxLitehtmlPanel::OnMouseWheel)
+EVT_SIZE(wxLitehtmlPanel::OnSize)
+EVT_DROP_FILES(wxLitehtmlPanel::OnDropFiles)
 wxEND_EVENT_TABLE()

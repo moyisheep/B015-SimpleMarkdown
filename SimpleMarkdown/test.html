@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            background: white;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei UI", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #eee;
+            z-index: 1;
+        }
+
+        /* 头部样式 */
+        .header {
+            padding: 35px 20px 25px;
+            text-align: center;
+            background: white;
+            position: relative;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            color: #222;
+            position: relative;
+        }
+
+        .subtitle {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #777;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+        }
+
+        /* 内容区域 */
+        .content {
+            padding: 30px 40px;
+            background: white;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+            .section::after {
+                content: "";
+                position: absolute;
+                bottom: -20px;
+                left: 10%;
+                right: 10%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #eee, transparent);
+            }
+
+            .section:last-child::after {
+                display: none;
+            }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #222;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+        }
+
+            .section-title::after {
+                content: "";
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 50%;
+                height: 2px;
+                background: #222;
+                border-radius: 2px;
+            }
+
+        /* 操作指南 */
+        .instructions-list {
+            list-style: none;
+            margin-left: 5px;
+        }
+
+            .instructions-list li {
+                position: relative;
+                padding-left: 32px;
+                margin-bottom: 18px;
+                line-height: 1.7;
+                font-size: 1rem;
+                color: #444;
+            }
+
+                .instructions-list li:before {
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    top: 6px;
+                    width: 20px;
+                    height: 20px;
+                    background: #f5f5f5;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #555;
+                    font-weight: bold;
+                    font-size: 0.9rem;
+                    border: 1px solid #ddd;
+                }
+
+                .instructions-list li:first-child:before {
+                    content: "1";
+                }
+
+                .instructions-list li:nth-child(2):before {
+                    content: "2";
+                }
+
+                .instructions-list li:nth-child(3):before {
+                    content: "3";
+                }
+
+        /* 快捷键区域 */
+        .shortcuts-grid {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #eee;
+        }
+
+        .shortcut-row {
+            display: table-row;
+        }
+
+            .shortcut-row:nth-child(even) {
+                background-color: #fafafa;
+            }
+
+        .shortcut-key, .shortcut-desc {
+            display: table-cell;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .shortcut-key {
+            font-weight: 600;
+            width: 200px;
+            color: #444;
+            letter-spacing: 0.3px;
+        }
+
+        .shortcut-key_item {
+            background: #f5f5f5;
+            border-radius: 4px;
+            padding: 5px 10px;
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+            margin: 3px 2px;
+            border: 1px solid #ddd;
+            min-width: 32px;
+        }
+
+        .shortcut-desc {
+            color: #444;
+            font-size: 1rem;
+        }
+
+        /* 页脚装饰 */
+        .footer-decoration {
+            text-align: center;
+            padding: 20px 0;
+            background: white;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+        }
+
+            .footer-decoration::before {
+                content: "···";
+                display: block;
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+                color: #ddd;
+                letter-spacing: 5px;
+            }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .content {
+                padding: 25px 20px;
+            }
+
+            .shortcut-key, .shortcut-desc {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+
+            .shortcut-key {
+                width: 140px;
+            }
+
+            .logo {
+                font-size: 2.2rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <div class="header">
+            <div class="logo">Simple Reader</div>
+
+            <div class="subtitle"></div>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">总阅读时长</h2>
+                <ul class="instructions-list">
+                    <li><strong>[ID_READING_TIME]</strong> </li>
+
+                </ul>
+            </div>
+            <!-- 操作指南区域 -->
+            <div class="section">
+                <h2 class="section-title">如何开始阅读</h2>
+                <ul class="instructions-list">
+                    <li><strong>菜单栏打开</strong> - 使用顶部菜单栏：文件 → 打开，选择 EPUB 文件</li>
+                    <li><strong>拖放打开</strong> - 将 EPUB 文件直接拖放到此窗口即可打开</li>
+                    <li><strong>双击打开</strong> - 设置 EPUB 文件默认使用本程序打开后，直接双击文件打开</li>
+                </ul>
+            </div>
+
+            <!-- 快捷键区域 -->
+            <div class="section">
+                <h2 class="section-title">快捷键指南</h2>
+                <div class="shortcuts-grid">
+                    <div class="shortcut-row">
+                        <div class="shortcut-key"><span class="shortcut-key_item">TAB</span></div>
+                        <div class="shortcut-desc">显示/隐藏目录窗口</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key"><span class="shortcut-key_item">F5</span></div>
+                        <div class="shortcut-desc">刷新当前文档</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">CTRL</span> <span class="shortcut-key_item">+</span>
+                        </div>
+                        <div class="shortcut-desc">增大字体</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">ALT</span>  <span class="shortcut-key_item">+</span>
+                        </div>
+                        <div class="shortcut-desc">增加文档宽度</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">CTRL</span>
+                            <span class="shortcut-key_item">SHIFT</span>  <span class="shortcut-key_item">+</span>
+                        </div>
+                        <div class="shortcut-desc">增加行高</div>
+                    </div>
+
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">CTRL</span> <span class="shortcut-key_item">-</span>
+                        </div>
+                        <div class="shortcut-desc">减小字体</div>
+                    </div>
+
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">ALT</span>  <span class="shortcut-key_item">-</span>
+                        </div>
+                        <div class="shortcut-desc">减小文档宽度</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">CTRL</span>
+                            <span class="shortcut-key_item">SHIFT</span>  <span class="shortcut-key_item">-</span>
+                        </div>
+                        <div class="shortcut-desc">减小行高</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key"><span class="shortcut-key_item">CTRL</span> <span class="shortcut-key_item">BACKSPACE</span></div>
+                        <div class="shortcut-desc">重置字体大小</div>
+                    </div>
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">ALT</span> <span class="shortcut-key_item">BACKSPACE</span>
+                        </div>
+                        <div class="shortcut-desc">重置文档宽度</div>
+                    </div>
+
+                    <div class="shortcut-row">
+                        <div class="shortcut-key">
+                            <span class="shortcut-key_item">CTRL</span>
+                            <span class="shortcut-key_item">SHIFT</span>  <span class="shortcut-key_item">BACKSPACE</span>
+                        </div>
+                        <div class="shortcut-desc">重置行高</div>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+</html>

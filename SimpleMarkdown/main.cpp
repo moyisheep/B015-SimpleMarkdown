@@ -15,8 +15,10 @@ bool MyApp::OnInit()
     wxLitehtmlPanel* container = new wxLitehtmlPanel(frame);
     frame->Show(true);
 
-    std::string html = "<html><body><h1>Hello, World!</h1><p>This is a simple HTML page rendered using LiteHtml and wxWidgets.</p></body></html>";
-    container->set_html(html);
+    //std::string html = "<html><body><h1>Hello, World!</h1><p>This is a simple HTML page rendered using LiteHtml and wxWidgets.</p></body></html>";
+    //container->set_html(html);
+    container->EnableDragAndDrop(true);
+    container->open_html("./test.html");
 
     return true;
 }

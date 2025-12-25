@@ -6,14 +6,23 @@
 #include <wx/wx.h>
 
 
-class wxLitehtmlPanel : public litehtml::document_container, public wxPanel
+class wxLitehtmlPanel : public litehtml::document_container, public wxScrolled<wxPanel>
 {
 public:
-    wxLitehtmlPanel(wxFrame* parent);
+    wxLitehtmlPanel(wxWindow* parent);
     ~wxLitehtmlPanel();
 
     // 其他方法
     void set_html(const std::string& html);
+    bool open_html(const wxString& file_path);
+
+    // 滚动相关方法
+    void SetupScrollbars();
+    void ScrollToPosition(int pos);
+    int GetScrollPosition() const;
+
+    // 拖拽加载
+    void EnableDragAndDrop(bool enable = true);
 private:
 
     litehtml::element::ptr create_element(const char* tag_name, const litehtml::string_map& attributes, const std::shared_ptr<litehtml::document>& doc) override;
@@ -55,11 +64,26 @@ private:
     bool on_element_click(const litehtml::element::ptr& el) override;
     void on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event) override;
 
-    void OnPaint(wxPaintEvent& event);
     litehtml::document::ptr m_doc;
 
     wxFrame* m_parent;
  
+    // 滚动相关变量
+    int m_totalHeight;
+    int m_scrollPos;
+
+    // 重写事件处理
+    void OnPaint(wxPaintEvent& event);
+    void OnScroll(wxScrollWinEvent& event);
+    void OnMouseWheel(wxMouseEvent& event);
+    void OnSize(wxSizeEvent& event);
+
+    // Add these event handlers
+    void OnDropFiles(wxDropFilesEvent& event);
+    bool CanOpenFile(const wxString& file_path);
+
+    // Add to your existing private section
+    std::string m_base_url;
 
     DECLARE_EVENT_TABLE()
 };
