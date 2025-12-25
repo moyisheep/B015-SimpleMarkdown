@@ -6,6 +6,7 @@
 #include <wx/uri.h>
 #include <wx/tokenzr.h>
 #include <wx/fontenum.h>
+#include <wx/clipbrd.h>
 #include <algorithm>
 
 //wxLitehtmlPanel::wxLitehtmlPanel(wxFrame* parent) : wxPanel(parent), m_parent(parent)
@@ -17,8 +18,12 @@
 wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
 {
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
     m_totalHeight = 0;
     m_scrollPos = 0;
+    m_isSelecting = false;
+    m_selectionStart = wxDefaultPosition;
+    m_selectionEnd = wxDefaultPosition;
     SetScrollRate(0, 20); // 设置垂直滚动步长
 }
 wxLitehtmlPanel::~wxLitehtmlPanel()
@@ -276,6 +281,10 @@ void wxLitehtmlPanel::draw_text(litehtml::uint_ptr hdc, const char* text,
     dc->SetFont(*font);
     dc->SetTextForeground(wxColour(color.red, color.green, color.blue));
     dc->DrawText(wxString::FromUTF8(text), pos.x, pos.y);
+
+    // 缓存文本信息
+    wxSize textSize = dc->GetTextExtent(wxString::FromUTF8(text));
+    AddTextToCache(wxString::FromUTF8(text), wxRect(pos.x, pos.y, textSize.GetWidth(), textSize.GetHeight()), font);
 }
 
 void wxLitehtmlPanel::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker)
@@ -486,14 +495,19 @@ void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
     DoPrepareDC(dc); // 处理滚动偏移
 
     dc.Clear();
+    // 清除文本缓存（每次绘制时重新缓存）
+    m_textChunks.clear();
 
     if (m_doc)
     {
+        // 绘制选择区域
+ 
         litehtml::position pos;
         get_viewport(pos);
 
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
         m_doc->draw(hdc, 0, -m_scrollPos, &pos);
+        DrawSelection(dc);
     }
 }
 
@@ -576,10 +590,200 @@ void wxLitehtmlPanel::OnDropFiles(wxDropFilesEvent& event)
 }
 
 
+
+// 添加文本到缓存
+void wxLitehtmlPanel::AddTextToCache(const wxString& text, const wxRect& rect, wxFont* font)
+{
+    TextChunk chunk;
+    chunk.text = text;
+    chunk.rect = rect;
+    chunk.font = std::make_shared<wxFont>(*font);
+    m_textChunks.push_back(chunk);
+}
+
+// 获取选中文本
+wxString wxLitehtmlPanel::GetSelectedText() const
+{
+    return ExtractTextFromSelection();
+}
+
+// 复制选中文本到剪贴板
+void wxLitehtmlPanel::CopySelectedText()
+{
+    wxString selectedText = GetSelectedText();
+    if (!selectedText.IsEmpty() && wxTheClipboard->Open())
+    {
+        wxTheClipboard->SetData(new wxTextDataObject(selectedText));
+        wxTheClipboard->Close();
+    }
+}
+
+// 清除选择
+void wxLitehtmlPanel::ClearSelection()
+{
+    m_selectionStart = wxDefaultPosition;
+    m_selectionEnd = wxDefaultPosition;
+    m_selectionRects.clear();
+    Refresh();
+}
+
+// 鼠标事件处理
+void wxLitehtmlPanel::OnLeftDown(wxMouseEvent& event)
+{
+    wxPoint pt = event.GetPosition();
+    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+
+    m_selectionStart = pt;
+    m_selectionEnd = pt;
+    m_isSelecting = true;
+    m_textChunks.clear(); // 清除旧缓存
+
+    SetFocus();
+    Refresh();
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnMouseMove(wxMouseEvent& event)
+{
+    if (m_isSelecting && event.Dragging())
+    {
+        wxPoint pt = event.GetPosition();
+        CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+
+        m_selectionEnd = pt;
+        UpdateSelection(pt);
+        Refresh();
+    }
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnLeftUp(wxMouseEvent& event)
+{
+    if (m_isSelecting)
+    {
+        m_isSelecting = false;
+        Refresh();
+    }
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnKeyDown(wxKeyEvent& event)
+{
+    if (event.GetKeyCode() == 'A' && event.ControlDown())
+    {
+        // 全选
+        wxSize size = GetClientSize();
+        m_selectionStart = wxPoint(0, 0);
+        m_selectionEnd = wxPoint(size.GetWidth(), size.GetHeight());
+        UpdateSelection(m_selectionEnd);
+        Refresh();
+    }
+    else if (event.GetKeyCode() == 'C' && event.ControlDown())
+    {
+        CopySelectedText();
+    }
+    else if (event.GetKeyCode() == WXK_ESCAPE)
+    {
+        ClearSelection();
+    }
+    event.Skip();
+}
+
+// 更新选择区域
+void wxLitehtmlPanel::UpdateSelection(const wxPoint& pt)
+{
+    m_selectionRects.clear();
+
+    // 手动标准化选择区域（替代Normalize()）
+    int left = wxMin(m_selectionStart.x, m_selectionEnd.x);
+    int right = wxMax(m_selectionStart.x, m_selectionEnd.x);
+    int top = wxMin(m_selectionStart.y, m_selectionEnd.y);
+    int bottom = wxMax(m_selectionStart.y, m_selectionEnd.y);
+    wxRect selectionRect(left, top, right - left, bottom - top);
+
+    // 查找与选择区域相交的文本块
+    for (const auto& chunk : m_textChunks)
+    {
+        if (chunk.rect.Intersects(selectionRect))
+        {
+            // 计算精确的交集区域
+            wxRect intersect = chunk.rect;
+            intersect.Intersect(selectionRect);
+            m_selectionRects.push_back(intersect);
+        }
+    }
+}
+
+// 绘制选择高亮
+void wxLitehtmlPanel::DrawSelection(wxDC& dc)
+{
+    if (m_selectionRects.empty() || m_textChunks.empty()) return;
+
+    // 设置选择高亮样式
+    wxColour highlightColor(51, 153, 255, 120); // 半透明蓝色
+    dc.SetBrush(wxBrush(highlightColor));
+    dc.SetPen(*wxTRANSPARENT_PEN);
+
+    // 遍历所有文本块
+    for (const auto& chunk : m_textChunks)
+    {
+        // 检查文本块是否与任何选择矩形相交
+        for (const auto& selRect : m_selectionRects)
+        {
+            if (chunk.rect.Intersects(selRect))
+            {
+                // 计算精确的交集区域
+                wxRect highlightRect = chunk.rect;
+                highlightRect.Intersect(selRect);
+
+                // 绘制高亮背景
+                dc.DrawRectangle(highlightRect);
+
+
+            }
+        }
+    }
+}
+
+
+// 从选择区域提取文本
+wxString wxLitehtmlPanel::ExtractTextFromSelection() const
+{
+    wxString result;
+
+    // 按Y坐标排序选择区域
+    std::vector<wxRect> sortedRects = m_selectionRects;
+    std::sort(sortedRects.begin(), sortedRects.end(),
+        [](const wxRect& a, const wxRect& b) {
+            return a.y < b.y || (a.y == b.y && a.x < b.x);
+        });
+
+    // 提取文本
+    for (const auto& selRect : sortedRects)
+    {
+        for (const auto& chunk : m_textChunks)
+        {
+            if (chunk.rect.Intersects(selRect))
+            {
+                // 简单实现：添加整个文本块
+                // 更精确的实现需要计算字符级别的选择
+                result += chunk.text + " ";
+                break;
+            }
+        }
+    }
+
+    return result.Trim();
+}
+
 wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxScrolled<wxPanel>)
-EVT_PAINT(wxLitehtmlPanel::OnPaint)
-EVT_SCROLLWIN(wxLitehtmlPanel::OnScroll)
-EVT_MOUSEWHEEL(wxLitehtmlPanel::OnMouseWheel)
-EVT_SIZE(wxLitehtmlPanel::OnSize)
-EVT_DROP_FILES(wxLitehtmlPanel::OnDropFiles)
+    EVT_PAINT(wxLitehtmlPanel::OnPaint)
+    EVT_SCROLLWIN(wxLitehtmlPanel::OnScroll)
+    EVT_MOUSEWHEEL(wxLitehtmlPanel::OnMouseWheel)
+    EVT_SIZE(wxLitehtmlPanel::OnSize)
+    EVT_DROP_FILES(wxLitehtmlPanel::OnDropFiles)
+    EVT_LEFT_DOWN(wxLitehtmlPanel::OnLeftDown)
+    EVT_LEFT_UP(wxLitehtmlPanel::OnLeftUp)
+    EVT_MOTION(wxLitehtmlPanel::OnMouseMove)
+    EVT_KEY_DOWN(wxLitehtmlPanel::OnKeyDown)
 wxEND_EVENT_TABLE()

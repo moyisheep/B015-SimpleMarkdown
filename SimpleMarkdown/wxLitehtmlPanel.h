@@ -23,6 +23,12 @@ public:
 
     // 拖拽加载
     void EnableDragAndDrop(bool enable = true);
+
+    // 新增文本选择和复制功能
+    wxString GetSelectedText() const;
+    void CopySelectedText();
+    void ClearSelection();
+
 private:
 
     litehtml::element::ptr create_element(const char* tag_name, const litehtml::string_map& attributes, const std::shared_ptr<litehtml::document>& doc) override;
@@ -84,6 +90,35 @@ private:
 
     // Add to your existing private section
     std::string m_base_url;
+
+    // 文本位置缓存结构
+    struct TextChunk {
+        wxString text;
+        wxRect rect;
+        std::shared_ptr<wxFont> font;
+    };
+
+    // 选择相关成员变量
+    std::vector<TextChunk> m_textChunks;
+    wxPoint m_selectionStart;
+    wxPoint m_selectionEnd;
+    bool m_isSelecting;
+    std::vector<wxRect> m_selectionRects;
+
+    // 新增事件处理
+    void OnLeftDown(wxMouseEvent& event);
+    void OnLeftUp(wxMouseEvent& event);
+    void OnMouseMove(wxMouseEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
+
+    // 辅助方法
+    void UpdateSelection(const wxPoint& pos);
+    void DrawSelection(wxDC& dc);
+    void DrawCharacterLevelSelection(wxDC& dc);
+    std::vector<wxRect> CalculateCharacterRects(const TextChunk& chunk);
+    bool IsCharacterSelected(const TextChunk& chunk, size_t charIndex);
+    wxString ExtractTextFromSelection() const;
+    void AddTextToCache(const wxString& text, const wxRect& rect, wxFont* font);
 
     DECLARE_EVENT_TABLE()
 };
