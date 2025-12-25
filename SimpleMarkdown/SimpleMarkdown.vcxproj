@@ -148,10 +148,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
+    <ClInclude Include="wxContainer.h" />
     <ClInclude Include="wxLitehtmlPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="wxLitehtmlPanel.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
