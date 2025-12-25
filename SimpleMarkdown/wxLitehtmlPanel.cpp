@@ -58,8 +58,8 @@ litehtml::uint_ptr wxLitehtmlPanel::create_font(const litehtml::font_description
     const litehtml::document* doc, litehtml::font_metrics* fm)
 {
     wxFont font;
-    int size = (int)(descr.size * 96.0f / 72.0f); // Convert pt to px
-
+    //int size = (int)(descr.size * 96.0f / 72.0f); // Convert pt to px
+    int size = descr.size;
     // Parse font family list (comma-separated)
     wxArrayString fontFamilies;
     wxStringTokenizer tokenizer(wxString::FromUTF8(descr.family.c_str()), ",");
@@ -145,10 +145,11 @@ litehtml::uint_ptr wxLitehtmlPanel::create_font(const litehtml::font_description
         wxCoord height, descent, externalLeading;
         dc.GetTextExtent("x", nullptr, &height, &descent, &externalLeading);
 
+        fm->font_size = descr.size;
         fm->ascent = height - descent;
         fm->descent = descent;
         fm->height = height;
-
+        
         // Better approximation for x-height
         wxCoord xHeight;
         dc.GetTextExtent("x", nullptr, &xHeight);
