@@ -21,6 +21,8 @@ wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
     m_selectionEnd = wxDefaultPosition;
     SetScrollRate(0, 20); // 设置垂直滚动步长
     m_container = std::make_unique<wxContainer>(this);
+    m_container->set_vfs(std::make_shared< LocalVFS>());
+
 }
 wxLitehtmlPanel::~wxLitehtmlPanel()
 {
@@ -117,64 +119,6 @@ int wxLitehtmlPanel::GetScrollPosition() const
     return m_scrollPos;
 }
 
-void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
-{
-    wxPaintDC dc(this);
-    DoPrepareDC(dc); // 处理滚动偏移
-
-    dc.Clear();
-    // 清除文本缓存（每次绘制时重新缓存）
-    m_textChunks.clear();
-
-    if (m_doc)
-    {
-        // 绘制选择区域
- 
-        litehtml::position pos;
-        m_container->get_viewport(pos);
-
-        litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
-        m_doc->draw(hdc, 0, -m_scrollPos, &pos);
-        DrawSelection(dc);
-    }
-}
-
-void wxLitehtmlPanel::OnScroll(wxScrollWinEvent& event)
-{
-    int newPos = GetScrollPos(wxVERTICAL);
-    if (newPos != m_scrollPos)
-    {
-        m_scrollPos = newPos;
-        Refresh();
-    }
-    event.Skip();
-}
-
-void wxLitehtmlPanel::OnMouseWheel(wxMouseEvent& event)
-{
-    int rotation = event.GetWheelRotation();
-    int delta = event.GetWheelDelta();
-    int lines = rotation / delta;
-
-    int newPos = m_scrollPos - lines * 20; // 20是滚动步长
-    newPos = wxMax(0, wxMin(newPos, m_totalHeight - GetClientSize().GetHeight()));
-
-    if (newPos != m_scrollPos)
-    {
-        ScrollToPosition(newPos);
-    }
-}
-
-void wxLitehtmlPanel::OnSize(wxSizeEvent& event)
-{
-    if (m_doc)
-    {
-        int width = GetClientSize().GetWidth();
-        m_doc->render(width);
-        SetupScrollbars();
-    }
-    event.Skip();
-}
 
 
 void wxLitehtmlPanel::EnableDragAndDrop(bool enable)
@@ -247,67 +191,6 @@ void wxLitehtmlPanel::ClearSelection()
     Refresh();
 }
 
-// 鼠标事件处理
-void wxLitehtmlPanel::OnLeftDown(wxMouseEvent& event)
-{
-    wxPoint pt = event.GetPosition();
-    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
-
-    m_selectionStart = pt;
-    m_selectionEnd = pt;
-    m_isSelecting = true;
-    m_textChunks.clear(); // 清除旧缓存
-
-    SetFocus();
-    Refresh();
-    event.Skip();
-}
-
-void wxLitehtmlPanel::OnMouseMove(wxMouseEvent& event)
-{
-    if (m_isSelecting && event.Dragging())
-    {
-        wxPoint pt = event.GetPosition();
-        CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
-
-        m_selectionEnd = pt;
-        UpdateSelection(pt);
-        Refresh();
-    }
-    event.Skip();
-}
-
-void wxLitehtmlPanel::OnLeftUp(wxMouseEvent& event)
-{
-    if (m_isSelecting)
-    {
-        m_isSelecting = false;
-        Refresh();
-    }
-    event.Skip();
-}
-
-void wxLitehtmlPanel::OnKeyDown(wxKeyEvent& event)
-{
-    if (event.GetKeyCode() == 'A' && event.ControlDown())
-    {
-        // 全选
-        wxSize size = GetClientSize();
-        m_selectionStart = wxPoint(0, 0);
-        m_selectionEnd = wxPoint(size.GetWidth(), size.GetHeight());
-        UpdateSelection(m_selectionEnd);
-        Refresh();
-    }
-    else if (event.GetKeyCode() == 'C' && event.ControlDown())
-    {
-        CopySelectedText();
-    }
-    else if (event.GetKeyCode() == WXK_ESCAPE)
-    {
-        ClearSelection();
-    }
-    event.Skip();
-}
 
 // 更新选择区域
 void wxLitehtmlPanel::UpdateSelection(const wxPoint& pt)
@@ -396,6 +279,294 @@ wxString wxLitehtmlPanel::ExtractTextFromSelection() const
     return result.Trim();
 }
 
+// 更新光标
+void wxLitehtmlPanel::UpdateCursor(const wxPoint& pt)
+{
+    // 首先检查文档是否需要特殊光标
+    if (m_doc)
+    {
+        // 这里可以查询文档当前位置的光标类型
+        // 例如：通过文档获取当前元素的光标样式
+
+        // 暂时使用简单逻辑：如果在选择中，使用文本光标
+        if (m_isSelecting)
+        {
+            SetCursor(wxCursor(wxCURSOR_IBEAM));
+        }
+        else
+        {
+            // 可以检查文档返回的光标类型
+            SetCursor(wxCursor(wxCURSOR_ARROW));
+        }
+    }
+    else
+    {
+        SetCursor(wxCursor(m_isSelecting ? wxCURSOR_IBEAM : wxCURSOR_ARROW));
+    }
+}
+
+// 全选
+void wxLitehtmlPanel::SelectAll()
+{
+    wxSize size = GetClientSize();
+    m_selectionStart = wxPoint(0, 0);
+    m_selectionEnd = wxPoint(size.GetWidth(), size.GetHeight());
+
+    // 更新选择
+    UpdateSelection(m_selectionEnd);
+
+    // 请求重绘
+    Refresh();
+}
+
+// 请求重绘指定区域
+void wxLitehtmlPanel::RequestRedraw(const litehtml::position::vector& redraw_boxes)
+{
+    for (const auto& rect : redraw_boxes)
+    {
+        // 将 litehtml::position 转换为 wxRect
+        wxRect wxRect(rect.x, rect.y, rect.width, rect.height);
+
+        // 转换为滚动位置
+        wxPoint scrollPos;
+        CalcScrolledPosition(wxRect.x, wxRect.y, &scrollPos.x, &scrollPos.y);
+        wxRect.SetPosition(scrollPos);
+
+        // 刷新区域
+        RefreshRect(wxRect);
+    }
+}
+
+
+// =============事件处理======================
+
+void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
+{
+    wxPaintDC dc(this);
+    DoPrepareDC(dc); // 处理滚动偏移
+
+    dc.Clear();
+    // 清除文本缓存（每次绘制时重新缓存）
+    m_textChunks.clear();
+
+    if (m_doc)
+    {
+        // 绘制选择区域
+
+        litehtml::position pos;
+        m_container->get_viewport(pos);
+
+        litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
+        m_doc->draw(hdc, 0, -m_scrollPos, &pos);
+        DrawSelection(dc);
+    }
+}
+
+void wxLitehtmlPanel::OnScroll(wxScrollWinEvent& event)
+{
+    int newPos = GetScrollPos(wxVERTICAL);
+    if (newPos != m_scrollPos)
+    {
+        m_scrollPos = newPos;
+        Refresh();
+    }
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnMouseWheel(wxMouseEvent& event)
+{
+    int rotation = event.GetWheelRotation();
+    int delta = event.GetWheelDelta();
+    int lines = rotation / delta;
+
+    int newPos = m_scrollPos - lines * 20; // 20是滚动步长
+    newPos = wxMax(0, wxMin(newPos, m_totalHeight - GetClientSize().GetHeight()));
+
+    if (newPos != m_scrollPos)
+    {
+        ScrollToPosition(newPos);
+    }
+}
+
+void wxLitehtmlPanel::OnSize(wxSizeEvent& event)
+{
+    if (m_doc)
+    {
+        int width = GetClientSize().GetWidth();
+        m_doc->render(width);
+        SetupScrollbars();
+    }
+    event.Skip();
+}
+
+// 鼠标事件处理
+void wxLitehtmlPanel::OnLeftDown(wxMouseEvent& event)
+{
+    wxPoint pt = event.GetPosition();
+    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+
+    // 调用文档的鼠标按下事件
+    litehtml::position::vector redraw_boxes;
+
+    if (m_doc && m_doc->on_lbutton_down(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+    {
+        // 文档处理了事件，可能触发了重绘
+        if (!redraw_boxes.empty())
+        {
+            // 请求重绘受影响区域
+            RequestRedraw(redraw_boxes);
+        }
+    }
+    else
+    {
+        // 文档没有处理，使用我们的选择逻辑
+        m_selectionStart = pt;
+        m_selectionEnd = pt;
+        m_isSelecting = true;
+        m_textChunks.clear(); // 清除旧缓存
+
+        // 开始选择
+        CaptureMouse();
+        SetFocus();
+    }
+
+    Refresh();
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnMouseMove(wxMouseEvent& event)
+{
+    wxPoint pt = event.GetPosition();
+    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+
+    // 首先调用文档的鼠标悬停事件
+    litehtml::position::vector redraw_boxes;
+    bool handledByDoc = false;
+
+    if (m_doc)
+    {
+        if (event.LeftIsDown() && m_doc->on_mouse_over(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+        {
+            handledByDoc = true;
+        }
+        else if (m_doc->on_mouse_over(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+        {
+            handledByDoc = true;
+        }
+
+        if (!redraw_boxes.empty())
+        {
+            RequestRedraw(redraw_boxes);
+        }
+    }
+
+    // 如果文档没有处理且我们正在选择，则使用我们的选择逻辑
+    if (!handledByDoc && m_isSelecting && event.Dragging())
+    {
+        m_selectionEnd = pt;
+        UpdateSelection(pt);
+        Refresh();
+    }
+
+    // 更新光标
+    UpdateCursor(pt);
+
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnLeftUp(wxMouseEvent& event)
+{
+    wxPoint pt = event.GetPosition();
+    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+
+    // 调用文档的鼠标释放事件
+    litehtml::position::vector redraw_boxes;
+
+    if (m_doc && m_doc->on_lbutton_up(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+    {
+        if (!redraw_boxes.empty())
+        {
+            RequestRedraw(redraw_boxes);
+        }
+    }
+    else if (m_isSelecting)
+    {
+        // 完成选择
+        m_isSelecting = false;
+        m_selectionEnd = pt;
+        UpdateSelection(pt);
+
+        // 释放鼠标捕获
+        if (HasCapture())
+        {
+            ReleaseMouse();
+        }
+
+        // 提取选择的文本
+        wxString selectedText = ExtractTextFromSelection();
+        if (!selectedText.empty())
+        {
+            // 可以在这里处理选择的文本，比如复制到剪贴板
+            wxLogMessage("Selected: %s", selectedText);
+        }
+    }
+
+    Refresh();
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnMouseLeave(wxMouseEvent& event)
+{
+    // 调用文档的鼠标离开事件
+    if (m_doc)
+    {
+        litehtml::position::vector redraw_boxes;
+        if (m_doc->on_mouse_leave(redraw_boxes))
+        {
+            if (!redraw_boxes.empty())
+            {
+                RequestRedraw(redraw_boxes);
+            }
+        }
+    }
+
+    event.Skip();
+}
+
+void wxLitehtmlPanel::OnKeyDown(wxKeyEvent& event)
+{
+    // 处理 ESC 键取消
+    if (event.GetKeyCode() == WXK_ESCAPE)
+    {
+        if (m_doc)
+        {
+            litehtml::position::vector redraw_boxes;
+            if (m_doc->on_button_cancel(redraw_boxes))
+            {
+                if (!redraw_boxes.empty())
+                {
+                    RequestRedraw(redraw_boxes);
+                }
+            }
+        }
+
+        ClearSelection();
+    }
+    else if (event.GetKeyCode() == 'A' && event.ControlDown())
+    {
+        // 全选
+        SelectAll();
+    }
+    else if (event.GetKeyCode() == 'C' && event.ControlDown())
+    {
+        // 复制选择的文本
+        CopySelectedText();
+    }
+
+
+    event.Skip();
+}
+
 wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxScrolled<wxPanel>)
     EVT_PAINT(wxLitehtmlPanel::OnPaint)
     EVT_SCROLLWIN(wxLitehtmlPanel::OnScroll)
@@ -405,5 +576,6 @@ wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxScrolled<wxPanel>)
     EVT_LEFT_DOWN(wxLitehtmlPanel::OnLeftDown)
     EVT_LEFT_UP(wxLitehtmlPanel::OnLeftUp)
     EVT_MOTION(wxLitehtmlPanel::OnMouseMove)
+    EVT_LEAVE_WINDOW(wxLitehtmlPanel::OnMouseLeave)  // 添加这行
     EVT_KEY_DOWN(wxLitehtmlPanel::OnKeyDown)
 wxEND_EVENT_TABLE()

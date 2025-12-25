@@ -145,15 +145,348 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
     media.resolution = 96;
 }
 
+#include <fstream>
+#include <algorithm>
+#include <unordered_map>
+
 void wxContainer::import_css(litehtml::string& text,
     const litehtml::string& url, litehtml::string& baseurl)
 {
-    // Not implemented in this basic version
+    if (!m_vfs) return;
+
+    try
+    {
+        // 解析CSS文件的完整路径
+        std::string full_path = m_vfs->resolve(url, baseurl);
+
+        // 检查文件是否存在
+        if (!m_vfs->exists(full_path))
+        {
+            wxLogWarning("CSS file not found: %s", full_path);
+            return;
+        }
+
+        // 获取CSS文件内容
+        auto file_data = m_vfs->get(full_path);
+        if ( !file_data.empty())
+        {
+            // 将二进制数据转换为字符串
+            text = litehtml::string(file_data.begin(), file_data.end());
+
+            // 更新baseurl为CSS文件所在目录
+            std::string full_path_str = full_path;
+            size_t last_slash = full_path_str.find_last_of("/\\");
+            if (last_slash != std::string::npos)
+            {
+                baseurl = litehtml::string(full_path_str.substr(0, last_slash + 1));
+            }
+        }
+        else
+        {
+            wxLogWarning("Failed to load CSS file: %s", full_path);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        wxLogError("Error importing CSS: %s", e.what());
+    }
 }
 
 void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_on_ready)
 {
-    // Not implemented in this basic version
+    if (!m_vfs || !src) return;
+
+    std::string src_str(src);
+    std::string baseurl_str(baseurl ? baseurl : "");
+
+    try
+    {
+        // 检查图片是否已经在缓存中
+        std::string cache_key = src_str + "|" + baseurl_str;
+        auto it = m_imageCache.find(cache_key);
+        if (it != m_imageCache.end())
+        {
+            // 图片已经在缓存中
+            if (redraw_on_ready)
+            {
+                // 请求重绘
+                m_wnd->Refresh();
+            }
+            return;
+        }
+
+        // 解析图片路径
+        std::string full_path = m_vfs->resolve(src_str, baseurl_str);
+
+        // 检查文件是否存在
+        if (!m_vfs->exists(full_path))
+        {
+            wxLogWarning("Image file not found: %s", full_path);
+            return;
+        }
+
+        // 获取图片数据
+        auto file_data = m_vfs->get(full_path);
+        if (file_data.empty())
+        {
+            wxLogWarning("Failed to load image data: %s", full_path);
+            return;
+        }
+
+        // 从内存数据创建wxImage
+        wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
+        wxImage image;
+
+        // 根据MIME类型确定格式
+        bool image_loaded = false;
+
+
+
+        image_loaded = image.LoadFile(mem_stream);
+   
+        if (image_loaded && image.IsOk())
+        {
+            // 缓存图片
+            wxBitmap bitmap(image);
+            m_imageCache[cache_key] = bitmap;
+
+            if (redraw_on_ready)
+            {
+                m_wnd->Refresh();
+            }
+        }
+        else
+        {
+            wxLogWarning("Failed to decode image: %s", src);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        wxLogError("Error loading image: %s, error: %s", src, e.what());
+    }
+}
+
+void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
+{
+    sz.width = 0;
+    sz.height = 0;
+
+    if (!m_vfs || !src) return;
+
+    std::string src_str(src);
+    std::string baseurl_str(baseurl ? baseurl : "");
+
+    try
+    {
+        // 检查图片是否已经在缓存中
+        std::string cache_key = src_str + "|" + baseurl_str;
+        auto it = m_imageCache.find(cache_key);
+        if (it != m_imageCache.end())
+        {
+            // 从缓存中获取尺寸
+            const wxBitmap& bitmap = it->second;
+            if (bitmap.IsOk())
+            {
+                sz.width = bitmap.GetWidth();
+                sz.height = bitmap.GetHeight();
+            }
+            return;
+        }
+
+        // 解析图片路径
+        std::string full_path = m_vfs->resolve(src_str, baseurl_str);
+
+        // 检查文件是否存在
+        if (!m_vfs->exists(full_path))
+        {
+            wxLogWarning("Image file not found for size check: %s", full_path);
+            return;
+        }
+
+        // 尝试只读取图片头信息来获取尺寸（避免加载整个图片）
+        auto file_data = m_vfs->get(full_path);
+        if (file_data.empty())
+        {
+            return;
+        }
+
+
+        wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
+
+  
+
+        // 如果无法解析尺寸，尝试加载整个图片
+        if (sz.width == 0 && sz.height == 0)
+        {
+            wxImage image;
+            if (image.LoadFile(mem_stream))
+            {
+                sz.width = image.GetWidth();
+                sz.height = image.GetHeight();
+
+                // 缓存这个图片
+                wxBitmap bitmap(image);
+                m_imageCache[cache_key] = bitmap;
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        wxLogError("Error getting image size: %s, error: %s", src, e.what());
+    }
+}
+
+void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
+    const std::string& url, const std::string& base_url)
+{
+    wxPaintDC* dc = (wxPaintDC*)hdc;
+    if (!dc || !m_vfs || url.empty()) return;
+
+    try
+    {
+        // 查找缓存的图片
+        std::string cache_key = url + "|" + base_url;
+        auto it = m_imageCache.find(cache_key);
+        if (it == m_imageCache.end())
+        {
+            // 图片未加载，尝试加载它（同步方式）
+            load_image(url.c_str(), base_url.c_str(), false);
+            it = m_imageCache.find(cache_key);
+            if (it == m_imageCache.end())
+            {
+                wxLogWarning("Image not loaded: %s", url);
+                return;
+            }
+        }
+
+        const wxBitmap& bitmap = it->second;
+        if (!bitmap.IsOk())
+        {
+            wxLogWarning("Invalid bitmap for: %s", url);
+            return;
+        }
+
+        // 获取图片原始尺寸
+        int img_width = bitmap.GetWidth();
+        int img_height = bitmap.GetHeight();
+
+        if (img_width <= 0 || img_height <= 0)
+        {
+            return;
+        }
+
+        // 计算绘制区域
+        int border_x = layer.border_box.x;
+        int border_y = layer.border_box.y;
+        int border_width = layer.border_box.width;
+        int border_height = layer.border_box.height;
+
+        // 获取origin_box（背景定位参考点）
+        int origin_x = layer.origin_box.x;
+        int origin_y = layer.origin_box.y;
+        int origin_width = layer.origin_box.width;
+        int origin_height = layer.origin_box.height;
+
+        // 计算背景位置（这里简化处理，实际CSS背景定位更复杂）
+        int bg_x = origin_x;
+        int bg_y = origin_y;
+
+        // 处理background-repeat
+        int draw_width = img_width;
+        int draw_height = img_height;
+
+        switch (layer.repeat)
+        {
+        case litehtml::background_repeat_repeat:
+            // 平铺（默认）
+            // 计算需要绘制的次数
+            for (int y = bg_y; y < border_y + border_height; y += draw_height)
+            {
+                for (int x = bg_x; x < border_x + border_width; x += draw_width)
+                {
+                    dc->DrawBitmap(bitmap, x, y, true);
+                }
+            }
+            break;
+
+        case litehtml::background_repeat_repeat_x:
+            // 水平平铺
+            for (int x = bg_x; x < border_x + border_width; x += draw_width)
+            {
+                dc->DrawBitmap(bitmap, x, bg_y, true);
+            }
+            break;
+
+        case litehtml::background_repeat_repeat_y:
+            // 垂直平铺
+            for (int y = bg_y; y < border_y + border_height; y += draw_height)
+            {
+                dc->DrawBitmap(bitmap, bg_x, y, true);
+            }
+            break;
+
+        case litehtml::background_repeat_no_repeat:
+        default:
+            // 不平铺，只绘制一次
+        {
+            // 确保图片在边框区域内
+            if (bg_x + draw_width > border_x + border_width)
+            {
+                draw_width = border_x + border_width - bg_x;
+            }
+            if (bg_y + draw_height > border_y + border_height)
+            {
+                draw_height = border_y + border_height - bg_y;
+            }
+            if (draw_width > 0 && draw_height > 0)
+            {
+                // 如果尺寸不匹配，需要创建缩放后的位图
+                if (draw_width != img_width || draw_height != img_height)
+                {
+                    wxImage img = bitmap.ConvertToImage();
+                    if (img.IsOk())
+                    {
+                        img.Rescale(draw_width, draw_height, wxIMAGE_QUALITY_HIGH);
+                        wxBitmap scaled_bitmap(img);
+                        dc->DrawBitmap(scaled_bitmap, bg_x, bg_y, true);
+                    }
+                }
+                else
+                {
+                    dc->DrawBitmap(bitmap, bg_x, bg_y, true);
+                }
+            }
+        }
+        break;
+        }
+
+        // 处理background-attachment（这里简化处理，实际需要处理滚动）
+        // background_attachment_fixed: 相对于视口固定
+        // background_attachment_scroll: 随内容滚动（默认）
+        // 在实际的浏览器中，这需要根据滚动位置调整绘制位置
+
+        // 应用裁剪区域
+        if (layer.clip_box.width > 0 && layer.clip_box.height > 0)
+        {
+            // 注意：wxWidgets的裁剪是叠加的，所以需要先清除之前的裁剪
+            dc->DestroyClippingRegion();
+            dc->SetClippingRegion(layer.clip_box.x, layer.clip_box.y,
+                layer.clip_box.width, layer.clip_box.height);
+        }
+
+        // 处理border-radius（如果有的话）
+        if (layer.border_radius.top_left_x > 0 || layer.border_radius.top_right_x > 0 ||
+            layer.border_radius.bottom_left_x > 0 || layer.border_radius.bottom_right_x > 0)
+        {
+            // 这里可以添加圆角裁剪逻辑
+            // 注意：wxWidgets没有内置的圆角裁剪，可能需要使用wxGraphicsContext
+            // 或者创建路径进行裁剪
+        }
+    }
+    catch (const std::exception& e)
+    {
+        wxLogError("Error drawing image: %s, error: %s", url, e.what());
+    }
 }
 
 litehtml::pixel_t wxContainer::pt_to_px(float pt) const
@@ -214,12 +547,7 @@ void wxContainer::get_viewport(litehtml::position& viewport) const
     viewport.height = sz.GetHeight();
 }
 
-void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
-{
-    sz.width = 0;
-    sz.height = 0;
-    // Not implemented in this basic version
-}
+
 
 void wxContainer::del_clip()
 {
@@ -263,11 +591,7 @@ void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_
     }
 }
 
-void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
-    const std::string& url, const std::string& base_url)
-{
-    // Not implemented in this basic version
-}
+
 
 void wxContainer::draw_solid_fill(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::web_color& color)
@@ -278,28 +602,386 @@ void wxContainer::draw_solid_fill(litehtml::uint_ptr hdc, const litehtml::backgr
     dc->DrawRectangle(layer.border_box.x, layer.border_box.y,
         layer.border_box.width, layer.border_box.height);
 }
-
 void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::linear_gradient& gradient)
 {
-    // Not implemented in this basic version
-    //draw_solid_fill(hdc, layer, gradient.colors.empty() ? litehtml::web_color() : gradient.colors[0]);
+    wxPaintDC* dc = (wxPaintDC*)hdc;
+    if (!dc) return;
+
+    // 获取边框盒的坐标
+    int x = layer.border_box.x;
+    int y = layer.border_box.y;
+    int width = layer.border_box.width;
+    int height = layer.border_box.height;
+
+    // 创建一个临时的内存DC来绘制渐变
+    wxBitmap bitmap(width, height);
+    wxMemoryDC memDC(bitmap);
+
+    // 计算渐变起点和终点的实际坐标（相对于bitmap）
+    wxPoint startPoint(
+        static_cast<int>(gradient.start.x * width),
+        static_cast<int>(gradient.start.y * height)
+    );
+
+    wxPoint endPoint(
+        static_cast<int>(gradient.end.x * width),
+        static_cast<int>(gradient.end.y * height)
+    );
+
+    // 创建颜色数组
+    std::vector<wxColor> colors;
+    std::vector<float> positions;
+
+    for (const auto& color_point : gradient.color_points)
+    {
+        litehtml::web_color lite_color = color_point.color;
+        wxColor wx_color(
+            lite_color.red,
+            lite_color.green,
+            lite_color.blue,
+            lite_color.alpha
+        );
+
+        colors.push_back(wx_color);
+        positions.push_back(color_point.offset);
+    }
+
+    if (colors.empty()) return;
+
+    // 绘制渐变到内存DC
+    if (colors.size() == 1)
+    {
+        // 单色情况
+        memDC.SetBrush(wxBrush(colors[0]));
+        memDC.SetPen(*wxTRANSPARENT_PEN);
+        memDC.DrawRectangle(0, 0, width, height);
+    }
+    else
+    {
+        // 多色渐变
+        // 创建渐变图像
+        wxImage gradientImage(width, height);
+        gradientImage.InitAlpha();
+
+        unsigned char* data = gradientImage.GetData();
+        unsigned char* alpha = gradientImage.GetAlpha();
+
+        for (int py = 0; py < height; py++)
+        {
+            for (int px = 0; px < width; px++)
+            {
+                // 计算当前像素在渐变线上的位置
+                wxPoint current(px, py);
+                float t = CalculateLinearGradientPosition(current, startPoint, endPoint);
+
+                // 插值颜色
+                wxColor color = InterpolateColor(colors, positions, t);
+
+                int idx = (py * width + px) * 3;
+                data[idx] = color.Red();
+                data[idx + 1] = color.Green();
+                data[idx + 2] = color.Blue();
+                alpha[py * width + px] = color.Alpha();
+            }
+        }
+
+        // 将渐变图像绘制到内存DC
+        wxBitmap gradientBitmap(gradientImage);
+        memDC.DrawBitmap(gradientBitmap, 0, 0);
+    }
+
+    // 将内存DC的内容绘制到实际DC
+    dc->Blit(x, y, width, height, &memDC, 0, 0);
 }
 
 void wxContainer::draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::radial_gradient& gradient)
 {
-    // Not implemented in this basic version
-    //draw_solid_fill(hdc, layer, gradient.colors.empty() ? litehtml::web_color() : gradient.colors[0]);
+    wxPaintDC* dc = (wxPaintDC*)hdc;
+    if (!dc) return;
+
+    // 获取边框盒的坐标
+    int x = layer.border_box.x;
+    int y = layer.border_box.y;
+    int width = layer.border_box.width;
+    int height = layer.border_box.height;
+
+    // 创建一个临时的内存DC
+    wxBitmap bitmap(width, height);
+    wxMemoryDC memDC(bitmap);
+
+    // 计算渐变中心点（相对于bitmap）
+    wxPoint center(
+        static_cast<int>(gradient.position.x * width),
+        static_cast<int>(gradient.position.y * height)
+    );
+
+    // 计算半径
+    double radiusX = gradient.radius.x * width;
+    double radiusY = gradient.radius.y * height;
+    double maxRadius = std::max(radiusX, radiusY);
+
+    // 创建颜色数组
+    std::vector<wxColor> colors;
+    std::vector<float> positions;
+
+    for (const auto& color_point : gradient.color_points)
+    {
+        litehtml::web_color lite_color = color_point.color;
+        wxColor wx_color(
+            lite_color.red,
+            lite_color.green,
+            lite_color.blue,
+            lite_color.alpha
+        );
+
+        colors.push_back(wx_color);
+        positions.push_back(color_point.offset);
+    }
+
+    if (colors.empty()) return;
+
+    // 绘制径向渐变到内存DC
+    if (colors.size() == 1)
+    {
+        // 单色情况
+        memDC.SetBrush(wxBrush(colors[0]));
+        memDC.SetPen(*wxTRANSPARENT_PEN);
+        memDC.DrawRectangle(0, 0, width, height);
+    }
+    else
+    {
+        // 多色渐变
+        wxImage gradientImage(width, height);
+        gradientImage.InitAlpha();
+
+        unsigned char* data = gradientImage.GetData();
+        unsigned char* alpha = gradientImage.GetAlpha();
+
+        for (int py = 0; py < height; py++)
+        {
+            for (int px = 0; px < width; px++)
+            {
+                // 计算当前像素到中心的距离（归一化）
+                double dx = (px - center.x) / maxRadius;
+                double dy = (py - center.y) / maxRadius;
+                double distance = std::sqrt(dx * dx + dy * dy);
+
+                // 限制在 [0, 1] 范围内
+                float t = static_cast<float>(std::min(1.0, std::max(0.0, distance)));
+
+                // 插值颜色
+                wxColor color = InterpolateColor(colors, positions, t);
+
+                int idx = (py * width + px) * 3;
+                data[idx] = color.Red();
+                data[idx + 1] = color.Green();
+                data[idx + 2] = color.Blue();
+                alpha[py * width + px] = color.Alpha();
+            }
+        }
+
+        // 将渐变图像绘制到内存DC
+        wxBitmap gradientBitmap(gradientImage);
+        memDC.DrawBitmap(gradientBitmap, 0, 0);
+    }
+
+    // 将内存DC的内容绘制到实际DC
+    dc->Blit(x, y, width, height, &memDC, 0, 0);
 }
 
 void wxContainer::draw_conic_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::conic_gradient& gradient)
 {
-    // Not implemented in this basic version
-    //draw_solid_fill(hdc, layer, gradient.colors.empty() ? litehtml::web_color() : gradient.colors[0]);
+    wxPaintDC* dc = (wxPaintDC*)hdc;
+    if (!dc) return;
+
+    // 获取边框盒的坐标
+    int x = layer.border_box.x;
+    int y = layer.border_box.y;
+    int width = layer.border_box.width;
+    int height = layer.border_box.height;
+
+    // 创建一个临时的内存DC
+    wxBitmap bitmap(width, height);
+    wxMemoryDC memDC(bitmap);
+
+    // 计算渐变中心点（相对于bitmap）
+    wxPoint center(
+        static_cast<int>(gradient.position.x * width),
+        static_cast<int>(gradient.position.y * height)
+    );
+
+    // 将CSS角度转换为弧度（CSS：0度在顶部，顺时针）
+    float startAngle = wxDegToRad(gradient.angle);
+
+    // 计算最大半径
+    double maxRadius = 0;
+    if (gradient.radius > 0)
+    {
+        maxRadius = gradient.radius * std::max(width, height);
+    }
+    else
+    {
+        // 从中心到四个角落的最大距离
+        double dx1 = center.x;
+        double dy1 = center.y;
+        double dx2 = width - center.x;
+        double dy2 = center.y;
+        double dx3 = width - center.x;
+        double dy3 = height - center.y;
+        double dx4 = center.x;
+        double dy4 = height - center.y;
+
+        maxRadius = std::max({
+            std::sqrt(dx1 * dx1 + dy1 * dy1),
+            std::sqrt(dx2 * dx2 + dy2 * dy2),
+            std::sqrt(dx3 * dx3 + dy3 * dy3),
+            std::sqrt(dx4 * dx4 + dy4 * dy4)
+            });
+    }
+
+    // 创建颜色数组
+    std::vector<wxColor> colors;
+    std::vector<float> positions;
+
+    for (const auto& color_point : gradient.color_points)
+    {
+        litehtml::web_color lite_color = color_point.color;
+        wxColor wx_color(
+            lite_color.red,
+            lite_color.green,
+            lite_color.blue,
+            lite_color.alpha
+        );
+
+        colors.push_back(wx_color);
+        positions.push_back(color_point.offset);
+    }
+
+    if (colors.empty()) return;
+
+    // 绘制圆锥渐变到内存DC
+    if (colors.size() == 1)
+    {
+        // 单色情况
+        memDC.SetBrush(wxBrush(colors[0]));
+        memDC.SetPen(*wxTRANSPARENT_PEN);
+        memDC.DrawRectangle(0, 0, width, height);
+    }
+    else
+    {
+        // 多色渐变
+        wxImage gradientImage(width, height);
+        gradientImage.InitAlpha();
+
+        unsigned char* data = gradientImage.GetData();
+        unsigned char* alpha = gradientImage.GetAlpha();
+
+        for (int py = 0; py < height; py++)
+        {
+            for (int px = 0; px < width; px++)
+            {
+                // 计算角度（从中心到当前像素）
+                double dx = px - center.x;
+                double dy = py - center.y;
+
+                // 计算角度（0-2π范围，0在右侧，逆时针）
+                double angle = atan2(dy, dx);
+
+                // 转换为CSS角度（0在顶部，顺时针）
+                // - 减去 π/2 使0在顶部
+                // - 取负号使顺时针为正
+                double cssAngle = -angle + 3.14f/2.0f;  // M_PI_2 = π/2
+
+                // 确保角度在 [0, 2π) 范围内
+                if (cssAngle < 0) cssAngle += 2 * M_PI;
+
+                // 减去起始角度
+                cssAngle -= startAngle;
+
+                // 确保角度在 [0, 2π) 范围内
+                if (cssAngle < 0) cssAngle += 2 * M_PI;
+                if (cssAngle >= 2 * M_PI) cssAngle -= 2 * M_PI;
+
+                // 归一化到 [0, 1)
+                float t = static_cast<float>(cssAngle / (2 * M_PI));
+
+                // 插值颜色
+                wxColor color = InterpolateColor(colors, positions, t);
+
+                int idx = (py * width + px) * 3;
+                data[idx] = color.Red();
+                data[idx + 1] = color.Green();
+                data[idx + 2] = color.Blue();
+                alpha[py * width + px] = color.Alpha();
+            }
+        }
+
+        // 将渐变图像绘制到内存DC
+        wxBitmap gradientBitmap(gradientImage);
+        memDC.DrawBitmap(gradientBitmap, 0, 0);
+    }
+
+    // 将内存DC的内容绘制到实际DC
+    dc->Blit(x, y, width, height, &memDC, 0, 0);
 }
 
+// 辅助函数：计算线性渐变位置
+float wxContainer::CalculateLinearGradientPosition(const wxPoint& point,
+    const wxPoint& start,
+    const wxPoint& end)
+{
+    // 向量 AB
+    wxPoint AB(end.x - start.x, end.y - start.y);
+
+    // 向量 AC
+    wxPoint AC(point.x - start.x, point.y - start.y);
+
+    // 计算AB的长度
+    float AB_length_sq = AB.x * AB.x + AB.y * AB.y;
+
+    if (AB_length_sq == 0) return 0.0f;
+
+    // 计算投影：AC在AB上的投影长度 / AB长度
+    float projection = (AC.x * AB.x + AC.y * AB.y) / AB_length_sq;
+
+    return std::max(0.0f, std::min(1.0f, projection));
+}
+
+// 辅助函数：颜色插值
+wxColor wxContainer::InterpolateColor(const std::vector<wxColor>& colors,
+    const std::vector<float>& positions,
+    float t)
+{
+    if (colors.empty()) return *wxBLACK;
+    if (colors.size() == 1) return colors[0];
+
+    // 查找包围t的两个停止点
+    int i = 0;
+    for (; i < static_cast<int>(positions.size()); i++)
+    {
+        if (positions[i] >= t)
+            break;
+    }
+
+    if (i == 0) return colors[0];
+    if (i >= static_cast<int>(positions.size())) return colors.back();
+
+    // 线性插值
+    const wxColor& c1 = colors[i - 1];
+    const wxColor& c2 = colors[i];
+
+    float t_local = (t - positions[i - 1]) / (positions[i] - positions[i - 1]);
+
+    return wxColor(
+        static_cast<unsigned char>(c1.Red() + (c2.Red() - c1.Red()) * t_local),
+        static_cast<unsigned char>(c1.Green() + (c2.Green() - c1.Green()) * t_local),
+        static_cast<unsigned char>(c1.Blue() + (c2.Blue() - c1.Blue()) * t_local),
+        static_cast<unsigned char>(c1.Alpha() + (c2.Alpha() - c1.Alpha()) * t_local)
+    );
+}
 void wxContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders,
     const litehtml::position& draw_pos, bool root)
 {
