@@ -9,6 +9,8 @@
 #include <wx/clipbrd.h>
 #include <algorithm>
 
+#include "HtmlDumper.h"
+
 
 wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
@@ -37,6 +39,16 @@ void wxLitehtmlPanel::set_html(const std::string& html)
 
 
     m_doc = litehtml::document::createFromString(html.c_str() , m_container.get());
+
+    auto el = m_doc->root()->select_one(".container");
+
+    if( el)
+    {
+    
+        m_doc->append_children_from_string(*el, "<p> hello world</p>");
+    }
+    
+    
     if (m_doc)
     {
         int width = GetClientSize().GetWidth();
@@ -44,6 +56,10 @@ void wxLitehtmlPanel::set_html(const std::string& html)
         SetupScrollbars(); // Ìí¼ÓÕâÐÐ
     }
     Refresh();
+    HtmlDumper dumper;
+    m_doc->dump(dumper);
+    OutputDebugStringA(dumper.get_html().c_str());
+
 }
 
 

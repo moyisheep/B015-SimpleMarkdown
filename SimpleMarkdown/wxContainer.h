@@ -1,8 +1,12 @@
 #pragma once
 
 
-
+#include <fstream>
+#include <algorithm>
+#include <unordered_map>
+#include <vector>
 #include <memory>
+
 #include <litehtml.h>
 #include <wx/wx.h>
 #include <wx/tokenzr.h>

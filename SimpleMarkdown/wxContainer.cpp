@@ -145,9 +145,7 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
     media.resolution = 96;
 }
 
-#include <fstream>
-#include <algorithm>
-#include <unordered_map>
+
 
 void wxContainer::import_css(litehtml::string& text,
     const litehtml::string& url, litehtml::string& baseurl)

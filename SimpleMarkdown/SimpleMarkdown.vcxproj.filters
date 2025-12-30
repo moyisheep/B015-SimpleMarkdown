@@ -24,6 +24,9 @@
     <ClInclude Include="wxContainer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="HtmlDumper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,6 +36,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="wxContainer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HtmlDumper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

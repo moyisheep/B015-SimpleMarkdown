@@ -14,69 +14,140 @@
 #include "wxContainer.h"
 
 
+#include <filesystem>
+#include <fstream>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <cctype>
+
 class LocalVFS : public VirtualFileSystem
 {
 private:
-    std::string base_dir;
-
-    std::string get_extension(const std::string& path)
+    std::string get_extension(const std::string& path) const
     {
-        size_t dot = path.find_last_of('.');
-        if (dot == std::string::npos) return "";
-
-        std::string ext = path.substr(dot);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        std::filesystem::path fs_path(path);
+        std::string ext = fs_path.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](unsigned char c) { return std::tolower(c); });
         return ext;
     }
 
-public:
-    LocalVFS(const std::string& dir = "") : base_dir(dir)
+    std::string normalize_path(const std::string& path) const
     {
-        
+        try {
+            std::filesystem::path fs_path(path);
+
+            // 转换为绝对路径并规范化
+            if (fs_path.is_relative()) {
+                // 相对路径相对于当前工作目录
+                fs_path = std::filesystem::absolute(fs_path);
+            }
+
+            return std::filesystem::weakly_canonical(fs_path).string();
+        }
+        catch (const std::exception&) {
+            return path; // 出错时返回原路径
+        }
     }
+
+public:
+    LocalVFS() = default;
 
     std::vector<unsigned char> get(const std::string& path) override
     {
-        std::vector<unsigned char> data;
+        std::string full_path = normalize_path(path);
 
-        std::string full_path =  path;
-
-        // 打开文件
         std::ifstream file(full_path, std::ios::binary | std::ios::ate);
-        if (!file.is_open())
-        {
-            return data;  // 返回空vector
+        if (!file.is_open()) {
+            return {};
         }
 
-        // 获取大小
-        std::streamsize size = file.tellg();
-        if (size <= 0)
-        {
-            return data;
+        auto size = file.tellg();
+        if (size <= 0) {
+            return {};
         }
 
-        // 读取数据
         file.seekg(0, std::ios::beg);
-        data.resize(static_cast<size_t>(size));
+        std::vector<unsigned char> data(static_cast<size_t>(size));
 
-        if (file.read(reinterpret_cast<char*>(data.data()), size))
-        {
-            return data;
+        if (!file.read(reinterpret_cast<char*>(data.data()), size)) {
+            return {};
         }
 
-        return std::vector<unsigned char>();  // 读取失败返回空
+        return data;
     }
 
     bool exists(const std::string& path) override
     {
-        
-        return std::filesystem::exists(path);
+        std::string full_path = normalize_path(path);
+        return std::filesystem::exists(full_path);
     }
 
     std::string resolve(const std::string& url, const std::string& base) override
     {
-        if (url.empty()) return "";
-        return base + url;
+        if (url.empty()) return base;
+
+        try {
+            // 1. 处理绝对URL（包含协议）
+            if (url.find("://") != std::string::npos) {
+                return url;
+            }
+
+            // 2. 处理绝对路径（以/开头或Windows盘符）
+            std::filesystem::path url_path(url);
+            if (url_path.is_absolute()) {
+                return normalize_path(url);
+            }
+
+            // 3. 处理data URL
+            if (url.starts_with("data:")) {
+                return url;
+            }
+
+            // 4. 处理相对路径（需要base路径）
+            if (base.empty()) {
+                // 没有base，使用当前工作目录
+                return normalize_path(url);
+            }
+
+            // 获取base路径的目录部分
+            std::filesystem::path base_path(base);
+
+            // 如果base是文件路径，取目录部分
+            if (base_path.has_filename()) {
+                base_path = base_path.parent_path();
+            }
+
+            // 构建完整路径：base目录 + 相对url
+            std::filesystem::path resolved_path = base_path / url_path;
+
+            // 规范化路径（处理../和./）
+            return std::filesystem::weakly_canonical(resolved_path).string();
+        }
+        catch (const std::exception& e) {
+            // 错误处理：返回拼接的路径
+            return (std::filesystem::path(base).parent_path() / url).string();
+        }
+    }
+
+    // 辅助方法：获取当前工作目录
+    static std::string get_current_directory()
+    {
+        return std::filesystem::current_path().string();
+    }
+
+    // 辅助方法：将路径转换为相对于当前目录的相对路径
+    std::string make_relative(const std::string& path) const
+    {
+        try {
+            std::filesystem::path fs_path(path);
+            std::filesystem::path current = std::filesystem::current_path();
+            return std::filesystem::relative(fs_path, current).string();
+        }
+        catch (const std::exception&) {
+            return path;
+        }
     }
 };
 class wxLitehtmlPanel :  public wxScrolled<wxPanel>

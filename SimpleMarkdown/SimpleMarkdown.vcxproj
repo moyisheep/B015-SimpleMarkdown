@@ -147,11 +147,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HtmlDumper.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="wxContainer.h" />
     <ClInclude Include="wxLitehtmlPanel.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="HtmlDumper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="wxLitehtmlPanel.cpp" />
