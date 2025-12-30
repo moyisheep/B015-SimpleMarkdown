@@ -154,34 +154,21 @@ void wxContainer::import_css(litehtml::string& text,
 
     try
     {
-        // 解析CSS文件的完整路径
-        std::string full_path = m_vfs->resolve(url, baseurl);
 
-        // 检查文件是否存在
-        if (!m_vfs->exists(full_path))
-        {
-            wxLogWarning("CSS file not found: %s", full_path);
-            return;
-        }
 
         // 获取CSS文件内容
-        auto file_data = m_vfs->get(full_path);
+        auto file_data = m_vfs->get_binary(url);
         if ( !file_data.empty())
         {
             // 将二进制数据转换为字符串
             text = litehtml::string(file_data.begin(), file_data.end());
 
             // 更新baseurl为CSS文件所在目录
-            std::string full_path_str = full_path;
-            size_t last_slash = full_path_str.find_last_of("/\\");
-            if (last_slash != std::string::npos)
-            {
-                baseurl = litehtml::string(full_path_str.substr(0, last_slash + 1));
-            }
+            
         }
         else
         {
-            wxLogWarning("Failed to load CSS file: %s", full_path);
+            wxLogWarning("Failed to load CSS file: %s", url);
         }
     }
     catch (const std::exception& e)
@@ -214,20 +201,14 @@ void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_o
         }
 
         // 解析图片路径
-        std::string full_path = m_vfs->resolve(src_str, baseurl_str);
+        
 
-        // 检查文件是否存在
-        if (!m_vfs->exists(full_path))
-        {
-            wxLogWarning("Image file not found: %s", full_path);
-            return;
-        }
 
         // 获取图片数据
-        auto file_data = m_vfs->get(full_path);
+        auto file_data = m_vfs->get_binary(src);
         if (file_data.empty())
         {
-            wxLogWarning("Failed to load image data: %s", full_path);
+            wxLogWarning("Failed to load image data: %s", src);
             return;
         }
 
@@ -291,18 +272,10 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
             return;
         }
 
-        // 解析图片路径
-        std::string full_path = m_vfs->resolve(src_str, baseurl_str);
-
-        // 检查文件是否存在
-        if (!m_vfs->exists(full_path))
-        {
-            wxLogWarning("Image file not found for size check: %s", full_path);
-            return;
-        }
+ 
 
         // 尝试只读取图片头信息来获取尺寸（避免加载整个图片）
-        auto file_data = m_vfs->get(full_path);
+        auto file_data = m_vfs->get_binary(src);
         if (file_data.empty())
         {
             return;

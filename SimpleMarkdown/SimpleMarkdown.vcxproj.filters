@@ -18,7 +18,7 @@
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="wxLitehtmlPanel.h">
+    <ClInclude Include="HtmlWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="wxContainer.h">
@@ -27,18 +27,27 @@
     <ClInclude Include="HtmlDumper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="VirtualFileSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalVFS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="wxLitehtmlPanel.cpp">
+    <ClCompile Include="HtmlWindow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="wxContainer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="HtmlDumper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalVFS.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

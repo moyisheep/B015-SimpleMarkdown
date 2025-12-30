@@ -148,15 +148,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HtmlDumper.h" />
+    <ClInclude Include="LocalVFS.h" />
+    <ClInclude Include="VirtualFileSystem.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="wxContainer.h" />
-    <ClInclude Include="wxLitehtmlPanel.h" />
+    <ClInclude Include="HtmlWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HtmlDumper.cpp" />
+    <ClCompile Include="LocalVFS.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="wxContainer.cpp" />
-    <ClCompile Include="wxLitehtmlPanel.cpp" />
+    <ClCompile Include="HtmlWindow.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

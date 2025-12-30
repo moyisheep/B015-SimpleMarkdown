@@ -13,21 +13,9 @@
 #include <wx/fontenum.h>
 #include <wx/mstream.h>
 
-// 在 wxContainer.h 中添加
-class VirtualFileSystem
-{
-public:
-    // 获取文件数据，找不到返回空vector
-    virtual std::vector<unsigned char> get(const std::string& path) = 0;
+#include "VirtualFileSystem.h"
 
-    // 检查文件是否存在
-    virtual bool exists(const std::string& path) = 0;
 
-    // 解析URL路径
-    virtual std::string resolve(const std::string& url, const std::string& base = "") = 0;
-
-    virtual ~VirtualFileSystem() = default;
-};
 
 class wxContainer : public litehtml::document_container
 {

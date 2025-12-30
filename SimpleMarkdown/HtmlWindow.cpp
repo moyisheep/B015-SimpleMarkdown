@@ -1,4 +1,4 @@
-#include "wxLitehtmlPanel.h"
+#include "HtmlWindow.h"
 #include <wx/dcclient.h>
 #include <wx/dcmemory.h>
 #include <wx/font.h>
@@ -9,10 +9,15 @@
 #include <wx/clipbrd.h>
 #include <algorithm>
 
+
 #include "HtmlDumper.h"
 
 
-wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
+
+
+
+
+HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
@@ -26,7 +31,7 @@ wxLitehtmlPanel::wxLitehtmlPanel(wxWindow* parent)
     m_container->set_vfs(std::make_shared< LocalVFS>());
 
 }
-wxLitehtmlPanel::~wxLitehtmlPanel()
+HtmlWindow::~HtmlWindow()
 {
     if (m_doc)
     {
@@ -34,7 +39,7 @@ wxLitehtmlPanel::~wxLitehtmlPanel()
     }
 }
 
-void wxLitehtmlPanel::set_html(const std::string& html)
+void HtmlWindow::set_html(const std::string& html)
 {
 
 
@@ -56,16 +61,16 @@ void wxLitehtmlPanel::set_html(const std::string& html)
         SetupScrollbars(); // 添加这行
     }
     Refresh();
-    HtmlDumper dumper;
-    m_doc->dump(dumper);
-    OutputDebugStringA(dumper.get_html().c_str());
+    //HtmlDumper dumper;
+    //m_doc->dump(dumper);
+    //OutputDebugStringA(dumper.get_html().c_str());
 
 }
 
 
 
 
-bool wxLitehtmlPanel::open_html(const wxString& file_path)
+bool HtmlWindow::open_html(const wxString& file_path)
 {
     // Check if file exists
     if (!wxFileExists(file_path)) {
@@ -90,7 +95,8 @@ bool wxLitehtmlPanel::open_html(const wxString& file_path)
     // Set base URL to file's directory for relative paths
     wxFileName fn(file_path);
     fn.MakeAbsolute();
-    std::string base_url = fn.GetPath(wxPATH_GET_SEPARATOR | wxPATH_GET_VOLUME).ToStdString();
+    wxString base_url = fn.GetPath(wxPATH_GET_SEPARATOR | wxPATH_GET_VOLUME);
+    fn.SetCwd(base_url);
     m_container->set_base_url(base_url.c_str());
 
     // Set the HTML content
@@ -103,7 +109,7 @@ bool wxLitehtmlPanel::open_html(const wxString& file_path)
 
 
 
-void wxLitehtmlPanel::SetupScrollbars()
+void HtmlWindow::SetupScrollbars()
 {
     if (!m_doc) return;
 
@@ -123,21 +129,21 @@ void wxLitehtmlPanel::SetupScrollbars()
     }
 }
 
-void wxLitehtmlPanel::ScrollToPosition(int pos)
+void HtmlWindow::ScrollToPosition(int pos)
 {
     m_scrollPos = pos;
     SetScrollPos(wxVERTICAL, pos);
     Refresh();
 }
 
-int wxLitehtmlPanel::GetScrollPosition() const
+int HtmlWindow::GetScrollPosition() const
 {
     return m_scrollPos;
 }
 
 
 
-void wxLitehtmlPanel::EnableDragAndDrop(bool enable)
+void HtmlWindow::EnableDragAndDrop(bool enable)
 {
     if (enable)
     {
@@ -149,14 +155,14 @@ void wxLitehtmlPanel::EnableDragAndDrop(bool enable)
     }
 }
 
-bool wxLitehtmlPanel::CanOpenFile(const wxString& file_path)
+bool HtmlWindow::CanOpenFile(const wxString& file_path)
 {
     //wxString ext = wxFileName(file_path).GetExt().Lower();
     //return ext == "html" || ext == "htm";
     return true;
 }
 
-void wxLitehtmlPanel::OnDropFiles(wxDropFilesEvent& event)
+void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
 {
     if (event.GetNumberOfFiles() > 0)
     {
@@ -182,13 +188,13 @@ void wxLitehtmlPanel::OnDropFiles(wxDropFilesEvent& event)
 
 
 // 获取选中文本
-wxString wxLitehtmlPanel::GetSelectedText() const
+wxString HtmlWindow::GetSelectedText() const
 {
     return ExtractTextFromSelection();
 }
 
 // 复制选中文本到剪贴板
-void wxLitehtmlPanel::CopySelectedText()
+void HtmlWindow::CopySelectedText()
 {
     wxString selectedText = GetSelectedText();
     if (!selectedText.IsEmpty() && wxTheClipboard->Open())
@@ -199,7 +205,7 @@ void wxLitehtmlPanel::CopySelectedText()
 }
 
 // 清除选择
-void wxLitehtmlPanel::ClearSelection()
+void HtmlWindow::ClearSelection()
 {
     m_selectionStart = wxDefaultPosition;
     m_selectionEnd = wxDefaultPosition;
@@ -209,7 +215,7 @@ void wxLitehtmlPanel::ClearSelection()
 
 
 // 更新选择区域
-void wxLitehtmlPanel::UpdateSelection(const wxPoint& pt)
+void HtmlWindow::UpdateSelection(const wxPoint& pt)
 {
     m_selectionRects.clear();
 
@@ -234,7 +240,7 @@ void wxLitehtmlPanel::UpdateSelection(const wxPoint& pt)
 }
 
 // 绘制选择高亮
-void wxLitehtmlPanel::DrawSelection(wxDC& dc)
+void HtmlWindow::DrawSelection(wxDC& dc)
 {
     if (m_selectionRects.empty() || m_textChunks.empty()) return;
 
@@ -266,7 +272,7 @@ void wxLitehtmlPanel::DrawSelection(wxDC& dc)
 
 
 // 从选择区域提取文本
-wxString wxLitehtmlPanel::ExtractTextFromSelection() const
+wxString HtmlWindow::ExtractTextFromSelection() const
 {
     wxString result;
 
@@ -296,7 +302,7 @@ wxString wxLitehtmlPanel::ExtractTextFromSelection() const
 }
 
 // 更新光标
-void wxLitehtmlPanel::UpdateCursor(const wxPoint& pt)
+void HtmlWindow::UpdateCursor(const wxPoint& pt)
 {
     // 首先检查文档是否需要特殊光标
     if (m_doc)
@@ -322,7 +328,7 @@ void wxLitehtmlPanel::UpdateCursor(const wxPoint& pt)
 }
 
 // 全选
-void wxLitehtmlPanel::SelectAll()
+void HtmlWindow::SelectAll()
 {
     wxSize size = GetClientSize();
     m_selectionStart = wxPoint(0, 0);
@@ -336,7 +342,7 @@ void wxLitehtmlPanel::SelectAll()
 }
 
 // 请求重绘指定区域
-void wxLitehtmlPanel::RequestRedraw(const litehtml::position::vector& redraw_boxes)
+void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
 {
     for (const auto& rect : redraw_boxes)
     {
@@ -356,7 +362,7 @@ void wxLitehtmlPanel::RequestRedraw(const litehtml::position::vector& redraw_box
 
 // =============事件处理======================
 
-void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
+void HtmlWindow::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
     DoPrepareDC(dc); // 处理滚动偏移
@@ -378,7 +384,7 @@ void wxLitehtmlPanel::OnPaint(wxPaintEvent& event)
     }
 }
 
-void wxLitehtmlPanel::OnScroll(wxScrollWinEvent& event)
+void HtmlWindow::OnScroll(wxScrollWinEvent& event)
 {
     int newPos = GetScrollPos(wxVERTICAL);
     if (newPos != m_scrollPos)
@@ -389,7 +395,7 @@ void wxLitehtmlPanel::OnScroll(wxScrollWinEvent& event)
     event.Skip();
 }
 
-void wxLitehtmlPanel::OnMouseWheel(wxMouseEvent& event)
+void HtmlWindow::OnMouseWheel(wxMouseEvent& event)
 {
     int rotation = event.GetWheelRotation();
     int delta = event.GetWheelDelta();
@@ -404,7 +410,7 @@ void wxLitehtmlPanel::OnMouseWheel(wxMouseEvent& event)
     }
 }
 
-void wxLitehtmlPanel::OnSize(wxSizeEvent& event)
+void HtmlWindow::OnSize(wxSizeEvent& event)
 {
     if (m_doc)
     {
@@ -416,7 +422,7 @@ void wxLitehtmlPanel::OnSize(wxSizeEvent& event)
 }
 
 // 鼠标事件处理
-void wxLitehtmlPanel::OnLeftDown(wxMouseEvent& event)
+void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
     CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
@@ -450,7 +456,7 @@ void wxLitehtmlPanel::OnLeftDown(wxMouseEvent& event)
     event.Skip();
 }
 
-void wxLitehtmlPanel::OnMouseMove(wxMouseEvent& event)
+void HtmlWindow::OnMouseMove(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
     CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
@@ -490,7 +496,7 @@ void wxLitehtmlPanel::OnMouseMove(wxMouseEvent& event)
     event.Skip();
 }
 
-void wxLitehtmlPanel::OnLeftUp(wxMouseEvent& event)
+void HtmlWindow::OnLeftUp(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
     CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
@@ -531,7 +537,7 @@ void wxLitehtmlPanel::OnLeftUp(wxMouseEvent& event)
     event.Skip();
 }
 
-void wxLitehtmlPanel::OnMouseLeave(wxMouseEvent& event)
+void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
 {
     // 调用文档的鼠标离开事件
     if (m_doc)
@@ -549,7 +555,7 @@ void wxLitehtmlPanel::OnMouseLeave(wxMouseEvent& event)
     event.Skip();
 }
 
-void wxLitehtmlPanel::OnKeyDown(wxKeyEvent& event)
+void HtmlWindow::OnKeyDown(wxKeyEvent& event)
 {
     // 处理 ESC 键取消
     if (event.GetKeyCode() == WXK_ESCAPE)
@@ -583,15 +589,15 @@ void wxLitehtmlPanel::OnKeyDown(wxKeyEvent& event)
     event.Skip();
 }
 
-wxBEGIN_EVENT_TABLE(wxLitehtmlPanel, wxScrolled<wxPanel>)
-    EVT_PAINT(wxLitehtmlPanel::OnPaint)
-    EVT_SCROLLWIN(wxLitehtmlPanel::OnScroll)
-    EVT_MOUSEWHEEL(wxLitehtmlPanel::OnMouseWheel)
-    EVT_SIZE(wxLitehtmlPanel::OnSize)
-    EVT_DROP_FILES(wxLitehtmlPanel::OnDropFiles)
-    EVT_LEFT_DOWN(wxLitehtmlPanel::OnLeftDown)
-    EVT_LEFT_UP(wxLitehtmlPanel::OnLeftUp)
-    EVT_MOTION(wxLitehtmlPanel::OnMouseMove)
-    EVT_LEAVE_WINDOW(wxLitehtmlPanel::OnMouseLeave)  // 添加这行
-    EVT_KEY_DOWN(wxLitehtmlPanel::OnKeyDown)
+wxBEGIN_EVENT_TABLE(HtmlWindow, wxScrolled<wxPanel>)
+    EVT_PAINT(HtmlWindow::OnPaint)
+    EVT_SCROLLWIN(HtmlWindow::OnScroll)
+    EVT_MOUSEWHEEL(HtmlWindow::OnMouseWheel)
+    EVT_SIZE(HtmlWindow::OnSize)
+    EVT_DROP_FILES(HtmlWindow::OnDropFiles)
+    EVT_LEFT_DOWN(HtmlWindow::OnLeftDown)
+    EVT_LEFT_UP(HtmlWindow::OnLeftUp)
+    EVT_MOTION(HtmlWindow::OnMouseMove)
+    EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)  // 添加这行
+    EVT_KEY_DOWN(HtmlWindow::OnKeyDown)
 wxEND_EVENT_TABLE()
