@@ -8,14 +8,25 @@
 
 #include <wx/clipbrd.h>
 #include <algorithm>
-
-
+#include <litehtml/el_text.h>
+#include <litehtml/render_item.h>
+#include <cmark-gfm.h>
 #include "HtmlDumper.h"
 
 
 
 
+std::string md_to_html(const std::string& markdown) {
+    char* html = cmark_markdown_to_html(
+        markdown.c_str(),
+        markdown.length(),
+        CMARK_OPT_DEFAULT
+    );
+    std::string result(html);
 
+    std::free(html);  // 使用 std::free
+    return result;
+}
 
 HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
@@ -29,6 +40,7 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
     SetScrollRate(0, 20); // 设置垂直滚动步长
     m_container = std::make_unique<wxContainer>(this);
     m_container->set_vfs(std::make_shared< LocalVFS>());
+
 
 }
 HtmlWindow::~HtmlWindow()
@@ -45,12 +57,11 @@ void HtmlWindow::set_html(const std::string& html)
 
     m_doc = litehtml::document::createFromString(html.c_str() , m_container.get());
 
-    auto el = m_doc->root()->select_one(".container");
+    auto el = m_doc->root()->select_one(".section");
 
     if( el)
     {
-    
-        m_doc->append_children_from_string(*el, "<p> hello world</p>");
+        m_doc->append_children_from_string(*el, "<p>hello world</p>");
     }
     
     
@@ -99,8 +110,10 @@ bool HtmlWindow::open_html(const wxString& file_path)
     fn.SetCwd(base_url);
     m_container->set_base_url(base_url.c_str());
 
+    std::string md = html_content.ToUTF8().data();
+    std::string html = md_to_html(md);
     // Set the HTML content
-    this->set_html(html_content.ToUTF8().data());
+    this->set_html(html);
     return true;
 }
 
@@ -187,159 +200,8 @@ void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
 
 
 
-// 获取选中文本
-wxString HtmlWindow::GetSelectedText() const
-{
-    return ExtractTextFromSelection();
-}
-
-// 复制选中文本到剪贴板
-void HtmlWindow::CopySelectedText()
-{
-    wxString selectedText = GetSelectedText();
-    if (!selectedText.IsEmpty() && wxTheClipboard->Open())
-    {
-        wxTheClipboard->SetData(new wxTextDataObject(selectedText));
-        wxTheClipboard->Close();
-    }
-}
-
-// 清除选择
-void HtmlWindow::ClearSelection()
-{
-    m_selectionStart = wxDefaultPosition;
-    m_selectionEnd = wxDefaultPosition;
-    m_selectionRects.clear();
-    Refresh();
-}
 
 
-// 更新选择区域
-void HtmlWindow::UpdateSelection(const wxPoint& pt)
-{
-    m_selectionRects.clear();
-
-    // 手动标准化选择区域（替代Normalize()）
-    int left = wxMin(m_selectionStart.x, m_selectionEnd.x);
-    int right = wxMax(m_selectionStart.x, m_selectionEnd.x);
-    int top = wxMin(m_selectionStart.y, m_selectionEnd.y);
-    int bottom = wxMax(m_selectionStart.y, m_selectionEnd.y);
-    wxRect selectionRect(left, top, right - left, bottom - top);
-
-    // 查找与选择区域相交的文本块
-    for (const auto& chunk : m_textChunks)
-    {
-        if (chunk.rect.Intersects(selectionRect))
-        {
-            // 计算精确的交集区域
-            wxRect intersect = chunk.rect;
-            intersect.Intersect(selectionRect);
-            m_selectionRects.push_back(intersect);
-        }
-    }
-}
-
-// 绘制选择高亮
-void HtmlWindow::DrawSelection(wxDC& dc)
-{
-    if (m_selectionRects.empty() || m_textChunks.empty()) return;
-
-    // 设置选择高亮样式
-    wxColour highlightColor(51, 153, 255, 120); // 半透明蓝色
-    dc.SetBrush(wxBrush(highlightColor));
-    dc.SetPen(*wxTRANSPARENT_PEN);
-
-    // 遍历所有文本块
-    for (const auto& chunk : m_textChunks)
-    {
-        // 检查文本块是否与任何选择矩形相交
-        for (const auto& selRect : m_selectionRects)
-        {
-            if (chunk.rect.Intersects(selRect))
-            {
-                // 计算精确的交集区域
-                wxRect highlightRect = chunk.rect;
-                highlightRect.Intersect(selRect);
-
-                // 绘制高亮背景
-                dc.DrawRectangle(highlightRect);
-
-
-            }
-        }
-    }
-}
-
-
-// 从选择区域提取文本
-wxString HtmlWindow::ExtractTextFromSelection() const
-{
-    wxString result;
-
-    // 按Y坐标排序选择区域
-    std::vector<wxRect> sortedRects = m_selectionRects;
-    std::sort(sortedRects.begin(), sortedRects.end(),
-        [](const wxRect& a, const wxRect& b) {
-            return a.y < b.y || (a.y == b.y && a.x < b.x);
-        });
-
-    // 提取文本
-    for (const auto& selRect : sortedRects)
-    {
-        for (const auto& chunk : m_textChunks)
-        {
-            if (chunk.rect.Intersects(selRect))
-            {
-                // 简单实现：添加整个文本块
-                // 更精确的实现需要计算字符级别的选择
-                result += chunk.text + " ";
-                break;
-            }
-        }
-    }
-
-    return result.Trim();
-}
-
-// 更新光标
-void HtmlWindow::UpdateCursor(const wxPoint& pt)
-{
-    // 首先检查文档是否需要特殊光标
-    if (m_doc)
-    {
-        // 这里可以查询文档当前位置的光标类型
-        // 例如：通过文档获取当前元素的光标样式
-
-        // 暂时使用简单逻辑：如果在选择中，使用文本光标
-        if (m_isSelecting)
-        {
-            SetCursor(wxCursor(wxCURSOR_IBEAM));
-        }
-        else
-        {
-            // 可以检查文档返回的光标类型
-            SetCursor(wxCursor(wxCURSOR_ARROW));
-        }
-    }
-    else
-    {
-        SetCursor(wxCursor(m_isSelecting ? wxCURSOR_IBEAM : wxCURSOR_ARROW));
-    }
-}
-
-// 全选
-void HtmlWindow::SelectAll()
-{
-    wxSize size = GetClientSize();
-    m_selectionStart = wxPoint(0, 0);
-    m_selectionEnd = wxPoint(size.GetWidth(), size.GetHeight());
-
-    // 更新选择
-    UpdateSelection(m_selectionEnd);
-
-    // 请求重绘
-    Refresh();
-}
 
 // 请求重绘指定区域
 void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
@@ -380,7 +242,7 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
         m_doc->draw(hdc, 0, -m_scrollPos, &pos);
-        DrawSelection(dc);
+        //DrawSelection(dc);
     }
 }
 
@@ -425,7 +287,46 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
 void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
-    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+    //CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+    CalcScrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+    auto render = m_doc->root_render();
+    auto el = render->get_element_by_point(pt.x, pt.y, pt.x, pt.y);
+    if (el)
+    {
+        
+        std::string text;
+        el->get_text(text);
+        std::string tagName = el->get_tagName();
+        litehtml::position pos = el->get_placement();
+        std::string txt = tagName + " : " + text  + "\n";
+        txt += "(" + std::to_string(pos.left()) + "," +
+            std::to_string(pos.top()) + "," +
+            std::to_string(pos.right()) + "," +
+            std::to_string(pos.bottom()) + ")";
+        wxLogInfo(wxString::FromUTF8(txt));
+
+      
+        for (auto& child: el->children())
+        {
+            if(child)
+            {
+                text = "";
+                tagName = "";
+                litehtml::size sz;
+                child->get_text(text);
+                child->get_content_size(sz, 1000);
+                tagName = child->get_tagName();
+                pos = child->get_placement();
+                
+                txt = "    " + text + " ";
+                txt += "(" + std::to_string(pos.left()) + "," +
+                    std::to_string(pos.top()) + "," +
+                    std::to_string(pos.right()) + "," +
+                    std::to_string(pos.bottom()) + ")";
+                wxLogInfo(wxString::FromUTF8(txt));
+            }
+        }
+    }
 
     // 调用文档的鼠标按下事件
     litehtml::position::vector redraw_boxes;
@@ -459,7 +360,7 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 void HtmlWindow::OnMouseMove(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
-    CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
+    //CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
 
     // 首先调用文档的鼠标悬停事件
     litehtml::position::vector redraw_boxes;
@@ -486,12 +387,12 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
     if (!handledByDoc && m_isSelecting && event.Dragging())
     {
         m_selectionEnd = pt;
-        UpdateSelection(pt);
+        //UpdateSelection(pt);
         Refresh();
     }
 
     // 更新光标
-    UpdateCursor(pt);
+    //UpdateCursor(pt);
 
     event.Skip();
 }
@@ -511,27 +412,7 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
             RequestRedraw(redraw_boxes);
         }
     }
-    else if (m_isSelecting)
-    {
-        // 完成选择
-        m_isSelecting = false;
-        m_selectionEnd = pt;
-        UpdateSelection(pt);
-
-        // 释放鼠标捕获
-        if (HasCapture())
-        {
-            ReleaseMouse();
-        }
-
-        // 提取选择的文本
-        wxString selectedText = ExtractTextFromSelection();
-        if (!selectedText.empty())
-        {
-            // 可以在这里处理选择的文本，比如复制到剪贴板
-            wxLogMessage("Selected: %s", selectedText);
-        }
-    }
+    
 
     Refresh();
     event.Skip();
@@ -572,17 +453,14 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
             }
         }
 
-        ClearSelection();
     }
     else if (event.GetKeyCode() == 'A' && event.ControlDown())
     {
-        // 全选
-        SelectAll();
+
     }
     else if (event.GetKeyCode() == 'C' && event.ControlDown())
     {
-        // 复制选择的文本
-        CopySelectedText();
+
     }
 
 

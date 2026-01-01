@@ -13,42 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="VFS">
+      <UniqueIdentifier>{afdc12b2-5482-4486-9308-f5ff71ecf94b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HtmlWindow">
+      <UniqueIdentifier>{e5970c18-8175-4778-81b8-32ac73300c4b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="HtmlWindow.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="wxContainer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="HtmlDumper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="VirtualFileSystem.h">
-      <Filter>头文件</Filter>
+      <Filter>VFS</Filter>
     </ClInclude>
     <ClInclude Include="LocalVFS.h">
-      <Filter>头文件</Filter>
+      <Filter>VFS</Filter>
+    </ClInclude>
+    <ClInclude Include="HtmlDumper.h">
+      <Filter>HtmlWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="HtmlWindow.h">
+      <Filter>HtmlWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="wxContainer.h">
+      <Filter>HtmlWindow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="HtmlWindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="wxContainer.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="LocalVFS.cpp">
+      <Filter>VFS</Filter>
     </ClCompile>
     <ClCompile Include="HtmlDumper.cpp">
-      <Filter>源文件</Filter>
+      <Filter>HtmlWindow</Filter>
     </ClCompile>
-    <ClCompile Include="LocalVFS.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="HtmlWindow.cpp">
+      <Filter>HtmlWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="wxContainer.cpp">
+      <Filter>HtmlWindow</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

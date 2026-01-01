@@ -1032,6 +1032,14 @@ void wxContainer::on_mouse_event(const litehtml::element::ptr& el, litehtml::mou
     // Not implemented in this basic version
 }
 
+void wxContainer::execute_script(const std::string& src, const std::string& content, const std::string& type, bool async, bool defer)
+{
+}
+
+void wxContainer::import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl)
+{
+}
+
 // 添加文本到缓存
 void wxContainer::AddTextToCache(const wxString& text, const wxRect& rect, wxFont* font)
 {

@@ -51,6 +51,11 @@ litehtml::pixel_t litehtml::line_box_item::height() const
 	return m_element->height();
 }
 
+void litehtml::line_box_item::y_shift(pixel_t shift)
+{
+	m_element->y_shift(shift);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 litehtml::lbi_start::lbi_start(const std::shared_ptr<render_item>& element) : line_box_item(element)
@@ -435,7 +440,7 @@ std::list< std::unique_ptr<litehtml::line_box_item> > litehtml::line_box::finish
 			{
 			case va_bottom:
 			case va_top:
-				// Align by base line 0 all inline boxes with top and bottom vertical aling
+				// Align by base line 0 all inline boxes with top and bottom vertical align
 				bl = 0;
 				is_top_bottom_box = true;
 				break;
@@ -584,7 +589,7 @@ std::list< std::unique_ptr<litehtml::line_box_item> > litehtml::line_box::finish
 		}
 	} else
 	{
-		// Add inline boxes dimentions
+		// Add inline boxes dimensions
 		line_max_height.top = std::min(line_max_height.top, inline_boxes_dims.top);
 		line_max_height.bottom = std::max(line_max_height.bottom, inline_boxes_dims.bottom);
 
@@ -820,10 +825,10 @@ litehtml::pixel_t litehtml::line_box::bottom_margin() const
 void litehtml::line_box::y_shift( pixel_t shift )
 {
 	m_top += shift;
-    for (auto& el : m_items)
-    {
-        el->pos().y += shift;
-    }
+	for (auto& el : m_items)
+	{
+		el->y_shift(shift);
+	}
 }
 
 bool litehtml::line_box::is_break_only() const

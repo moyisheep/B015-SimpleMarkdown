@@ -21,6 +21,8 @@
 #include <string>
 #include <cctype>
 
+
+
 #include "LocalVFS.h"
 
 class HtmlWindow :  public wxScrolled<wxPanel>
@@ -42,9 +44,9 @@ public:
     void EnableDragAndDrop(bool enable = true);
 
     // 新增文本选择和复制功能
-    wxString GetSelectedText() const;
-    void CopySelectedText();
-    void ClearSelection();
+    //wxString GetSelectedText() const;
+    //void CopySelectedText();
+    //void ClearSelection();
 
 private:
 
@@ -57,7 +59,7 @@ private:
     int m_totalHeight;
     int m_scrollPos;
 
-    void SelectAll();
+    //void SelectAll();
 
     void RequestRedraw(const litehtml::position::vector& redraw_boxes);
 
@@ -96,11 +98,11 @@ private:
     void OnKeyDown(wxKeyEvent& event);
 
     // 辅助方法
-    void UpdateSelection(const wxPoint& pos);
-    void DrawSelection(wxDC& dc);
-    wxString ExtractTextFromSelection() const;
+    //void UpdateSelection(const wxPoint& pos);
+    //void DrawSelection(wxDC& dc);
+    //wxString ExtractTextFromSelection() const;
 
-    void UpdateCursor(const wxPoint& pt);
+    //void UpdateCursor(const wxPoint& pt);
 
 
     DECLARE_EVENT_TABLE()

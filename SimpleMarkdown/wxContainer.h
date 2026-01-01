@@ -63,6 +63,14 @@ public:
     bool on_element_click(const litehtml::element::ptr& el) override;
     void on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event) override;
 
+    void execute_script(const std::string& src,
+        const std::string& content,
+        const std::string& type,
+        bool async,
+        bool defer) override;
+    void import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) override;
+
+
     void set_vfs(std::shared_ptr<VirtualFileSystem> vfs) { m_vfs = vfs; }
     std::shared_ptr<VirtualFileSystem> get_vfs() const { return m_vfs; }
  private:
