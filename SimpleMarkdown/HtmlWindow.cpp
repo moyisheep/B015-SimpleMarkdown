@@ -104,7 +104,17 @@ bool HtmlWindow::open_html(const std::string &file_path)
 
     std::string raw = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
     
-    std::string ext = fs::path(file_path).extension().generic_string();
+
+    fs::path filePath = fs::path(file_path);
+    fs::path parentDir = filePath.parent_path();
+    if(fs::exists(parentDir))
+    {
+        fs::current_path(parentDir);
+    }
+    
+
+
+    std::string ext = filePath.extension().generic_string();
     std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
     
     std::string html = "";
@@ -207,12 +217,8 @@ void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
     for (const auto& rect : redraw_boxes)
     {
         // 将 litehtml::position 转换为 wxRect
-        wxRect wxRect(rect.x, rect.y, rect.width, rect.height);
+        wxRect wxRect(rect.x, rect.y - m_scrollPos, rect.width, rect.height);
 
-        // 转换为滚动位置
-        wxPoint scrollPos;
-        CalcScrolledPosition(wxRect.x, wxRect.y, &scrollPos.x, &scrollPos.y);
-        wxRect.SetPosition(scrollPos);
 
         // 刷新区域
         RefreshRect(wxRect);
@@ -225,13 +231,13 @@ void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
 void HtmlWindow::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
-    DoPrepareDC(dc); // 处理滚动偏移
+    //DoPrepareDC(dc); // 处理滚动偏移
 
             // 获取需要重绘的区域
     wxRegion updateRegion = GetUpdateRegion();
     wxRect updateRect = updateRegion.GetBox();
 
-
+ 
 
     // 绘制背景
     dc.SetBrush(*wxWHITE_BRUSH);
@@ -245,8 +251,6 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     {
         // 绘制选择区域
 
-        litehtml::position pos;
-        m_container->get_viewport(pos);
         
         litehtml::position clip{ (float)updateRect.x, 
             (float)updateRect.y, 
@@ -300,7 +304,9 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
     {
         int width = GetClientSize().GetWidth();
         m_doc->render(width);
+        m_doc->media_changed();
         SetupScrollbars();
+        Refresh();
     }
     event.Skip();
 }
@@ -309,53 +315,13 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
 void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
-    //CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
-    CalcScrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
-    auto render = m_doc->root_render();
 
-    auto el = render->get_element_by_point(pt.x, pt.y, 0, 0);
-    
-    if (el)
-    {
-        
-        std::string text;
-        el->get_text(text);
-        std::string tagName = el->get_tagName();
-        litehtml::position pos = el->get_placement();
-        std::string txt = tagName + " : " + text  + "\n";
-        txt += "(" + std::to_string(pos.left()) + "," +
-            std::to_string(pos.top()) + "," +
-            std::to_string(pos.right()) + "," +
-            std::to_string(pos.bottom()) + ")";
-        wxLogInfo(wxString::FromUTF8(txt));
 
-      
-        //for (auto& child: el->children())
-        //{
-        //    if(child)
-        //    {
-        //        text = "";
-        //        tagName = "";
-        //        litehtml::size sz;
-        //        child->get_text(text);
-        //        child->get_content_size(sz, 1000);
-        //        tagName = child->get_tagName();
-        //        pos = child->get_placement();
-        //        
-        //        txt = "    " + text + " ";
-        //        txt += "(" + std::to_string(pos.left()) + "," +
-        //            std::to_string(pos.top()) + "," +
-        //            std::to_string(pos.right()) + "," +
-        //            std::to_string(pos.bottom()) + ")";
-        //        wxLogInfo(wxString::FromUTF8(txt));
-        //    }
-        //}
-    }
 
     // 调用文档的鼠标按下事件
     litehtml::position::vector redraw_boxes;
 
-    if (m_doc && m_doc->on_lbutton_down(pt.x, pt.y, 0, 0, redraw_boxes))
+    if (m_doc && m_doc->on_lbutton_down(pt.x, pt.y + m_scrollPos, 0, 0, redraw_boxes))
     {
         // 文档处理了事件，可能触发了重绘
         if (!redraw_boxes.empty())
@@ -366,23 +332,19 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
     }
 
 
-    Refresh();
-    event.Skip();
+
+    //event.Skip();
 }
 
 void HtmlWindow::OnMouseMove(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
-    //CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
-
-    // 首先调用文档的鼠标悬停事件
-    litehtml::position::vector redraw_boxes;
 
 
     if (m_doc)
     {
-
-        m_doc->on_mouse_over(pt.x, pt.y, 0, 0, redraw_boxes);
+        litehtml::position::vector redraw_boxes;
+        m_doc->on_mouse_over(pt.x, pt.y + m_scrollPos, 0, 0, redraw_boxes);
 
 
         if (!redraw_boxes.empty())
@@ -391,11 +353,7 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
         }
     }
 
-    //Refresh();
-    // 更新光标
-    //UpdateCursor(pt);
 
-    //event.Skip();
 }
 
 void HtmlWindow::OnLeftUp(wxMouseEvent& event)
@@ -406,45 +364,32 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
     // 调用文档的鼠标释放事件
     litehtml::position::vector redraw_boxes;
 
-    if (m_doc && m_doc->on_lbutton_up(pt.x, pt.y, 0, 0, redraw_boxes))
+    if (m_doc && m_doc->on_lbutton_up(pt.x, pt.y + m_scrollPos, 0, 0, redraw_boxes))
     {
         if (!redraw_boxes.empty())
         {
             RequestRedraw(redraw_boxes);
         }
     }
-    if(m_doc)
-    {
-        auto render = m_doc->root_render();
-        auto el = render->get_text_element_by_point(pt.x, pt.y, 0, 0);
-        if (el)
-        {
-            auto pos = el->get_placement();
-            m_selection = true;
-            m_selection_rect = wxRect(pos.x, pos.y, pos.width, pos.height);
-        }
-    }
 
-    Refresh();
-    event.Skip();
 }
 
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
 {
     // 调用文档的鼠标离开事件
-    //if (m_doc)
-    //{
-    //    litehtml::position::vector redraw_boxes;
-    //    if (m_doc->on_mouse_leave(redraw_boxes))
-    //    {
-    //        if (!redraw_boxes.empty())
-    //        {
-    //            RequestRedraw(redraw_boxes);
-    //        }
-    //    }
-    //}
+    if (m_doc)
+    {
+        litehtml::position::vector redraw_boxes;
+        if (m_doc->on_mouse_leave(redraw_boxes))
+        {
+            if (!redraw_boxes.empty())
+            {
+                RequestRedraw(redraw_boxes);
+            }
+        }
+    }
 
-    event.Skip();
+    //event.Skip();
 }
 
 void HtmlWindow::OnKeyDown(wxKeyEvent& event)
