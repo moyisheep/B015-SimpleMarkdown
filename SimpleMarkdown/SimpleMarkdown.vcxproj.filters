@@ -19,6 +19,9 @@
     <Filter Include="HtmlWindow">
       <UniqueIdentifier>{e5970c18-8175-4778-81b8-32ac73300c4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="wxContainer">
+      <UniqueIdentifier>{056788ed-ef1d-47eb-8462-dcf7bb66e2d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -37,7 +40,7 @@
       <Filter>HtmlWindow</Filter>
     </ClInclude>
     <ClInclude Include="wxContainer.h">
-      <Filter>HtmlWindow</Filter>
+      <Filter>wxContainer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -54,7 +57,7 @@
       <Filter>HtmlWindow</Filter>
     </ClCompile>
     <ClCompile Include="wxContainer.cpp">
-      <Filter>HtmlWindow</Filter>
+      <Filter>wxContainer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

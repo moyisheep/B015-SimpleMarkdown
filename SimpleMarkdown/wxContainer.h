@@ -63,12 +63,13 @@ public:
     bool on_element_click(const litehtml::element::ptr& el) override;
     void on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event) override;
 
-    void execute_script(const std::string& src,
-        const std::string& content,
-        const std::string& type,
-        bool async,
-        bool defer) override;
-    void import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) override;
+
+    //void execute_script(const std::string& src,
+    //    const std::string& content,
+    //    const std::string& type,
+    //    bool async,
+    //    bool defer) override;
+    //void import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) override;
 
 
     void set_vfs(std::shared_ptr<VirtualFileSystem> vfs) { m_vfs = vfs; }
@@ -78,24 +79,15 @@ public:
     // Add to your existing private section
     std::string m_base_url;
 
-    // 文本位置缓存结构
-    struct TextChunk {
-        wxString text;
-        wxRect rect;
-        std::shared_ptr<wxFont> font;
-    };
+
 
     // 选择相关成员变量
-    std::vector<TextChunk> m_textChunks;
-    wxPoint m_selectionStart;
-    wxPoint m_selectionEnd;
-    bool m_isSelecting;
-    std::vector<wxRect> m_selectionRects;
+
     wxWindow* m_wnd;
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
     std::unordered_map<std::string, wxBitmap> m_imageCache; // 图片缓存
 
-    void AddTextToCache(const wxString& text, const wxRect& rect, wxFont* font);
+
 
     // 辅助函数
     float CalculateLinearGradientPosition(const wxPoint& point,

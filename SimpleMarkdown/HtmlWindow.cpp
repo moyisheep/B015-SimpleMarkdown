@@ -13,19 +13,20 @@
 #include <cmark-gfm.h>
 #include "HtmlDumper.h"
 
+#include <filesystem>
 
+namespace fs = std::filesystem;
 
 
 std::string md_to_html(const std::string& markdown) {
-    char* html = cmark_markdown_to_html(
+    std::string html = cmark_markdown_to_html(
         markdown.c_str(),
         markdown.length(),
         CMARK_OPT_DEFAULT
     );
-    std::string result(html);
 
-    std::free(html);  // 使用 std::free
-    return result;
+    
+    return html;
 }
 
 HtmlWindow::HtmlWindow(wxWindow* parent)
@@ -34,12 +35,11 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     m_totalHeight = 0;
     m_scrollPos = 0;
-    m_isSelecting = false;
-    m_selectionStart = wxDefaultPosition;
-    m_selectionEnd = wxDefaultPosition;
-    SetScrollRate(0, 20); // 设置垂直滚动步长
+
+    //SetScrollRate(0, 20); // 设置垂直滚动步长
     m_container = std::make_unique<wxContainer>(this);
-    m_container->set_vfs(std::make_shared< LocalVFS>());
+    m_vfs = std::make_shared< LocalVFS>();
+    m_container->set_vfs(m_vfs);
 
 
 }
@@ -55,15 +55,29 @@ void HtmlWindow::set_html(const std::string& html)
 {
 
 
-    m_doc = litehtml::document::createFromString(html.c_str() , m_container.get());
+    m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, m_container.get());
 
-    auto el = m_doc->root()->select_one(".section");
+    //auto el = m_doc->root()->select_one(".instructions-list");
 
-    if( el)
-    {
-        m_doc->append_children_from_string(*el, "<p>hello world</p>");
-    }
-    
+    //if (el)
+    //{
+    //    std::string text = "";
+    //    el->get_text(text);
+    //    std::string txt = std::string(el->get_tagName()) + ":"  + text;
+    //    wxLogInfo(txt);
+    //    for (auto& child: el->children())
+    //    {
+    //        text.clear();
+    //        child->get_text(text);
+    //        txt = std::string(child->get_tagName()) + ":" + text;
+    //        wxLogInfo(txt);
+    //    }
+    //    m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong> </li>");
+
+
+    //    
+    //}
+    //
     
     if (m_doc)
     {
@@ -81,38 +95,32 @@ void HtmlWindow::set_html(const std::string& html)
 
 
 
-bool HtmlWindow::open_html(const wxString& file_path)
+bool HtmlWindow::open_html(const std::string &file_path)
 {
-    // Check if file exists
-    if (!wxFileExists(file_path)) {
-        wxLogError("HTML file not found: %s", file_path);
-        return false;
+    if (!m_vfs) { return false; }
+    
+    auto bin = m_vfs->get_binary(file_path);
+    if(bin.empty()){ return false; }
+
+    std::string raw = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
+    
+    std::string ext = fs::path(file_path).extension().generic_string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+    
+    std::string html = "";
+    if (ext == ".md")
+    {
+        html += "<html><style>a:hover{background:blue;}:selected {  background:#3297fd;color: white;}</style><body>";
+        html += md_to_html(raw);
+        html += "</body></html>";
     }
-
-    // Read the file content
-    wxFile file(file_path);
-    if (!file.IsOpened()) {
-        wxLogError("Failed to open HTML file: %s", file_path);
-        return false;
+    else
+    {
+        html = raw;
     }
-
-    wxString html_content;
-    if (!file.ReadAll(&html_content, wxConvAuto())) {
-        wxLogError("Failed to read HTML file: %s", file_path);
-        return false;
-    }
-    file.Close();
-
-    // Set base URL to file's directory for relative paths
-    wxFileName fn(file_path);
-    fn.MakeAbsolute();
-    wxString base_url = fn.GetPath(wxPATH_GET_SEPARATOR | wxPATH_GET_VOLUME);
-    fn.SetCwd(base_url);
-    m_container->set_base_url(base_url.c_str());
-
-    std::string md = html_content.ToUTF8().data();
-    std::string html = md_to_html(md);
+    
     // Set the HTML content
+
     this->set_html(html);
     return true;
 }
@@ -130,12 +138,12 @@ void HtmlWindow::SetupScrollbars()
     m_totalHeight = m_doc->height();
 
     SetVirtualSize(-1, m_totalHeight);
-    SetScrollRate(0, 20);
+    //SetScrollRate(0, 20);
 
     int scrollRange = m_totalHeight - clientHeight;
     if (scrollRange > 0) {
         EnableScrolling(false, true);
-        SetScrollbars(0, 20, 0, scrollRange / 20 + 1, 0, m_scrollPos / 20);
+        SetScrollbars(0, 20, 0, scrollRange, 0, m_scrollPos);
     }
     else {
         EnableScrolling(false, false);
@@ -168,12 +176,7 @@ void HtmlWindow::EnableDragAndDrop(bool enable)
     }
 }
 
-bool HtmlWindow::CanOpenFile(const wxString& file_path)
-{
-    //wxString ext = wxFileName(file_path).GetExt().Lower();
-    //return ext == "html" || ext == "htm";
-    return true;
-}
+
 
 void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
 {
@@ -182,17 +185,12 @@ void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
         wxString* dropped = event.GetFiles();
         wxString file_path = dropped[0];
 
-        if (CanOpenFile(file_path))
+
+        if (!open_html(file_path.ToStdString()))
         {
-            if (!open_html(file_path))
-            {
-                wxMessageBox("Failed to load HTML file", "Error", wxICON_ERROR);
-            }
+            wxMessageBox("Failed to load HTML file", "Error", wxICON_ERROR);
         }
-        else
-        {
-            wxMessageBox("Only HTML files (.html, .htm) are supported", "Error", wxICON_WARNING);
-        }
+
     }
 }
 
@@ -229,32 +227,55 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     wxPaintDC dc(this);
     DoPrepareDC(dc); // 处理滚动偏移
 
-    dc.Clear();
-    // 清除文本缓存（每次绘制时重新缓存）
-    m_textChunks.clear();
+            // 获取需要重绘的区域
+    wxRegion updateRegion = GetUpdateRegion();
+    wxRect updateRect = updateRegion.GetBox();
 
+
+
+    // 绘制背景
+    dc.SetBrush(*wxWHITE_BRUSH);
+    dc.SetPen(*wxTRANSPARENT_PEN);
+    dc.DrawRectangle(updateRect);
+
+
+
+ 
     if (m_doc)
     {
         // 绘制选择区域
 
         litehtml::position pos;
         m_container->get_viewport(pos);
-
+        
+        litehtml::position clip{ (float)updateRect.x, 
+            (float)updateRect.y, 
+            (float)updateRect.width, 
+            (float)updateRect.height };
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
-        m_doc->draw(hdc, 0, -m_scrollPos, &pos);
+        m_doc->draw(hdc, 0, -m_scrollPos, &clip);
         //DrawSelection(dc);
     }
+    if(m_selection)
+    {
+        dc.DrawRectangle(m_selection_rect);
+    }
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.SetPen(*wxRED_PEN);
+    dc.DrawRectangle(updateRect);
 }
 
 void HtmlWindow::OnScroll(wxScrollWinEvent& event)
 {
-    int newPos = GetScrollPos(wxVERTICAL);
+    int newPos = event.GetPosition();
+    std::string txt = "OnScroll: " + std::to_string(newPos);
+    wxLogInfo(txt);
+    //int newPos = GetScrollPos(wxVERTICAL);
     if (newPos != m_scrollPos)
     {
-        m_scrollPos = newPos;
-        Refresh();
+        ScrollToPosition(newPos);
     }
-    event.Skip();
+    //event.Skip();
 }
 
 void HtmlWindow::OnMouseWheel(wxMouseEvent& event)
@@ -265,7 +286,8 @@ void HtmlWindow::OnMouseWheel(wxMouseEvent& event)
 
     int newPos = m_scrollPos - lines * 20; // 20是滚动步长
     newPos = wxMax(0, wxMin(newPos, m_totalHeight - GetClientSize().GetHeight()));
-
+    std::string txt = "OnMouseWheel: " + std::to_string(newPos);
+    wxLogInfo(txt);
     if (newPos != m_scrollPos)
     {
         ScrollToPosition(newPos);
@@ -290,7 +312,9 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
     //CalcUnscrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
     CalcScrolledPosition(pt.x, pt.y, &pt.x, &pt.y);
     auto render = m_doc->root_render();
-    auto el = render->get_element_by_point(pt.x, pt.y, pt.x, pt.y);
+
+    auto el = render->get_element_by_point(pt.x, pt.y, 0, 0);
+    
     if (el)
     {
         
@@ -306,32 +330,32 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
         wxLogInfo(wxString::FromUTF8(txt));
 
       
-        for (auto& child: el->children())
-        {
-            if(child)
-            {
-                text = "";
-                tagName = "";
-                litehtml::size sz;
-                child->get_text(text);
-                child->get_content_size(sz, 1000);
-                tagName = child->get_tagName();
-                pos = child->get_placement();
-                
-                txt = "    " + text + " ";
-                txt += "(" + std::to_string(pos.left()) + "," +
-                    std::to_string(pos.top()) + "," +
-                    std::to_string(pos.right()) + "," +
-                    std::to_string(pos.bottom()) + ")";
-                wxLogInfo(wxString::FromUTF8(txt));
-            }
-        }
+        //for (auto& child: el->children())
+        //{
+        //    if(child)
+        //    {
+        //        text = "";
+        //        tagName = "";
+        //        litehtml::size sz;
+        //        child->get_text(text);
+        //        child->get_content_size(sz, 1000);
+        //        tagName = child->get_tagName();
+        //        pos = child->get_placement();
+        //        
+        //        txt = "    " + text + " ";
+        //        txt += "(" + std::to_string(pos.left()) + "," +
+        //            std::to_string(pos.top()) + "," +
+        //            std::to_string(pos.right()) + "," +
+        //            std::to_string(pos.bottom()) + ")";
+        //        wxLogInfo(wxString::FromUTF8(txt));
+        //    }
+        //}
     }
 
     // 调用文档的鼠标按下事件
     litehtml::position::vector redraw_boxes;
 
-    if (m_doc && m_doc->on_lbutton_down(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+    if (m_doc && m_doc->on_lbutton_down(pt.x, pt.y, 0, 0, redraw_boxes))
     {
         // 文档处理了事件，可能触发了重绘
         if (!redraw_boxes.empty())
@@ -340,18 +364,7 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
             RequestRedraw(redraw_boxes);
         }
     }
-    else
-    {
-        // 文档没有处理，使用我们的选择逻辑
-        m_selectionStart = pt;
-        m_selectionEnd = pt;
-        m_isSelecting = true;
-        m_textChunks.clear(); // 清除旧缓存
 
-        // 开始选择
-        CaptureMouse();
-        SetFocus();
-    }
 
     Refresh();
     event.Skip();
@@ -364,18 +377,13 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
 
     // 首先调用文档的鼠标悬停事件
     litehtml::position::vector redraw_boxes;
-    bool handledByDoc = false;
+
 
     if (m_doc)
     {
-        if (event.LeftIsDown() && m_doc->on_mouse_over(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
-        {
-            handledByDoc = true;
-        }
-        else if (m_doc->on_mouse_over(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
-        {
-            handledByDoc = true;
-        }
+
+        m_doc->on_mouse_over(pt.x, pt.y, 0, 0, redraw_boxes);
+
 
         if (!redraw_boxes.empty())
         {
@@ -383,18 +391,11 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
         }
     }
 
-    // 如果文档没有处理且我们正在选择，则使用我们的选择逻辑
-    if (!handledByDoc && m_isSelecting && event.Dragging())
-    {
-        m_selectionEnd = pt;
-        //UpdateSelection(pt);
-        Refresh();
-    }
-
+    //Refresh();
     // 更新光标
     //UpdateCursor(pt);
 
-    event.Skip();
+    //event.Skip();
 }
 
 void HtmlWindow::OnLeftUp(wxMouseEvent& event)
@@ -405,14 +406,24 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
     // 调用文档的鼠标释放事件
     litehtml::position::vector redraw_boxes;
 
-    if (m_doc && m_doc->on_lbutton_up(pt.x, pt.y, pt.x, pt.y, redraw_boxes))
+    if (m_doc && m_doc->on_lbutton_up(pt.x, pt.y, 0, 0, redraw_boxes))
     {
         if (!redraw_boxes.empty())
         {
             RequestRedraw(redraw_boxes);
         }
     }
-    
+    if(m_doc)
+    {
+        auto render = m_doc->root_render();
+        auto el = render->get_text_element_by_point(pt.x, pt.y, 0, 0);
+        if (el)
+        {
+            auto pos = el->get_placement();
+            m_selection = true;
+            m_selection_rect = wxRect(pos.x, pos.y, pos.width, pos.height);
+        }
+    }
 
     Refresh();
     event.Skip();
@@ -421,17 +432,17 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
 {
     // 调用文档的鼠标离开事件
-    if (m_doc)
-    {
-        litehtml::position::vector redraw_boxes;
-        if (m_doc->on_mouse_leave(redraw_boxes))
-        {
-            if (!redraw_boxes.empty())
-            {
-                RequestRedraw(redraw_boxes);
-            }
-        }
-    }
+    //if (m_doc)
+    //{
+    //    litehtml::position::vector redraw_boxes;
+    //    if (m_doc->on_mouse_leave(redraw_boxes))
+    //    {
+    //        if (!redraw_boxes.empty())
+    //        {
+    //            RequestRedraw(redraw_boxes);
+    //        }
+    //    }
+    //}
 
     event.Skip();
 }

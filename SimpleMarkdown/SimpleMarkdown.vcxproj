@@ -139,13 +139,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\litehtml\litehtml.vcxproj">
-      <Project>{5eee68e7-3cb0-4adb-af72-4c0bb01f0b18}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HtmlDumper.h" />
     <ClInclude Include="LocalVFS.h" />
@@ -160,6 +157,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="HtmlWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\litehtml\litehtml.vcxproj">
+      <Project>{5eee68e7-3cb0-4adb-af72-4c0bb01f0b18}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
