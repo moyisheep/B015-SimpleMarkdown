@@ -43,7 +43,8 @@ public:
     // 拖拽加载
     void EnableDragAndDrop(bool enable = true);
 
-
+    void ShowLinkWindow(std::string link);
+    void HideLinkWindow();
 
 private:
 
@@ -72,7 +73,7 @@ private:
 
     // Add to your existing private section
     std::string m_base_url;
-
+    std::unique_ptr<wxStaticText> m_link_ctrl;
 
 
     // 新增事件处理
@@ -84,7 +85,7 @@ private:
 
     bool m_selection = false;
     wxRect m_selection_rect;
-
+    std::string m_hover_link = "";
     //void UpdateCursor(const wxPoint& pt);
 
 

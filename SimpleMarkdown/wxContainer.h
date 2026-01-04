@@ -74,11 +74,13 @@ public:
 
     void set_vfs(std::shared_ptr<VirtualFileSystem> vfs) { m_vfs = vfs; }
     std::shared_ptr<VirtualFileSystem> get_vfs() const { return m_vfs; }
+
+    std::string get_hover_link() { return m_hover_link;}
  private:
 
     // Add to your existing private section
     std::string m_base_url;
-
+    std::string m_hover_link = "";
 
 
     // 选择相关成员变量

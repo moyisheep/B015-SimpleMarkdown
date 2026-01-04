@@ -3,7 +3,7 @@
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
 {
-
+    m_hover_link = "";
 }
 
 wxContainer::~wxContainer()
@@ -1027,7 +1027,24 @@ bool wxContainer::on_element_click(const litehtml::element::ptr& el)
 
 void wxContainer::on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event)
 {
-    // Not implemented in this basic version
+    if(event == litehtml::mouse_event_enter)
+    {
+        if(el)
+        {
+            std::string tag_name = el->get_tagName();
+            if (tag_name == "a")
+            {
+                auto txt = el->get_attr("href");
+                if (txt) { m_hover_link = txt; }
+                else { m_hover_link = ""; }
+            }
+        }
+
+    }
+    else if(event == litehtml::mouse_event_leave)
+    {
+        m_hover_link = "";
+    }
 }
 
 

@@ -40,8 +40,8 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
     m_container = std::make_unique<wxContainer>(this);
     m_vfs = std::make_shared< LocalVFS>();
     m_container->set_vfs(m_vfs);
-
-
+    m_link_ctrl = std::make_unique<wxStaticText>(this, wxID_ANY, "");
+    m_link_ctrl->Hide();
 }
 HtmlWindow::~HtmlWindow()
 {
@@ -184,6 +184,26 @@ void HtmlWindow::EnableDragAndDrop(bool enable)
     {
         DragAcceptFiles(false);
     }
+}
+
+void HtmlWindow::ShowLinkWindow(std::string link)
+{
+    if (link.empty() || link == m_hover_link) { return; }
+    m_hover_link = link;
+    m_link_ctrl->SetLabelText(m_hover_link);
+    auto sz = m_link_ctrl->GetBestSize();
+    m_link_ctrl->SetSize(sz);
+
+    auto csz = GetClientSize();
+    wxPoint pt{ 0, csz.GetHeight() - sz.GetHeight() };
+    m_link_ctrl->SetPosition(pt);
+    m_link_ctrl->Show();
+}
+
+void HtmlWindow::HideLinkWindow()
+{
+    m_hover_link = "";
+    m_link_ctrl->Hide();
 }
 
 
@@ -353,6 +373,12 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
         }
     }
 
+    if(m_doc)
+    {
+        auto link = m_container->get_hover_link();
+        if (link.empty()) { HideLinkWindow(); }
+        ShowLinkWindow(link);
+    }
 
 }
 
