@@ -59,7 +59,26 @@ private:
     litehtml::position m_pos{};
 
 };
+struct Point
+{
+    float x = 0;
+    float y = 0;
+    void clear()
+    {
+        x = 0;
+        y = 0;
+    }
+    bool empty()
+    {
+        return (x == 0) && (y == 0);
+    }
+    bool operator==(const Point& val)
+    {
+        return (x == val.x) && (y == val.y);
+    }
 
+
+};
 class SelectionRect
 {
 public:
@@ -179,13 +198,17 @@ private:
 
     bool m_selection = false;
     SelectionRect m_selection_rect;
-    Selection m_selection_start{};
-    Selection m_selection_end{};
+    //Selection m_selection_start{};
+    //Selection m_selection_end{};
+    Point m_selection_start;
+    Point m_selection_end;
+    litehtml::element::ptr m_selection_start_el = nullptr;
+    litehtml::element::ptr m_selection_end_el = nullptr;
     std::string m_selection_text = "";
 
     std::string m_hover_link = "";
     //void UpdateCursor(const wxPoint& pt);
-
-
+    void AddRecursive(litehtml::element::ptr el, litehtml::position sel_rect, bool& start, bool& end);
+    void UpdateSelectionElement(litehtml::element::ptr el, const litehtml::position& sel_rect);
     DECLARE_EVENT_TABLE()
 };
