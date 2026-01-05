@@ -210,5 +210,6 @@ private:
     //void UpdateCursor(const wxPoint& pt);
     void AddRecursive(litehtml::element::ptr el, litehtml::position sel_rect, bool& start, bool& end);
     void UpdateSelectionElement(litehtml::element::ptr el, const litehtml::position& sel_rect);
+    bool CopyToClipboard(const wxString& text);
     DECLARE_EVENT_TABLE()
 };

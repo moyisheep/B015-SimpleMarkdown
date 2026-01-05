@@ -5,6 +5,7 @@
 #include <wx/filesys.h>
 #include <wx/uri.h>
 
+#include <wx/dataobj.h>
 
 #include <wx/clipbrd.h>
 #include <algorithm>
@@ -402,10 +403,10 @@ void HtmlWindow::UpdateSelectionRect()
         start_pt = m_selection_start;
         end_pt = m_selection_end;
     }
-    litehtml::position selection_rect{ start_pt.x,
-                                      start_pt.y,
-                                      end_pt.x - start_pt.x,
-                                      end_pt.y - start_pt.y };
+    litehtml::position selection_rect{ std::min(m_selection_start.x, m_selection_end.x),
+                                      std::min(m_selection_start.y, m_selection_end.y),
+                                      std::abs(m_selection_end.x - m_selection_start.x),
+                                      std::abs(m_selection_end.y - m_selection_start.y) };
 
 
  
@@ -448,6 +449,7 @@ void HtmlWindow::UpdateSelectionRect()
 
 
     m_selection_rect.scroll(-m_scrollPos);
+    m_selection_text.erase(m_selection_text.find_last_not_of("\r\n") + 1);
     if(!m_selection_text.empty())
     {
         wxLogInfo(m_selection_text);
@@ -539,13 +541,13 @@ void HtmlWindow::AddRecursive(litehtml::element::ptr el, litehtml::position sel_
                         if (sel_rect.does_intersect(&c_pos))
                         {
                             m_selection_rect.add(c_pos);
-                            break;
+                            m_selection_text += wxString(c).ToUTF8();
                         }
                         c_pos.x += width;
                         index += 1;
 
                     }
-                    m_selection_text += u8text.SubString(index, u8text.Length()).ToUTF8();
+                    
                 }
             }
 
@@ -574,19 +576,18 @@ void HtmlWindow::UpdateSelectionElement(litehtml::element::ptr el, const litehtm
         if(child->is_text())
         {
             auto pos = child->get_placement();
+            if(!m_selection_start_el && 
+                (pos.does_intersect(&sel_rect) ||
+                pos.is_point_inside(sel_rect.left(), sel_rect.top()))  )
+            {
+                m_selection_start_el = child;
+            }
             if(pos.does_intersect(&sel_rect) ||
-                pos.is_point_inside(sel_rect.left(), sel_rect.top()) ||
                 pos.is_point_inside(sel_rect.right(), sel_rect.bottom()))
             {
-                if(!m_selection_start_el)
-                {
-                    m_selection_start_el = child;
+
                     m_selection_end_el = child;
-                }
-                else
-                {
-                    m_selection_end_el = child;
-                }
+            
             }
         }
         else
@@ -703,6 +704,24 @@ void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
     //event.Skip();
 }
 
+
+bool HtmlWindow::CopyToClipboard(const wxString& text)
+{
+    if (wxTheClipboard->Open())
+    {
+        // 清除剪贴板内容
+        wxTheClipboard->Clear();
+
+        // 设置文本数据
+        wxTheClipboard->SetData(new wxTextDataObject(text));
+
+        // 关闭剪贴板
+        wxTheClipboard->Close();
+
+        return true;
+    }
+    return false;
+}
 void HtmlWindow::OnKeyDown(wxKeyEvent& event)
 {
     // 处理 ESC 键取消
@@ -727,7 +746,10 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
     }
     else if (event.GetKeyCode() == 'C' && event.ControlDown())
     {
-
+        if(!m_selection_text.empty())
+        {
+            CopyToClipboard(wxString::FromUTF8(m_selection_text));
+        }
     }
 
 
