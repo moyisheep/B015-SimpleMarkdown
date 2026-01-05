@@ -25,6 +25,94 @@
 
 #include "LocalVFS.h"
 
+class Selection
+{
+public:
+    Selection(litehtml::element::ptr el = nullptr, size_t index=0, litehtml::position pos = litehtml::position{})
+    {
+        m_el = el;
+        m_pos = pos;
+        m_index = index;
+    }
+    size_t index() { return m_index; }
+    bool empty()
+    {
+        if (!m_el || m_pos.empty()) { return true; }
+        return false;
+    }
+    bool is_same_element(const Selection& val) { return m_el == val.m_el; }
+    litehtml::position position() { return m_pos; }
+    litehtml::element::ptr element() { return m_el; }
+    void clear()
+    {
+        m_el = nullptr;
+        m_index = 0;
+        m_pos.clear();
+    }
+    bool operator==(const Selection& val)
+    {
+        return ((m_el == val.m_el) && (m_index = val.m_index) && (m_pos == val.m_pos));
+    }
+private:
+    litehtml::element::ptr m_el = nullptr;
+    size_t m_index = 0;
+    litehtml::position m_pos{};
+
+};
+
+class SelectionRect
+{
+public:
+    SelectionRect() { m_rect.clear(); };
+    void add(litehtml::position pos)
+    {
+        if (m_rect.empty()) 
+        { 
+            m_rect.push_back(pos); 
+            return; 
+        }
+
+        auto back = m_rect.back();
+        if(back.y == pos.y && back.height == pos.height)
+        {
+            m_rect.pop_back();
+            back.width = pos.right() - back.left();
+            m_rect.push_back(back);
+        }
+        else
+        {
+            m_rect.push_back(pos);
+        }
+    }
+
+    void scroll(float delta)
+    {
+        for (auto& rect: m_rect)
+        {
+            rect.y = rect.y + delta;
+        }
+    }
+
+    std::vector<wxRect> get_rect()
+    {
+        std::vector<wxRect> rects;
+        for (auto& rect : m_rect)
+        {
+            rects.push_back(wxRect((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height));
+        }
+        return rects;
+    }
+    bool empty()
+    {
+        return m_rect.empty();
+    }
+    void clear()
+    {
+        m_rect.clear();
+    }
+private:
+    std::vector<litehtml::position> m_rect;
+};
 class HtmlWindow :  public wxScrolled<wxPanel>
 {
 public:
@@ -52,7 +140,7 @@ private:
     litehtml::document::ptr m_doc;
 
     wxFrame* m_parent;
- 
+
     // 滚动相关变量
     int m_totalHeight;
     int m_scrollPos;
@@ -71,6 +159,7 @@ private:
     void OnDropFiles(wxDropFilesEvent& event);
 
 
+
     // Add to your existing private section
     std::string m_base_url;
     std::unique_ptr<wxStaticText> m_link_ctrl;
@@ -81,10 +170,19 @@ private:
     void OnLeftUp(wxMouseEvent& event);
     void OnMouseLeave(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
+    Selection GetSelectionChar(float x, float y);
+    void UpdateSelectionRect();
+    void ClearSelection();
     void OnKeyDown(wxKeyEvent& event);
 
+
+
     bool m_selection = false;
-    wxRect m_selection_rect;
+    SelectionRect m_selection_rect;
+    Selection m_selection_start{};
+    Selection m_selection_end{};
+    std::string m_selection_text = "";
+
     std::string m_hover_link = "";
     //void UpdateCursor(const wxPoint& pt);
 

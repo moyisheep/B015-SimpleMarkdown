@@ -162,8 +162,10 @@ void HtmlWindow::SetupScrollbars()
 
 void HtmlWindow::ScrollToPosition(int pos)
 {
+   
     m_scrollPos = pos;
     SetScrollPos(wxVERTICAL, pos);
+    UpdateSelectionRect();
     Refresh();
 }
 
@@ -227,10 +229,6 @@ void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
 
 
 
-
-
-
-
 // 请求重绘指定区域
 void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
 {
@@ -265,7 +263,16 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     dc.DrawRectangle(updateRect);
 
 
+    if (!m_selection_rect.empty())
+    {
 
+        dc.SetBrush(*wxMEDIUM_GREY_BRUSH);
+        dc.SetPen(*wxTRANSPARENT_PEN);
+        for (auto& rect : m_selection_rect.get_rect())
+        {
+            dc.DrawRectangle(rect);
+        }
+    }
  
     if (m_doc)
     {
@@ -278,12 +285,11 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
             (float)updateRect.height };
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
         m_doc->draw(hdc, 0, -m_scrollPos, &clip);
-        //DrawSelection(dc);
+        
     }
-    if(m_selection)
-    {
-        dc.DrawRectangle(m_selection_rect);
-    }
+
+
+
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.SetPen(*wxRED_PEN);
     dc.DrawRectangle(updateRect);
@@ -331,6 +337,131 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
+
+Selection HtmlWindow::GetSelectionChar(float x, float y)
+{
+    auto root_render = m_doc->root_render();
+    auto el = root_render->get_element_by_point(x, y, 0, 0);
+
+    if (el)
+    {
+        for (auto& child : el->children())
+        {
+            auto pos = child->get_placement();
+            if (pos.is_point_inside(x, y))
+            {
+                std::string text; child->get_text(text);
+                wxString u8text = wxString::FromUTF8(text);
+                auto* font = (wxFont*)child->parent()->css().get_font();
+                wxMemoryDC dc;
+                dc.SetFont(*font);
+                litehtml::position c_pos{ pos.left(), pos.top(), 0.0f, pos.height };
+                size_t index = 0;
+                for (auto c : u8text)
+                {
+                    wxCoord width;
+                    dc.GetTextExtent(c, &width, nullptr);
+                    c_pos.width = width;
+                    if (c_pos.is_point_inside(x, y))
+                    {
+                        return Selection{ child, index, c_pos };
+                    }
+                    c_pos.x += width;
+                    index += 1;
+
+                }
+
+
+            }
+        }
+    }
+    return Selection{};
+}
+
+
+void HtmlWindow::UpdateSelectionRect()
+{
+    if(m_selection_start.empty() || 
+        m_selection_end.empty() || 
+        m_selection_start == m_selection_end)
+    {
+        return;
+    }
+    m_selection_rect.clear();
+    // process selection in same el_text element;
+    if(m_selection_start.is_same_element(m_selection_end))
+    {
+        auto start_pos = m_selection_start.position();
+        auto end_pos = m_selection_end.position();
+        m_selection_rect.add(start_pos);
+        m_selection_rect.add(end_pos);
+        std::string txt = "";
+        m_selection_start.element()->get_text(txt);
+        m_selection_text += txt.substr(m_selection_start.index(), m_selection_end.index() - m_selection_start.index() + 1);
+    }
+    // process selection in multiple el_text element;
+    else
+    {
+        // process start selection element
+        auto start_pos = m_selection_start.position();
+        m_selection_rect.add(start_pos);
+        std::string txt = "";
+        m_selection_start.element()->get_text(txt);
+        m_selection_text += txt.substr(m_selection_start.index());
+
+        // process between start and end selection element
+        auto start_el = m_selection_start.element();
+        auto end_el = m_selection_end.element();
+
+        auto parent_el = start_el->parent();
+        bool start_selection = false;
+        bool end_selection = false;
+        for(auto child: parent_el->children())
+        {
+            if (child == start_el)
+            {
+                start_selection = true;
+                continue;
+            }
+            if(child == end_el)
+            {
+                end_selection = true;
+                break;
+            }
+            if(start_selection)
+            {
+                m_selection_rect.add(child->get_placement());
+                child->get_text(m_selection_text);
+            }
+        }
+
+        if(!end_selection)
+        {
+            wxLogInfo("还没选择完");
+        }
+        if(end_selection)
+        {
+            auto end_pos = m_selection_end.position();
+            m_selection_rect.add(end_pos);
+            std::string txt = "";
+            m_selection_end.element()->get_text(txt);
+            m_selection_text += txt.substr(0, m_selection_end.index());
+        }
+    }
+
+    m_selection_rect.scroll(-m_scrollPos);
+}
+
+
+void HtmlWindow::ClearSelection()
+{
+    m_selection = false;
+    m_selection_start.clear();
+    m_selection_end.clear();
+    m_selection_text = "";
+    m_selection_rect.clear();
+}
+
 // 鼠标事件处理
 void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 {
@@ -351,7 +482,16 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
         }
     }
 
+    if(m_doc)
+    {
+        float x = pt.x;
+        float y = pt.y + m_scrollPos;
+        ClearSelection();
+        m_selection_start = GetSelectionChar(x, y);
+        m_selection_end = m_selection_start;
+        m_selection = true;
 
+    }
 
     //event.Skip();
 }
@@ -372,7 +512,13 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
             RequestRedraw(redraw_boxes);
         }
     }
+    if (m_doc && m_selection)
+    {
+        m_selection_end = GetSelectionChar(pt.x, pt.y + m_scrollPos);
+        UpdateSelectionRect();
 
+        Refresh();
+    }
     if(m_doc)
     {
         auto link = m_container->get_hover_link();
@@ -398,6 +544,13 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
         }
     }
 
+    if (m_doc)
+    {
+        m_selection_end = GetSelectionChar(pt.x, pt.y + m_scrollPos);
+        UpdateSelectionRect();
+        m_selection = false;
+        Refresh();
+    }
 }
 
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
