@@ -58,27 +58,27 @@ void HtmlWindow::set_html(const std::string& html)
 
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, m_container.get());
 
-    //auto el = m_doc->root()->select_one(".instructions-list");
+    auto el = m_doc->root()->select_one(".instructions-list");
 
-    //if (el)
-    //{
-    //    std::string text = "";
-    //    el->get_text(text);
-    //    std::string txt = std::string(el->get_tagName()) + ":"  + text;
-    //    wxLogInfo(txt);
-    //    for (auto& child: el->children())
-    //    {
-    //        text.clear();
-    //        child->get_text(text);
-    //        txt = std::string(child->get_tagName()) + ":" + text;
-    //        wxLogInfo(txt);
-    //    }
-    //    m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong> </li>");
+    if (el)
+    {
+        std::string text = "";
+        el->get_text(text);
+        std::string txt = std::string(el->get_tagName()) + ":"  + text;
+        wxLogInfo(txt);
+        for (auto& child: el->children())
+        {
+            text.clear();
+            child->get_text(text);
+            txt = std::string(child->get_tagName()) + ":" + text;
+            wxLogInfo(txt);
+        }
+        m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong>what <span style=\"color:blue\">¡¶ÄãºÃ¡·</span> </li>");
 
 
-    //    
-    //}
-    //
+        
+    }
+    
     
     if (m_doc)
     {
