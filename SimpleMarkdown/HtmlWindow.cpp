@@ -64,9 +64,9 @@ void HtmlWindow::set_html(const std::string& html)
     {
         std::string text = "";
         el->get_text(text);
-        std::string txt = std::string(el->get_tagName()) + ":"  + text;
+        std::string txt = std::string(el->get_tagName()) + ":" + text;
         wxLogInfo(txt);
-        for (auto& child: el->children())
+        for (auto& child : el->children())
         {
             text.clear();
             child->get_text(text);
@@ -76,7 +76,7 @@ void HtmlWindow::set_html(const std::string& html)
         m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong>what <span style=\"color:blue\">《你好》</span> </li>");
 
 
-        
+
     }
     
     
@@ -86,6 +86,7 @@ void HtmlWindow::set_html(const std::string& html)
         m_doc->render(width);
         SetupScrollbars(); // 添加这行
     }
+
     Refresh();
     //HtmlDumper dumper;
     //m_doc->dump(dumper);
