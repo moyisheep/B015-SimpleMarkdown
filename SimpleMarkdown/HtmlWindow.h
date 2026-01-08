@@ -85,7 +85,11 @@ public:
     SelectionRect() { m_rect.clear(); };
     void add(litehtml::position pos)
     {
-        m_rect.push_back(pos);
+
+  
+         m_rect.push_back(pos);
+   
+
         //if (m_rect.empty()) 
         //{ 
         //    m_rect.push_back(pos); 
@@ -214,6 +218,7 @@ private:
     //Selection m_selection_end{};
     int32_t m_selection_start;
     int32_t m_selection_end;
+    int32_t m_cursor_pos = -1;
     //litehtml::element::ptr m_selection_start_el = nullptr;
     //litehtml::element::ptr m_selection_end_el = nullptr;
     std::string m_selection_text = "";

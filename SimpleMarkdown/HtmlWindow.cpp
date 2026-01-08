@@ -100,7 +100,10 @@ void HtmlWindow::set_html(const std::string& html)
 }
 void HtmlWindow::record_char_boxes()
 {
+    // store all character's position, [type] std::vector<litehtml::position>
     m_char_boxes.clear();
+    
+    // store all character, [type] std::u32string
     m_plain_text.clear();
     record_char_boxes_recursive(m_doc->root());
 
@@ -109,6 +112,7 @@ void HtmlWindow::record_char_boxes_recursive(litehtml::element::ptr el)
 {
     for(auto child: el->children())
     {
+        // if it's el_text node, start record
         if (child->is_text() )
         {
             std::string txt = "";
@@ -118,6 +122,8 @@ void HtmlWindow::record_char_boxes_recursive(litehtml::element::ptr el)
             std::u32string ch;
             auto hfont = child->parent()->css().get_font();
             float x = pos.left();
+            
+            // split every word -> character, and record
             for(auto c : u32txt)
             {
                 ch += c;
@@ -347,7 +353,15 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
             dc.DrawRectangle(rect);
         }
     }
-
+    if(m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
+    {
+        auto pos = m_char_boxes[m_cursor_pos];
+        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        dc.SetPen(*wxBLACK_PEN);
+        wxPoint pt1(pos.right(), pos.top());
+        wxPoint pt2(pos.right(), pos.bottom());
+        dc.DrawLine(pt1, pt2);
+    }
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.SetPen(*wxRED_PEN);
     dc.DrawRectangle(updateRect);
@@ -692,9 +706,13 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
     {
 
         ClearSelection();
+
+        // test whether point inside, returen [m_char_boxes] index
         auto pos = hit_test(x, y);
+
         if(pos >= 0)
         {
+           
             m_selection_start = pos;
             m_selection_end = pos;
         }
@@ -705,12 +723,13 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 
     if(m_doc)
     {
-        m_selection_rect.clear();
+        //m_selection_rect.clear();
         auto pos = hit_test(x, y);
         if(pos >= 0)
         {
-            m_selection_rect.add(m_char_boxes[pos]);
-            m_selection_rect.scroll(-m_scrollPos);
+            //m_selection_rect.add(m_char_boxes[pos]);
+            //m_selection_rect.scroll(-m_scrollPos);
+            m_cursor_pos = pos;
             Refresh();
         }
     }
@@ -818,14 +837,21 @@ void HtmlWindow::UpdateSelectionRect()
     }
     m_selection_rect.clear();
     m_selection_text.clear();
+
+    // set start to min value, end to max value, and clamp to [0, m_char_boxes.size()]
     int32_t start = std::clamp((int32_t)std::min(m_selection_start, m_selection_end), 0, (int32_t)(m_char_boxes.size() - 1));
     int32_t end = std::clamp((int32_t)std::max(m_selection_start, m_selection_end), 0, (int32_t)(m_char_boxes.size() - 1));
 
+    // adding character postion to drawing rect
     for(int i = start; i < end; i++)
     {
         m_selection_rect.add(m_char_boxes[i]);
     }
+
+    // process scroll offset
     m_selection_rect.scroll(-m_scrollPos);
+
+    // this is get selection text, and convert to utf-8
     if(!m_plain_text.empty() && 
         start < m_plain_text.size() && 
         end < m_plain_text.size())
@@ -838,7 +864,7 @@ void HtmlWindow::UpdateSelectionRect()
     selected_text += "[position] " + std::to_string(start) + ", " + std::to_string(end) + "\n";
     
     selected_text += m_selection_text + "\n";
-    wxLogInfo(selected_text);
+    wxLogInfo(wxString::FromUTF8(selected_text));
     
 }
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
