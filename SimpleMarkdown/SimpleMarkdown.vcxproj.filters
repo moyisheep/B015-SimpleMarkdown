@@ -60,4 +60,8 @@
       <Filter>wxContainer</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\markdown.css" />
+    <CopyFileToFolders Include="resources\homepage.md" />
+  </ItemGroup>
 </Project>

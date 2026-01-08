@@ -1,4 +1,8 @@
 #include "wxContainer.h"
+#include <wx/url.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
@@ -154,10 +158,11 @@ void wxContainer::import_css(litehtml::string& text,
 
     try
     {
-
-
+        
+        
+ 
         // 获取CSS文件内容
-        auto file_data = m_vfs->get_binary(url);
+        auto file_data = m_vfs->get_binary(wxURL(url).BuildUnescapedURI().ToStdString());
         if ( !file_data.empty())
         {
             // 将二进制数据转换为字符串
@@ -181,68 +186,68 @@ void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_o
 {
     if (!m_vfs || !src) return;
 
-    std::string src_str(src);
-    std::string baseurl_str(baseurl ? baseurl : "");
+    //std::string src_str(src);
+    //std::string baseurl_str(baseurl ? baseurl : "");
 
-    try
-    {
-        // 检查图片是否已经在缓存中
-        std::string cache_key = src_str + "|" + baseurl_str;
-        auto it = m_imageCache.find(cache_key);
-        if (it != m_imageCache.end())
-        {
-            // 图片已经在缓存中
-            if (redraw_on_ready)
-            {
-                // 请求重绘
-                m_wnd->Refresh();
-            }
-            return;
-        }
+    //try
+    //{
+    //    // 检查图片是否已经在缓存中
+    //    std::string cache_key = src_str + "|" + baseurl_str;
+    //    auto it = m_imageCache.find(cache_key);
+    //    if (it != m_imageCache.end())
+    //    {
+    //        // 图片已经在缓存中
+    //        if (redraw_on_ready)
+    //        {
+    //            // 请求重绘
+    //            m_wnd->Refresh();
+    //        }
+    //        return;
+    //    }
 
-        // 解析图片路径
-        
-
-
-        // 获取图片数据
-        auto file_data = m_vfs->get_binary(src);
-        if (file_data.empty())
-        {
-            wxLogWarning("Failed to load image data: %s", src);
-            return;
-        }
-
-        // 从内存数据创建wxImage
-        wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
-        wxImage image;
-
-        // 根据MIME类型确定格式
-        bool image_loaded = false;
+    //    // 解析图片路径
+    //    
 
 
+    //    // 获取图片数据
+    //    auto file_data = m_vfs->get_binary(wxURL(src).BuildUnescapedURI().ToStdString());;
+    //    if (file_data.empty())
+    //    {
+    //        wxLogWarning("Failed to load image data: %s", src);
+    //        return;
+    //    }
 
-        image_loaded = image.LoadFile(mem_stream);
+    //    // 从内存数据创建wxImage
+    //    wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
+    //    wxImage image;
+
+    //    // 根据MIME类型确定格式
+    //    bool image_loaded = false;
+
+
+
+    //    image_loaded = image.LoadFile(mem_stream);
    
-        if (image_loaded && image.IsOk())
-        {
-            // 缓存图片
-            wxBitmap bitmap(image);
-            m_imageCache[cache_key] = bitmap;
+    //    if (image_loaded && image.IsOk())
+    //    {
+    //        // 缓存图片
+    //        wxBitmap bitmap(image);
+    //        m_imageCache[cache_key] = bitmap;
 
-            if (redraw_on_ready)
-            {
-                m_wnd->Refresh();
-            }
-        }
-        else
-        {
-            wxLogWarning("Failed to decode image: %s", src);
-        }
-    }
-    catch (const std::exception& e)
-    {
-        wxLogError("Error loading image: %s, error: %s", src, e.what());
-    }
+    //        if (redraw_on_ready)
+    //        {
+    //            m_wnd->Refresh();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        wxLogWarning("Failed to decode image: %s", src);
+    //    }
+    //}
+    //catch (const std::exception& e)
+    //{
+    //    wxLogError("Error loading image: %s, error: %s", src, e.what());
+    //}
 }
 
 void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
@@ -275,31 +280,26 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
  
 
         // 尝试只读取图片头信息来获取尺寸（避免加载整个图片）
-        auto file_data = m_vfs->get_binary(src);
+        auto file_data = m_vfs->get_binary(wxURL(src).BuildUnescapedURI().ToStdString());;
         if (file_data.empty())
         {
             return;
         }
 
+        // 使用 stb_image 只获取图片信息（不加载像素数据）
+        int width = 0, height = 0, channels = 0;
+        int success = stbi_info_from_memory(
+            reinterpret_cast<const stbi_uc*>(file_data.data()),
+            static_cast<int>(file_data.size()),
+            &width, &height, &channels);
 
-        wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
-
-  
-
-        // 如果无法解析尺寸，尝试加载整个图片
-        if (sz.width == 0 && sz.height == 0)
+        if (success && width > 0 && height > 0)
         {
-            wxImage image;
-            if (image.LoadFile(mem_stream))
-            {
-                sz.width = image.GetWidth();
-                sz.height = image.GetHeight();
-
-                // 缓存这个图片
-                wxBitmap bitmap(image);
-                m_imageCache[cache_key] = bitmap;
-            }
+            sz.width = width;
+            sz.height = height;
         }
+
+
     }
     catch (const std::exception& e)
     {
@@ -321,15 +321,81 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
         if (it == m_imageCache.end())
         {
             // 图片未加载，尝试加载它（同步方式）
-            load_image(url.c_str(), base_url.c_str(), false);
-            it = m_imageCache.find(cache_key);
-            if (it == m_imageCache.end())
+              // 使用 stb_image 解码
+            auto file_data = m_vfs->get_binary(wxURL(url).BuildUnescapedURI().ToStdString());;
+            if (file_data.empty())
             {
-                wxLogWarning("Image not loaded: %s", url);
                 return;
             }
-        }
+            int width = 0, height = 0, channels = 0;
+            stbi_uc* image_data = stbi_load_from_memory(
+                reinterpret_cast<const stbi_uc*>(file_data.data()),
+                static_cast<int>(file_data.size()),
+                &width, &height, &channels, 0);
 
+            if (image_data && width > 0 && height > 0)
+            {
+                // 根据通道数创建 wxImage
+                wxImage image(width, height, false); // 不初始化数据
+
+                if (channels == 1) // 灰度图
+                {
+                    // 转换为RGB
+                    image.Create(width, height);
+                    unsigned char* rgb_data = image.GetData();
+                    for (int i = 0; i < width * height; ++i)
+                    {
+                        unsigned char gray = image_data[i];
+                        rgb_data[i * 3] = gray;
+                        rgb_data[i * 3 + 1] = gray;
+                        rgb_data[i * 3 + 2] = gray;
+                    }
+                }
+                else if (channels == 3) // RGB
+                {
+                    // 直接复制数据（stb_image 的 RGB 顺序和 wxImage 一致）
+                    image.Create(width, height);
+                    memcpy(image.GetData(), image_data, width * height * 3);
+                }
+                else if (channels == 4) // RGBA
+                {
+                    // 处理带透明度的图片
+                    image.Create(width, height);
+
+                    // 分配 Alpha 通道数据
+                    image.InitAlpha();
+
+                    // 复制 RGB 数据并设置 Alpha
+                    unsigned char* rgb_data = image.GetData();
+                    unsigned char* alpha_data = image.GetAlpha();
+
+                    for (int i = 0; i < width * height; ++i)
+                    {
+                        rgb_data[i * 3] = image_data[i * 4];       // R
+                        rgb_data[i * 3 + 1] = image_data[i * 4 + 1]; // G
+                        rgb_data[i * 3 + 2] = image_data[i * 4 + 2]; // B
+                        alpha_data[i] = image_data[i * 4 + 3];     // A
+                    }
+                }
+
+                // 释放 stb_image 数据
+                stbi_image_free(image_data);
+
+                if (image.IsOk())
+                {
+                    // 缓存图片
+                    wxBitmap bitmap(image);
+                    m_imageCache[cache_key] = bitmap;
+
+                }
+                it = m_imageCache.find(cache_key);
+                if (it == m_imageCache.end())
+                {
+                    wxLogWarning("Image not loaded: %s", url);
+                    return;
+                }
+            }
+        }
         const wxBitmap& bitmap = it->second;
         if (!bitmap.IsOk())
         {

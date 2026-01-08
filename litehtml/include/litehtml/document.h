@@ -6,6 +6,7 @@
 #include "master_css.h"
 #include "encodings.h"
 #include "font_description.h"
+#include <vector>
 
 typedef struct GumboInternalOutput GumboOutput;
 
@@ -59,7 +60,6 @@ namespace litehtml
 		litehtml::css						m_master_css;
 		litehtml::css						m_user_css;
 		litehtml::size						m_size;
-		litehtml::size						m_content_size;
 		position::vector					m_fixed_boxes;
 		std::shared_ptr<element>			m_over_element;
 		std::shared_ptr<element>			m_active_element;
@@ -88,6 +88,7 @@ namespace litehtml
 		pixel_t							content_height() const;
 		void							add_stylesheet(const char* str, const char* baseurl, const char* media);
 		bool							on_mouse_over(pixel_t x, pixel_t y, pixel_t client_x, pixel_t client_y, position::vector& redraw_boxes);
+		std::vector<scroll_values>		on_scroll(pixel_t dx, pixel_t dy, pixel_t x, pixel_t y, pixel_t client_x, pixel_t client_y) const;
 		bool							on_lbutton_down(pixel_t x, pixel_t y, pixel_t client_x, pixel_t client_y, position::vector& redraw_boxes);
 		bool							on_lbutton_up(pixel_t x, pixel_t y, pixel_t client_x, pixel_t client_y, position::vector& redraw_boxes);
 		bool							on_button_cancel(position::vector& redraw_boxes);
@@ -104,7 +105,7 @@ namespace litehtml
 		void							add_tabular(const std::shared_ptr<render_item>& el);
 		std::shared_ptr<const element>	get_over_element() const { return m_over_element; }
 
-		void							append_children_from_string(element& parent, const char* str);
+		void							append_children_from_string(element& parent, const char* str, bool replace_existing);
 		void							dump(dumper& cout);
 
 		// see doc/document_createFromString.txt
@@ -118,7 +119,7 @@ namespace litehtml
 		uint_ptr	add_font(const font_description& descr, font_metrics* fm);
 
 		GumboOutput* parse_html(estring str);
-		void create_node(void* gnode, elements_list& elements, bool parseTextNode);
+		void create_node(void* gnode, elements_list& elements, bool parseTextNode, bool process_root);
 		bool update_media_lists(const media_features& features);
 		void fix_tables_layout();
 		void fix_table_children(const std::shared_ptr<render_item>& el_ptr, style_display disp, const char* disp_str);

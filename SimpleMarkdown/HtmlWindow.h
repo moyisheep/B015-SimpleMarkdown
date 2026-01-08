@@ -85,23 +85,24 @@ public:
     SelectionRect() { m_rect.clear(); };
     void add(litehtml::position pos)
     {
-        if (m_rect.empty()) 
-        { 
-            m_rect.push_back(pos); 
-            return; 
-        }
+        m_rect.push_back(pos);
+        //if (m_rect.empty()) 
+        //{ 
+        //    m_rect.push_back(pos); 
+        //    return; 
+        //}
 
-        auto back = m_rect.back();
-        if(back.y == pos.y && back.height == pos.height)
-        {
-            m_rect.pop_back();
-            back.width = pos.right() - back.left();
-            m_rect.push_back(back);
-        }
-        else
-        {
-            m_rect.push_back(pos);
-        }
+        //auto back = m_rect.back();
+        //if(back.y == pos.y && back.height == pos.height)
+        //{
+        //    m_rect.pop_back();
+        //    back.width = pos.right() - back.left();
+        //    m_rect.push_back(back);
+        //}
+        //else
+        //{
+        //    m_rect.push_back(pos);
+        //}
     }
 
     void scroll(float delta)
@@ -140,7 +141,12 @@ public:
 
     // 其他方法
     void set_html(const std::string& html);
+    void record_char_boxes();
+    void record_char_boxes_recursive(litehtml::element::ptr el);
     bool open_html(const std::string& file_path);
+
+    void set_user_css(const std::string& css);
+    void load_user_css(const std::string& path);
 
     // 滚动相关方法
     void SetupScrollbars();
@@ -153,11 +159,14 @@ public:
     void ShowLinkWindow(std::string link);
     void HideLinkWindow();
 
+
+
 private:
 
     std::unique_ptr<wxContainer> m_container;
     litehtml::document::ptr m_doc;
-
+    std::vector<litehtml::position> m_char_boxes;
+    std::u32string m_plain_text;
     wxFrame* m_parent;
 
     // 滚动相关变量
@@ -173,6 +182,8 @@ private:
     void OnScroll(wxScrollWinEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnSize(wxSizeEvent& event);
+
+    litehtml::position GetSelectedRect(float x, float y);
 
     // Add these event handlers
     void OnDropFiles(wxDropFilesEvent& event);
@@ -194,16 +205,17 @@ private:
     void ClearSelection();
     void OnKeyDown(wxKeyEvent& event);
 
-
+    int32_t hit_test(float x, float y);
 
     bool m_selection = false;
+    std::string m_user_css = "";
     SelectionRect m_selection_rect;
     //Selection m_selection_start{};
     //Selection m_selection_end{};
-    Point m_selection_start;
-    Point m_selection_end;
-    litehtml::element::ptr m_selection_start_el = nullptr;
-    litehtml::element::ptr m_selection_end_el = nullptr;
+    int32_t m_selection_start;
+    int32_t m_selection_end;
+    //litehtml::element::ptr m_selection_start_el = nullptr;
+    //litehtml::element::ptr m_selection_end_el = nullptr;
     std::string m_selection_text = "";
 
     std::string m_hover_link = "";
@@ -211,5 +223,6 @@ private:
     void AddRecursive(litehtml::element::ptr el, litehtml::position sel_rect, bool& start, bool& end);
     void UpdateSelectionElement(litehtml::element::ptr el, const litehtml::position& sel_rect);
     bool CopyToClipboard(const wxString& text);
+ 
     DECLARE_EVENT_TABLE()
 };
