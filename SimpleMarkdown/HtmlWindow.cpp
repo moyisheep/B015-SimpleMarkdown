@@ -40,10 +40,11 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
     m_totalHeight = 0;
     m_scrollPos = 0;
 
-    //SetScrollRate(0, 20); // 设置垂直滚动步长
+
     m_container = std::make_unique<wxContainer>(this);
     m_vfs = std::make_shared< LocalVFS>();
     m_container->set_vfs(m_vfs);
+
     m_link_ctrl = std::make_unique<wxStaticText>(this, wxID_ANY, "");
     m_link_ctrl->Hide();
 }
@@ -62,27 +63,27 @@ void HtmlWindow::set_html(const std::string& html)
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, 
         m_container.get(), litehtml::master_css, m_user_css);
 
-    auto el = m_doc->root()->select_one(".instructions-list");
+    //auto el = m_doc->root()->select_one(".instructions-list");
 
-    if (el)
-    {
-        std::string text = "";
-        el->get_text(text);
-        std::string txt = std::string(el->get_tagName()) + ":" + text;
-        wxLogInfo(txt);
-        for (auto& child : el->children())
-        {
-            text.clear();
-            child->get_text(text);
-            txt = std::string(child->get_tagName()) + ":" + text;
-            wxLogInfo(txt);
-        }
-        m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong>what <span style=\"color:blue\">《你好》</span> </li>", false);
+    //if (el)
+    //{
+    //    std::string text = "";
+    //    el->get_text(text);
+    //    std::string txt = std::string(el->get_tagName()) + ":" + text;
+    //    wxLogInfo(txt);
+    //    for (auto& child : el->children())
+    //    {
+    //        text.clear();
+    //        child->get_text(text);
+    //        txt = std::string(child->get_tagName()) + ":" + text;
+    //        wxLogInfo(txt);
+    //    }
+    //    m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong>what <span style=\"color:blue\">《你好》</span> </li>", false);
 
 
 
-    }
-    
+    //}
+    //
     
     if (m_doc)
     {
@@ -362,9 +363,9 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
         wxPoint pt2(pos.right(), pos.bottom());
         dc.DrawLine(pt1, pt2);
     }
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(*wxRED_PEN);
-    dc.DrawRectangle(updateRect);
+    //dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    //dc.SetPen(*wxRED_PEN);
+    //dc.DrawRectangle(updateRect);
 }
 
 
@@ -404,14 +405,26 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
         int width = GetClientSize().GetWidth();
         m_doc->render(width);
         record_char_boxes();
-        wxLogInfo(wxString::FromUTF8(litehtml::utf32_to_utf8(m_plain_text)));
+
         m_doc->media_changed();
         SetupScrollbars();
         Refresh();
     }
     event.Skip();
 }
+void HtmlWindow::re_render()
+{
+    if (m_doc)
+    {
+        int width = GetClientSize().GetWidth();
+        m_doc->render(width);
+        record_char_boxes();
 
+        m_doc->media_changed();
+        SetupScrollbars();
+        Refresh();
+    }
+}
 //litehtml::position HtmlWindow::GetSelectedRect(float x, float y)
 //{
 //    for (auto pos: m_char_pos)
@@ -843,7 +856,7 @@ void HtmlWindow::UpdateSelectionRect()
     int32_t end = std::clamp((int32_t)std::max(m_selection_start, m_selection_end), 0, (int32_t)(m_char_boxes.size() - 1));
 
     // adding character postion to drawing rect
-    for(int i = start; i < end; i++)
+    for(int i = start; i <= end; i++)
     {
         m_selection_rect.add(m_char_boxes[i]);
     }
@@ -856,15 +869,15 @@ void HtmlWindow::UpdateSelectionRect()
         start < m_plain_text.size() && 
         end < m_plain_text.size())
     {
-        m_selection_text = litehtml::utf32_to_utf8(m_plain_text.substr(start, end - start));
+        m_selection_text = litehtml::utf32_to_utf8(m_plain_text.substr(start, end - start + 1));
     }
-    std::string selected_text;
-    selected_text += "[original] " + std::to_string(m_selection_start) + ", " + std::to_string(m_selection_end) + "\n";
+    //std::string selected_text;
+    //selected_text += "[original] " + std::to_string(m_selection_start) + ", " + std::to_string(m_selection_end) + "\n";
 
-    selected_text += "[position] " + std::to_string(start) + ", " + std::to_string(end) + "\n";
-    
-    selected_text += m_selection_text + "\n";
-    wxLogInfo(wxString::FromUTF8(selected_text));
+    //selected_text += "[position] " + std::to_string(start) + ", " + std::to_string(end) + "\n";
+    //
+    //selected_text += m_selection_text + "\n";
+    //wxLogInfo(wxString::FromUTF8(selected_text));
     
 }
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
@@ -932,7 +945,68 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
             CopyToClipboard(wxString::FromUTF8(m_selection_text));
         }
     }
+    else if(event.GetKeyCode() == WXK_LEFT)
+    {
+        m_cursor_pos = std::max(0, m_cursor_pos - 1);
+        Refresh();
+    }
+    else if (event.GetKeyCode() == WXK_RIGHT)
+    {
+        m_cursor_pos = std::clamp( m_cursor_pos + 1, 0, (int32_t)m_char_boxes.size());
+        Refresh();
+    }
+    else if (event.GetKeyCode() == WXK_RETURN)
+    {
+        if (m_doc && !m_char_boxes.empty() && m_char_boxes.size() > m_cursor_pos)
+        {
+            auto pos = m_char_boxes[m_cursor_pos];
+            auto root_render = m_doc->root_render();
+            auto el = root_render->get_element_by_point(pos.x, pos.y, 0, 0, nullptr);
+            if (el)
+            {
+                auto color = el->css().get_color();
+                litehtml::web_color green{ 0, 128, 0 };
+                if(color == green)
+                {
+                    el->set_attr("style", "color:red;");
+                }else
+                {
+                    el->set_attr("style", "color:green;");
+                }
+                
+                //el->refresh_styles();
+                el->compute_styles();
+                Refresh();
 
+            }
+        }
+    }
+    else if (event.GetKeyCode() == WXK_BACK)
+    {
+        if(m_doc && !m_char_boxes.empty() && m_char_boxes.size() > m_cursor_pos)
+        {
+            auto pos = m_char_boxes[m_cursor_pos];
+            auto root_render = m_doc->root_render();
+            auto el = root_render->get_element_by_point(pos.x, pos.y, 0, 0, nullptr);
+            if(el)
+            {
+                for(auto child: el->children())
+                {
+                    if(child->is_text() && child->get_placement().is_point_inside(pos.x, pos.y))
+                    {
+                        std::string text = "";
+                        child->get_text(text);
+                        el->removeChild(child);
+                        wxLogInfo(text);
+                        re_render();
+                        break;
+
+                    }
+                }
+                
+            }
+        }
+    }
 
     event.Skip();
 }
