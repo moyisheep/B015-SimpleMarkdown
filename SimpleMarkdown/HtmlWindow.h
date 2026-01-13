@@ -245,7 +245,7 @@ private:
     void OnLeftUp(wxMouseEvent& event);
     void OnMouseLeave(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    Selection GetSelectionChar(float x, float y);
+
     void UpdateSelectionRect();
     void ClearSelection();
     void OnKeyDown(wxKeyEvent& event);
@@ -266,8 +266,7 @@ private:
 
     std::string m_hover_link = "";
     //void UpdateCursor(const wxPoint& pt);
-    void AddRecursive(litehtml::element::ptr el, litehtml::position sel_rect, bool& start, bool& end);
-    void UpdateSelectionElement(litehtml::element::ptr el, const litehtml::position& sel_rect);
+
     bool CopyToClipboard(const wxString& text);
  
     DECLARE_EVENT_TABLE()

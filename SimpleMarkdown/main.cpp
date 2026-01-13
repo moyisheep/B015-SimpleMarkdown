@@ -46,21 +46,25 @@ bool MyApp::OnInit()
     container->EnableDragAndDrop(true);
     container->load_user_css("./resources/markdown.css");
 
-    fs::path filePath("./test.md");
-    std::string ext = filePath.extension().generic_string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
 
-    std::string html = "";
-    if (ext == ".md")
+
+
+    wxArrayString args = wxAppConsole::argv.GetArguments();
+    if(args.GetCount() > 1)
     {
+        fs::path filePath(args[1].ToStdString());
+
         container->open_markdown(filePath.generic_string());
     }
     else
     {
-        container->open_html(filePath.generic_string());
-    }
+        fs::path filePath("./test.md");
 
-    
+        container->open_markdown(filePath.generic_string());
+    }
+    for (size_t i = 0; i < args.GetCount(); i++) {
+        wxLogMessage("²ÎÊý %zu: %s", i, args[i]);
+    }
 
     return true;
 }

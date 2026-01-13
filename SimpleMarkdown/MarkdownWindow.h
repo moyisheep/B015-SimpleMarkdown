@@ -12,4 +12,10 @@ public:
 
 	bool set_markdown(const std::string& md);
 	bool open_markdown(const std::string& path);
+
+
+
+private:
+	void OnDropFiles(wxDropFilesEvent& event);
+	DECLARE_EVENT_TABLE();
 };

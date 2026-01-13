@@ -62,3 +62,23 @@ bool MarkdownWindow::open_markdown(const std::string& path)
 
     return false;
 }
+
+void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
+{
+    if (event.GetNumberOfFiles() > 0)
+    {
+        wxString* dropped = event.GetFiles();
+        wxString file_path = dropped[0];
+
+
+        if (!open_markdown(file_path.ToStdString()))
+        {
+            wxMessageBox("Failed to load Markdown file", "Error", wxICON_ERROR);
+        }
+
+    }
+}
+wxBEGIN_EVENT_TABLE(MarkdownWindow, HtmlWindow)
+   EVT_DROP_FILES(MarkdownWindow::OnDropFiles)
+
+wxEND_EVENT_TABLE()
