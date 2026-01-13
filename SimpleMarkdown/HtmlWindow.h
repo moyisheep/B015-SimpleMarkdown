@@ -85,69 +85,23 @@ public:
     SelectionRect() { m_rect.clear(); };
     void add(litehtml::position pos)
     {
-
+        if(!m_rect.empty())
+        {
+            auto back = m_rect.back();
+            if(back.y == pos.y)
+            {
+                m_rect.pop_back();
+                back.width += pos.width;
+                m_rect.push_back(back);
+                return;
+            }
+        }
   
          m_rect.push_back(pos);
-         //merge();
-
-        //if (m_rect.empty()) 
-        //{ 
-        //    m_rect.push_back(pos); 
-        //    return; 
-        //}
-
-        //auto back = m_rect.back();
-        //if(back.y == pos.y && back.height == pos.height)
-        //{
-        //    m_rect.pop_back();
-        //    back.width = pos.right() - back.left();
-        //    m_rect.push_back(back);
-        //}
-        //else
-        //{
-        //    m_rect.push_back(pos);
-        //}
-    }
-
-    void merge()
-    {
-        std::sort(m_rect.begin(), m_rect.end(),
-            [](const litehtml::position& v1, const litehtml::position& v2)
-            {
-                // 先按top排序，再按left排序
-                if (v1.top() != v2.top())
-                    return v1.top() < v2.top();
-                return v1.left() < v2.left();
-            });
-        
-        std::vector<litehtml::position> result;
-        litehtml::position cur;
-        for (auto& rect: m_rect)
-        {
-            if (cur.empty()) { cur = rect; }
-            if (cur == rect) { continue; }
-            if(cur.y == rect.y && cur.right() == rect.left())
-            {
-                cur.width += rect.width;
-                continue;
-            }
-            
-            result.push_back(cur);
-            cur.clear();
-            
-        }
-        if(!cur.empty())
-        {
-            result.push_back(cur);
-        }
-        //m_rect.clear();
-        if(!result.empty())
-        {
-            m_rect = result;
-        }
-  
 
     }
+
+
     void scroll(float delta)
     {
         for (auto& rect: m_rect)
