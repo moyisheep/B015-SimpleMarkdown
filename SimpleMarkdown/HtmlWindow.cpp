@@ -16,7 +16,7 @@
 #include <litehtml/utf8_strings.h>
 #include <cmark-gfm.h>
 #include "HtmlDumper.h"
-
+#include "debug.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -63,40 +63,19 @@ void HtmlWindow::set_html(const std::string& html)
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, 
         m_container.get(), litehtml::master_css, m_user_css);
 
-    //auto el = m_doc->root()->select_one(".instructions-list");
 
-    //if (el)
-    //{
-    //    std::string text = "";
-    //    el->get_text(text);
-    //    std::string txt = std::string(el->get_tagName()) + ":" + text;
-    //    wxLogInfo(txt);
-    //    for (auto& child : el->children())
-    //    {
-    //        text.clear();
-    //        child->get_text(text);
-    //        txt = std::string(child->get_tagName()) + ":" + text;
-    //        wxLogInfo(txt);
-    //    }
-    //    m_doc->append_children_from_string(*el, "<li><strong>Hello World</strong>what <span style=\"color:blue\">《你好》</span> </li>", false);
-
-
-
-    //}
-    //
     
     if (m_doc)
     {
         int width = GetClientSize().GetWidth();
         m_doc->render(width);
         record_char_boxes();
-        SetupScrollbars(); // 添加这行
+        SetupScrollbars(); 
     }
-
+    //debug::print_render_tree(m_doc->root_render());
+    //debug::print_element_tree(m_doc->root());
     Refresh();
-    //HtmlDumper dumper;
-    //m_doc->dump(dumper);
-    //OutputDebugStringA(dumper.get_html().c_str());
+
 
 }
 void HtmlWindow::record_char_boxes()
@@ -363,9 +342,9 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
         wxPoint pt2(pos.right(), pos.bottom());
         dc.DrawLine(pt1, pt2);
     }
-    //dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    //dc.SetPen(*wxRED_PEN);
-    //dc.DrawRectangle(updateRect);
+    dc.SetBrush(*wxTRANSPARENT_BRUSH);
+    dc.SetPen(*wxRED_PEN);
+    dc.DrawRectangle(updateRect);
 }
 
 
@@ -420,7 +399,7 @@ void HtmlWindow::re_render()
         m_doc->render(width);
         record_char_boxes();
 
-        m_doc->media_changed();
+        //m_doc->media_changed();
         SetupScrollbars();
         Refresh();
     }
@@ -882,7 +861,7 @@ void HtmlWindow::UpdateSelectionRect()
 }
 void HtmlWindow::OnMouseLeave(wxMouseEvent& event)
 {
-    // 调用文档的鼠标离开事件
+   
     if (m_doc)
     {
         litehtml::position::vector redraw_boxes;
@@ -903,13 +882,13 @@ bool HtmlWindow::CopyToClipboard(const wxString& text)
 {
     if (wxTheClipboard->Open())
     {
-        // 清除剪贴板内容
+        
         wxTheClipboard->Clear();
 
-        // 设置文本数据
+     
         wxTheClipboard->SetData(new wxTextDataObject(text));
 
-        // 关闭剪贴板
+    
         wxTheClipboard->Close();
 
         return true;
@@ -918,7 +897,7 @@ bool HtmlWindow::CopyToClipboard(const wxString& text)
 }
 void HtmlWindow::OnKeyDown(wxKeyEvent& event)
 {
-    // 处理 ESC 键取消
+
     if (event.GetKeyCode() == WXK_ESCAPE)
     {
         if (m_doc)
@@ -965,6 +944,7 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
             if (el)
             {
                 auto color = el->css().get_color();
+                
                 litehtml::web_color green{ 0, 128, 0 };
                 if(color == green)
                 {
@@ -973,7 +953,7 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
                 {
                     el->set_attr("style", "color:green;");
                 }
-                
+                m_doc->root()->compute_styles();
                 //el->refresh_styles();
                 el->compute_styles();
                 Refresh();
@@ -983,29 +963,7 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
     }
     else if (event.GetKeyCode() == WXK_BACK)
     {
-        if(m_doc && !m_char_boxes.empty() && m_char_boxes.size() > m_cursor_pos)
-        {
-            auto pos = m_char_boxes[m_cursor_pos];
-            auto root_render = m_doc->root_render();
-            auto el = root_render->get_element_by_point(pos.x, pos.y, 0, 0, nullptr);
-            if(el)
-            {
-                for(auto child: el->children())
-                {
-                    if(child->is_text() && child->get_placement().is_point_inside(pos.x, pos.y))
-                    {
-                        std::string text = "";
-                        child->get_text(text);
-                        el->removeChild(child);
-                        wxLogInfo(text);
-                        re_render();
-                        break;
 
-                    }
-                }
-                
-            }
-        }
     }
 
     event.Skip();

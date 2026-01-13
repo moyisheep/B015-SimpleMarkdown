@@ -42,8 +42,8 @@
     <ClInclude Include="wxContainer.h">
       <Filter>wxContainer</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="debug.h">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +61,6 @@
     </ClCompile>
     <ClCompile Include="wxContainer.cpp">
       <Filter>wxContainer</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

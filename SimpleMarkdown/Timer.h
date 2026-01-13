@@ -2,7 +2,12 @@
 
 #include <string>
 #include <chrono>
-
+#include <memory>
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#define NOMINMAX
 #include <Windows.h>
 
 class Timer {

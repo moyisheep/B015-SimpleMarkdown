@@ -55,8 +55,8 @@ void TimerOutput::print()
         // 构建完整输出字符串
         std::ostringstream oss;
         oss << std::left << std::setw(30) << m.name << ": "
-            << std::right << std::setw(12) << time_str << " 秒, "
-            << std::right << std::setw(6) << m.times << " 次\n";
+            << std::right << std::setw(12) << time_str << " s, "
+            << std::right << std::setw(6) << m.times << " Hz\n";
 
         OutputDebugStringA(oss.str().c_str());
     }

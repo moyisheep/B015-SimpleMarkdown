@@ -11,19 +11,19 @@ public:
 
 class DebugFrame : public wxFrame {
 public:
-    DebugFrame() : wxFrame(nullptr, wxID_ANY, "调试窗口") {
-        // 创建文本控件用于显示日志
+    DebugFrame() : wxFrame(nullptr, wxID_ANY, "debug window") {
+        // display log
         wxTextCtrl* logCtrl = new wxTextCtrl(this, wxID_ANY, "",
             wxDefaultPosition, wxDefaultSize,
             wxTE_MULTILINE | wxTE_READONLY);
 
-        // 设置日志输出到文本控件
+        
         wxLogTextCtrl* logger = new wxLogTextCtrl(logCtrl);
         wxLog::SetActiveTarget(logger);
 
-        // 测试日志输出
-        wxLogMessage("程序启动");
-        wxLogDebug("调试信息");
+        // test
+        wxLogMessage("program start");
+        wxLogDebug("debug information");
     }
 };
 

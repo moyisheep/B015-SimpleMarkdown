@@ -144,9 +144,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="debug.h" />
     <ClInclude Include="HtmlDumper.h" />
     <ClInclude Include="LocalVFS.h" />
-    <ClInclude Include="Timer.h" />
     <ClInclude Include="VirtualFileSystem.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="wxContainer.h" />
@@ -156,7 +156,6 @@
     <ClCompile Include="HtmlDumper.cpp" />
     <ClCompile Include="LocalVFS.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="HtmlWindow.cpp" />
   </ItemGroup>
