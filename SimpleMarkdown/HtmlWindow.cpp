@@ -288,8 +288,6 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     if (m_doc)
     {
         // 绘制选择区域
-
-        
         litehtml::position clip{ (float)updateRect.x, 
             (float)updateRect.y, 
             (float)updateRect.width, 
@@ -312,10 +310,11 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     if(m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
     {
         auto pos = m_char_boxes[m_cursor_pos];
+        pos.y = pos.y - m_scrollPos;
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(*wxBLACK_PEN);
-        wxPoint pt1(pos.right(), pos.top());
-        wxPoint pt2(pos.right(), pos.bottom());
+        wxPoint pt1(pos.left(), pos.top());
+        wxPoint pt2(pos.left(), pos.bottom());
         dc.DrawLine(pt1, pt2);
     }
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -380,236 +379,6 @@ void HtmlWindow::re_render()
         Refresh();
     }
 }
-//litehtml::position HtmlWindow::GetSelectedRect(float x, float y)
-//{
-//    for (auto pos: m_char_pos)
-//    {
-//        if(pos.is_point_inside(x, y))
-//        {
-//            return pos;
-//        }
-//    }
-//    return {};
-//}
-//Selection HtmlWindow::GetSelectionChar(float x, float y)
-//{
-//    auto root_render = m_doc->root_render();
-//    auto el = root_render->get_element_by_point(x, y, 0, 0);
-//
-//    if (el)
-//    {
-//        for (auto& child : el->children())
-//        {
-//            auto pos = child->get_placement();
-//            if (pos.is_point_inside(x, y))
-//            {
-//                std::string text; child->get_text(text);
-//                wxString u8text = wxString::FromUTF8(text);
-//                auto* font = (wxFont*)child->parent()->css().get_font();
-//                wxMemoryDC dc;
-//                dc.SetFont(*font);
-//                litehtml::position c_pos{ pos.left(), pos.top(), 0.0f, pos.height };
-//                size_t index = 0;
-//                for (auto c : u8text)
-//                {
-//                    wxCoord width;
-//                    dc.GetTextExtent(c, &width, nullptr);
-//                    c_pos.width = width;
-//                    if (c_pos.is_point_inside(x, y))
-//                    {
-//                        return Selection{ child, index, c_pos };
-//                    }
-//                    c_pos.x += width;
-//                    index += 1;
-//
-//                }
-//
-//
-//            }
-//        }
-//    }
-//    return Selection{};
-//}
-
-
-//void HtmlWindow::UpdateSelectionRect()
-//{
-//    if(m_selection_start.empty() || 
-//        m_selection_end.empty() || 
-//        m_selection_start == m_selection_end)
-//    {
-//        return;
-//    }
-//    m_selection_rect.clear();
-//    m_selection_text = "";
-//    m_selection_start_el = nullptr;
-//    m_selection_end_el = nullptr;
-//    Point start_pt{};
-//    Point end_pt{};
-//    if (m_selection_start.y >= m_selection_end.y)
-//    {
-//        start_pt = m_selection_end;
-//        end_pt = m_selection_start;
-//    }else
-//    {
-//        start_pt = m_selection_start;
-//        end_pt = m_selection_end;
-//    }
-//    litehtml::position selection_rect{ std::min(m_selection_start.x, m_selection_end.x),
-//                                      std::min(m_selection_start.y, m_selection_end.y),
-//                                      std::abs(m_selection_end.x - m_selection_start.x),
-//                                      std::abs(m_selection_end.y - m_selection_start.y) };
-//
-//
-// 
-//    auto root = m_doc->root();
-//
-//    UpdateSelectionElement(root, selection_rect);
-//    
-//    if (!m_selection_start_el || !m_selection_end_el) { return; }
-//    if (m_selection_start_el == m_selection_end_el)
-//    {
-//        litehtml::position pos = m_selection_start_el->get_placement();
-//        std::string text;
-//        m_selection_start_el->get_text(text);
-//        wxString u8text = wxString::FromUTF8(text);
-//        auto* font = (wxFont*)m_selection_start_el->parent()->css().get_font();
-//        wxMemoryDC dc;
-//        dc.SetFont(*font);
-//        litehtml::position c_pos{ pos.left(), pos.top(), 0.0f, pos.height };
-//        for (auto c : u8text)
-//        {
-//            wxCoord width;
-//            dc.GetTextExtent(c, &width, nullptr);
-//            c_pos.width = width;
-//            if (selection_rect.does_intersect(&c_pos))
-//            {
-//                m_selection_rect.add(c_pos);
-//                m_selection_text += wxString(c).ToUTF8();
-//            }
-//            c_pos.x += width;
-//
-//
-//        }
-//    }
-//    else
-//    {
-//        bool start = false;
-//        bool end = false;
-//        AddRecursive(root, selection_rect, start, end);
-//    }
-//
-//
-//    m_selection_rect.scroll(-m_scrollPos);
-//    m_selection_text.erase(m_selection_text.find_last_not_of("\r\n") + 1);
-//    if(!m_selection_text.empty())
-//    {
-//        wxLogInfo(m_selection_text);
-//    }
-//
-//}
-//
-//void HtmlWindow::AddRecursive(litehtml::element::ptr el, litehtml::position sel_rect, bool& start, bool& end)
-//{
-//    if (end) { return; }
-//
-//    for (auto child: el->children())
-//    {
-//        if(child->is_text())
-//        {
-//            auto pos = child->get_placement();
-//            
-//            // different el_text
-//            if(child == m_selection_end_el)
-//            {
-//                end = true;
-//                if (sel_rect.intersect(pos) == pos)
-//                {
-//                    child->get_text(m_selection_text);
-//                    m_selection_rect.add(pos);
-//                }
-//                else
-//                {
-//                    std::string text;
-//                    child->get_text(text);
-//                    wxString u8text = wxString::FromUTF8(text);
-//                    auto* font = (wxFont*)child->parent()->css().get_font();
-//                    wxMemoryDC dc;
-//                    dc.SetFont(*font);
-//                    litehtml::position c_pos{ pos.left(), pos.top(), 0.0f, pos.height };
-//                    size_t index = 0;
-//                    for (auto c : u8text)
-//                    {
-//                        wxCoord width;
-//                        dc.GetTextExtent(c, &width, nullptr);
-//                        c_pos.width = width;
-//                        if (sel_rect.does_intersect(&c_pos))
-//                        {
-//                            m_selection_rect.add(c_pos);
-//                           
-//                        }
-//                        else
-//                        {
-//                            
-//                            break;
-//                        }
-//                        c_pos.x += width;
-//                        index += 1;
-//
-//                    }
-//                    m_selection_text += u8text.SubString(0, index-1).ToUTF8();
-//                }
-//                return;
-//            }
-//            if(start)
-//            {
-//                child->get_text(m_selection_text);
-//                m_selection_rect.add(pos);
-//                continue;
-//            }
-//            if(child == m_selection_start_el)
-//            {
-//                start = true;
-//                if(sel_rect.intersect(pos) == pos)
-//                {
-//                    child->get_text(m_selection_text);
-//                    m_selection_rect.add(pos);
-//                }
-//                else
-//                {
-//                    std::string text;
-//                    child->get_text(text);
-//                    wxString u8text = wxString::FromUTF8(text);
-//                    auto* font = (wxFont*)child->parent()->css().get_font();
-//                    wxMemoryDC dc;
-//                    dc.SetFont(*font);
-//                    litehtml::position c_pos{ pos.left(), pos.top(), 0.0f, pos.height };
-//                    size_t index = 0;
-//                    for (auto c : u8text)
-//                    {
-//                        wxCoord width;
-//                        dc.GetTextExtent(c, &width, nullptr);
-//                        c_pos.width = width;
-//                        if (sel_rect.does_intersect(&c_pos))
-//                        {
-//                            m_selection_rect.add(c_pos);
-//                            m_selection_text += wxString(c).ToUTF8();
-//                        }
-//                        c_pos.x += width;
-//                        index += 1;
-//
-//                    }
-//                    
-//                }
-//            }
-//
-//        }
-//        else
-//        {
-//            AddRecursive(child, sel_rect, start, end);
-//        }
-//    }
-//}
 
 void HtmlWindow::ClearSelection()
 {
@@ -619,37 +388,9 @@ void HtmlWindow::ClearSelection()
     m_selection_text = "";
     m_selection_rect.clear();
     
-    //m_selection_start_el = nullptr;
-    //m_selection_end_el = nullptr;
+
 }
-//void HtmlWindow::UpdateSelectionElement(litehtml::element::ptr el, const litehtml::position& sel_rect)
-//{
-//    for (auto child : el->children())
-//    {
-//        if(child->is_text())
-//        {
-//            auto pos = child->get_placement();
-//            if(!m_selection_start_el && 
-//                (pos.does_intersect(&sel_rect) ||
-//                pos.is_point_inside(sel_rect.left(), sel_rect.top()))  )
-//            {
-//                m_selection_start_el = child;
-//            }
-//            if(pos.does_intersect(&sel_rect) ||
-//                pos.is_point_inside(sel_rect.right(), sel_rect.bottom()))
-//            {
-//
-//                    m_selection_end_el = child;
-//            
-//            }
-//        }
-//        else
-//        {
-//            UpdateSelectionElement(child, sel_rect);
-//        }
-//    }
-//}
-// 鼠标事件处理
+
 void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 {
     wxPoint pt = event.GetPosition();
@@ -698,6 +439,7 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
             //m_selection_rect.add(m_char_boxes[pos]);
             //m_selection_rect.scroll(-m_scrollPos);
             m_cursor_pos = pos;
+            
             Refresh();
         }
     }

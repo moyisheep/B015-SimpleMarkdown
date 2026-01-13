@@ -204,17 +204,20 @@ public:
 
 protected:
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
+    int32_t m_cursor_pos = -1;
+    std::vector<litehtml::position> m_char_boxes;
+    int m_scrollPos;
 private:
 
     std::unique_ptr<wxContainer> m_container;
     litehtml::document::ptr m_doc;
-    std::vector<litehtml::position> m_char_boxes;
+
     std::u32string m_plain_text;
     wxFrame* m_parent;
 
     // 滚动相关变量
     int m_totalHeight;
-    int m_scrollPos;
+
 
 
 
@@ -228,7 +231,6 @@ private:
 
     void re_render();
 
-    litehtml::position GetSelectedRect(float x, float y);
 
     // Add these event handlers
     void OnDropFiles(wxDropFilesEvent& event);
@@ -259,7 +261,7 @@ private:
     //Selection m_selection_end{};
     int32_t m_selection_start;
     int32_t m_selection_end;
-    int32_t m_cursor_pos = -1;
+
     //litehtml::element::ptr m_selection_start_el = nullptr;
     //litehtml::element::ptr m_selection_end_el = nullptr;
     std::string m_selection_text = "";

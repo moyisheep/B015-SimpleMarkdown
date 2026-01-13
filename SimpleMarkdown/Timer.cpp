@@ -1,4 +1,9 @@
 #include "Timer.h"
+#include <wx/wx.h>
+void debug_print( std::string info)
+{
+    wxLogMessage(info);
+}
 
 Timer::Timer(const std::string& name) :
     name_(name), start_(std::chrono::high_resolution_clock::now())
@@ -58,7 +63,7 @@ void TimerOutput::print()
             << std::right << std::setw(12) << time_str << " s, "
             << std::right << std::setw(6) << m.times << " Hz\n";
 
-        OutputDebugStringA(oss.str().c_str());
+        debug_print(oss.str().c_str());
     }
 
     clear();

@@ -15,6 +15,9 @@ std::string md_to_html(const std::string& markdown) {
 MarkdownWindow::MarkdownWindow(wxWindow* parent)
     :HtmlWindow(parent)
 {
+    m_ctrl = std::make_unique<wxTextCtrl>(this, wxID_ANY);
+    m_ctrl->Hide();
+    SetFocus();
 }
 
 MarkdownWindow::~MarkdownWindow()
@@ -78,7 +81,25 @@ void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
 
     }
 }
+
+void MarkdownWindow::OnKeyDown(wxKeyEvent& event)
+{
+
+    if (event.GetKeyCode() == WXK_RETURN && event.ControlDown())
+    {
+        
+        auto pos = m_char_boxes[m_cursor_pos];
+        pos.y = pos.y - m_scrollPos;
+        auto sz = GetClientSize();
+        m_ctrl->SetPosition(wxPoint(0, pos.y));
+        m_ctrl->SetSize(wxSize(sz.GetWidth(), pos.height));
+        m_ctrl->SetLabelText("hello world");
+        m_ctrl->Show();
+    }
+
+    event.Skip();
+}
 wxBEGIN_EVENT_TABLE(MarkdownWindow, HtmlWindow)
    EVT_DROP_FILES(MarkdownWindow::OnDropFiles)
-
+    EVT_KEY_DOWN(MarkdownWindow::OnKeyDown)
 wxEND_EVENT_TABLE()

@@ -48,6 +48,9 @@
     <ClInclude Include="MarkdownWindow.h">
       <Filter>HtmlWindow</Filter>
     </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="MarkdownWindow.cpp">
       <Filter>HtmlWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

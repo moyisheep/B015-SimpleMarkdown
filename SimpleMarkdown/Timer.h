@@ -7,8 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#define NOMINMAX
-#include <Windows.h>
+
 
 class Timer {
 public:
@@ -54,7 +53,6 @@ private:
     TimerOutput(const TimerOutput&) = delete;
     TimerOutput& operator=(const TimerOutput&) = delete;
 
-    std::string format_duration(double seconds);
     struct data
     {
         std::string name = "";

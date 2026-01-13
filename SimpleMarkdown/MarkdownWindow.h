@@ -16,6 +16,8 @@ public:
 
 
 private:
+	std::unique_ptr<wxTextCtrl> m_ctrl;
 	void OnDropFiles(wxDropFilesEvent& event);
+	void OnKeyDown(wxKeyEvent& event);
 	DECLARE_EVENT_TABLE();
 };
