@@ -45,6 +45,9 @@
     <ClInclude Include="debug.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="MarkdownWindow.h">
+      <Filter>HtmlWindow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -61,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="wxContainer.cpp">
       <Filter>wxContainer</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkdownWindow.cpp">
+      <Filter>HtmlWindow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

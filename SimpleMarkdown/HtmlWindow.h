@@ -202,8 +202,8 @@ public:
     void ShowLinkWindow(std::string link);
     void HideLinkWindow();
 
-
-
+protected:
+    std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
 private:
 
     std::unique_ptr<wxContainer> m_container;
@@ -215,7 +215,7 @@ private:
     // 滚动相关变量
     int m_totalHeight;
     int m_scrollPos;
-    std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
+
 
 
     void RequestRedraw(const litehtml::position::vector& redraw_boxes);

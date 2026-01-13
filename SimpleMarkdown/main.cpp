@@ -1,7 +1,10 @@
 
-#include "HtmlWindow.h"
+#include "MarkdownWindow.h"
 #include <wx/app.h>
 #include <wx/frame.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class MyApp : public wxApp
 {
@@ -33,14 +36,31 @@ bool MyApp::OnInit()
     dbg_frame->Show(true);
     wxFrame* frame = new wxFrame(nullptr, wxID_ANY, "Simple Markdown", wxDefaultPosition, wxSize(800, 600));
 
-    HtmlWindow* container = new HtmlWindow(frame);
+
+
+    MarkdownWindow* container = new MarkdownWindow(frame);
     frame->Show(true);
 
     //std::string html = "<html><body><h1>Hello, World!</h1><p>This is a simple HTML page rendered using LiteHtml and wxWidgets.</p></body></html>";
     //container->set_html(html);
     container->EnableDragAndDrop(true);
     container->load_user_css("./resources/markdown.css");
-    container->open_html("./test.md");
+
+    fs::path filePath("./test.md");
+    std::string ext = filePath.extension().generic_string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    std::string html = "";
+    if (ext == ".md")
+    {
+        container->open_markdown(filePath.generic_string());
+    }
+    else
+    {
+        container->open_html(filePath.generic_string());
+    }
+
+    
 
     return true;
 }

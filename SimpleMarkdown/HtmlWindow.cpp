@@ -14,7 +14,7 @@
 #include <litehtml/el_text.h>
 #include <litehtml/render_item.h>
 #include <litehtml/utf8_strings.h>
-#include <cmark-gfm.h>
+
 #include "HtmlDumper.h"
 #include "debug.h"
 #include <filesystem>
@@ -22,16 +22,6 @@
 namespace fs = std::filesystem;
 
 
-std::string md_to_html(const std::string& markdown) {
-    std::string html = cmark_markdown_to_html(
-        markdown.c_str(),
-        markdown.length(),
-        CMARK_OPT_DEFAULT
-    );
-
-    
-    return html;
-}
 
 HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
@@ -132,37 +122,23 @@ bool HtmlWindow::open_html(const std::string &file_path)
     auto bin = m_vfs->get_binary(file_path);
     if(bin.empty()){ return false; }
 
-    std::string raw = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
+    std::string html = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
     
-
-    fs::path filePath = fs::path(file_path);
-    fs::path parentDir = filePath.parent_path();
-    if(fs::exists(parentDir))
+    if(!html.empty())
     {
-        fs::current_path(parentDir);
+        fs::path filePath = fs::path(file_path);
+        fs::path parentDir = filePath.parent_path();
+        if (fs::exists(parentDir))
+        {
+            fs::current_path(parentDir);
+        }
+        this->set_html(html);
+        return true;
     }
-    
 
 
-    std::string ext = filePath.extension().generic_string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
-    
-    std::string html = "";
-    if (ext == ".md")
-    {
+    return false;
 
-        html = md_to_html(raw);
-
-    }
-    else
-    {
-        html = raw;
-    }
-    
-    // Set the HTML content
-
-    this->set_html(html);
-    return true;
 }
 
 void HtmlWindow::set_user_css(const std::string& css)
