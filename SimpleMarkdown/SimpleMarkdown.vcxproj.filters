@@ -22,6 +22,9 @@
     <Filter Include="wxContainer">
       <UniqueIdentifier>{056788ed-ef1d-47eb-8462-dcf7bb66e2d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Markdown">
+      <UniqueIdentifier>{63f99067-7551-458e-ac67-4f8d325cc12f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -45,11 +48,14 @@
     <ClInclude Include="debug.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="MarkdownWindow.h">
-      <Filter>HtmlWindow</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkdownWindow.h">
+      <Filter>Markdown</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkdownFrame.h">
+      <Filter>Markdown</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -68,11 +74,14 @@
     <ClCompile Include="wxContainer.cpp">
       <Filter>wxContainer</Filter>
     </ClCompile>
-    <ClCompile Include="MarkdownWindow.cpp">
-      <Filter>HtmlWindow</Filter>
-    </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkdownWindow.cpp">
+      <Filter>Markdown</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkdownFrame.cpp">
+      <Filter>Markdown</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

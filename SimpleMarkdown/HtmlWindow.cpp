@@ -141,20 +141,30 @@ bool HtmlWindow::open_html(const std::string &file_path)
 
 }
 
-void HtmlWindow::set_user_css(const std::string& css)
+bool HtmlWindow::set_user_css(const std::string& css)
 {
-    m_user_css = css;
+    if(!css.empty())
+    {
+        m_user_css = css;
+        return true;
+    }
+    return false;
 }
 
-void HtmlWindow::load_user_css(const std::string& path)
+bool HtmlWindow::load_user_css(const std::string& path)
 {
-    if (!m_vfs) { return; }
+    if (m_vfs) 
+    { 
+        auto bin = m_vfs->get_binary(path);
+        if (!bin.empty()) 
+        { 
+            m_user_css = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
+            return true;
+        }
+    }
 
-    auto bin = m_vfs->get_binary(path);
-    if (bin.empty()) { return; }
-
-    m_user_css  = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
-
+ 
+    return false;
 }
 
 void HtmlWindow::clear()
@@ -345,8 +355,8 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 void HtmlWindow::OnScroll(wxScrollWinEvent& event)
 {
     int newPos = event.GetPosition();
-    std::string txt = "OnScroll: " + std::to_string(newPos);
-    wxLogInfo(txt);
+    //std::string txt = "OnScroll: " + std::to_string(newPos);
+    //wxLogInfo(txt);
     //int newPos = GetScrollPos(wxVERTICAL);
     if (newPos != m_scrollPos)
     {

@@ -1,31 +1,46 @@
 #include "MarkdownWindow.h"
 #include <cmark-gfm.h>
-#include <maddy/parser.h>
+#include <cmark-gfm-core-extensions.h>
+
 
 std::string md_to_html(const std::string& markdown) {
-    std::string html = cmark_markdown_to_html(
-        markdown.c_str(),
-        markdown.length(),
-        CMARK_OPT_DEFAULT
-    );
+    // Register all core extensions  
+    cmark_gfm_core_extensions_ensure_registered();
 
+    // Create parser with all options enabled  
+    int options = CMARK_OPT_DEFAULT | CMARK_OPT_FOOTNOTES |
+        CMARK_OPT_GITHUB_PRE_LANG | CMARK_OPT_HARDBREAKS |
+        CMARK_OPT_SMART | CMARK_OPT_VALIDATE_UTF8;
 
-    return html;
+    cmark_parser* parser = cmark_parser_new(options);
+
+    // Attach all available extensions  
+    const char* extension_names[] = { "autolink", "strikethrough", "table", "tagfilter", NULL };
+    for (const char** it = extension_names; *it; ++it) {
+        cmark_syntax_extension* syntax_extension = cmark_find_syntax_extension(*it);
+        if (syntax_extension) {
+            cmark_parser_attach_syntax_extension(parser, syntax_extension);
+        }
+    }
+
+    // Parse and render  
+    cmark_parser_feed(parser, markdown.c_str(), markdown.length());
+    cmark_node* doc = cmark_parser_finish(parser);
+    char* html = cmark_render_html(doc, options, NULL);
+
+    // Convert to std::string and cleanup  
+    std::string result(html);
+    free(html);
+    cmark_node_free(doc);
+    cmark_parser_free(parser);
+
+    return result;
 }
 
-
-//std::string md_to_html( const std::string& markdown) {
-//    std::stringstream markdownInput(markdown);
-//    std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>();
-//    std::string htmlOutput = parser->Parse(markdownInput);
-//
-//
-//    return htmlOutput;
-//}
 MarkdownWindow::MarkdownWindow(wxWindow* parent)
     :HtmlWindow(parent)
 {
- 
+    
 }
 
 MarkdownWindow::~MarkdownWindow()
@@ -36,6 +51,7 @@ bool MarkdownWindow::set_markdown(const std::string& md)
 {
     if(!md.empty())
     {
+        m_markdown_text = std::string(md);
         auto html = md_to_html(md);
         if (!html.empty())
         {
@@ -56,10 +72,11 @@ bool MarkdownWindow::open_markdown(const std::string& path)
             auto md = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
             if(!md.empty())
             {
+                m_markdown_text = std::string(md);
                 auto html = md_to_html(md);
                 if(!html.empty())
                 {
-                    wxLogMessage(html);
+                    //wxLogMessage(wxString::FromUTF8(html));
                     set_html(html);
                     return true;
                 }
@@ -73,6 +90,11 @@ bool MarkdownWindow::open_markdown(const std::string& path)
    
 
     return false;
+}
+
+std::string MarkdownWindow::get_markdown()
+{
+    return m_markdown_text;
 }
 
 void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
@@ -91,12 +113,7 @@ void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
     }
 }
 
-void MarkdownWindow::OnKeyDown(wxKeyEvent& event)
-{
 
-    event.Skip();
-}
 wxBEGIN_EVENT_TABLE(MarkdownWindow, HtmlWindow)
    EVT_DROP_FILES(MarkdownWindow::OnDropFiles)
-    EVT_KEY_DOWN(MarkdownWindow::OnKeyDown)
 wxEND_EVENT_TABLE()

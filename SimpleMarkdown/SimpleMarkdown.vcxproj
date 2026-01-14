@@ -153,6 +153,7 @@
     <ClInclude Include="wxContainer.h" />
     <ClInclude Include="HtmlWindow.h" />
     <ClInclude Include="MarkdownWindow.h" />
+    <ClInclude Include="MarkdownFrame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HtmlDumper.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="HtmlWindow.cpp" />
     <ClCompile Include="MarkdownWindow.cpp" />
+    <ClCompile Include="MarkdownFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\litehtml\litehtml.vcxproj">

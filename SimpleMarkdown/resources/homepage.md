@@ -52,7 +52,7 @@
 ## 🔗 链接与图片
 
 ### 链接
-[Simple Markdown 官网](https://example.com)
+[Simple Markdown 官网](https://github.com/moyisheep/B015-SimpleMarkdown)
 这是一个内联链接：访问 [GitHub](https://github.com) 获取更多信息。
 自动链接：<https://markdown.org>
 
@@ -188,4 +188,3 @@ HTML 规范由 W3C 维护。
 
 ---
 *最后更新：2026年月14日*
-*使用 [Simple Markdown](https://example.com) 编辑*

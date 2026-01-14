@@ -144,8 +144,8 @@ public:
     void record_char_boxes_recursive(litehtml::element::ptr el);
     bool open_html(const std::string& file_path);
 
-    void set_user_css(const std::string& css);
-    void load_user_css(const std::string& path);
+    bool set_user_css(const std::string& css);
+    bool load_user_css(const std::string& path);
     void clear();
     // 滚动相关方法
     void SetupScrollbars();
@@ -160,11 +160,10 @@ public:
 
 protected:
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
+private:
     int32_t m_cursor_pos = -1;
     std::vector<litehtml::position> m_char_boxes;
     int m_scrollPos;
-private:
-
     std::unique_ptr<wxContainer> m_container;
     litehtml::document::ptr m_doc;
 
@@ -173,13 +172,29 @@ private:
 
     // 滚动相关变量
     int m_totalHeight;
+    // Add to your existing private section
+    std::string m_base_url;
+    std::unique_ptr<wxStaticText> m_link_ctrl;
+    bool m_selection = false;
+    std::string m_user_css = "";
+    SelectionRect m_selection_rect;
+
+    int32_t m_selection_start;
+    int32_t m_selection_end;
+
+    std::string m_selection_text = "";
+
+    std::string m_hover_link = "";
+private:
+
+
 
 
 
 
     void RequestRedraw(const litehtml::position::vector& redraw_boxes);
 
-    // 重写事件处理
+
     void OnPaint(wxPaintEvent& event);
     void OnScroll(wxScrollWinEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
@@ -193,9 +208,7 @@ private:
 
 
 
-    // Add to your existing private section
-    std::string m_base_url;
-    std::unique_ptr<wxStaticText> m_link_ctrl;
+
 
 
     // 新增事件处理
@@ -210,19 +223,7 @@ private:
 
     int32_t hit_test(float x, float y);
 
-    bool m_selection = false;
-    std::string m_user_css = "";
-    SelectionRect m_selection_rect;
-    //Selection m_selection_start{};
-    //Selection m_selection_end{};
-    int32_t m_selection_start;
-    int32_t m_selection_end;
 
-    //litehtml::element::ptr m_selection_start_el = nullptr;
-    //litehtml::element::ptr m_selection_end_el = nullptr;
-    std::string m_selection_text = "";
-
-    std::string m_hover_link = "";
     //void UpdateCursor(const wxPoint& pt);
 
     bool CopyToClipboard(const wxString& text);

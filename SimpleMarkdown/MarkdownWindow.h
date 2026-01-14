@@ -13,14 +13,14 @@ public:
 	bool set_markdown(const std::string& md);
 	bool open_markdown(const std::string& path);
 
+	std::string get_markdown();
 
 private:
-	std::unique_ptr<wxTextCtrl> m_ctrl;
-
+	std::string  m_markdown_text;
 private:
 	
 	void OnDropFiles(wxDropFilesEvent& event);
-	void OnKeyDown(wxKeyEvent& event);
+
 
 	
 

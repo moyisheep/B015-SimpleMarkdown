@@ -119,3 +119,396 @@ img {
     border: 1px solid #e2e8f0;
     padding: 2px;
 }
+
+
+/* ============================================
+   cmark-gfm 代码高亮 CSS
+   支持 lang 属性，无需额外 JS
+   ============================================ */
+
+/* 代码块基础样式 */
+pre {
+    position: relative;
+    margin: 1.5em 0;
+    padding: 1.5em 1em 1em 1em;
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+    pre code {
+        display: block;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: 0;
+        font-size: inherit;
+        font-family: inherit;
+        line-height: inherit;
+        color: inherit;
+        white-space: pre;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    /* 语言标签样式 */
+    pre::before {
+        content: attr(lang);
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: #ffffff;
+        background: #6c757d;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 5px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        user-select: none;
+        z-index: 1;
+    }
+
+/* 复制按钮 */
+pre {
+    position: relative;
+}
+
+    pre:hover::after {
+        content: '复制';
+        position: absolute;
+        top: 8px;
+        right: 70px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #24292f;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #e1e4e8;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        z-index: 2;
+    }
+
+        pre:hover::after:hover {
+            opacity: 1;
+            background: #ffffff;
+        }
+
+    /* ============================================
+   语法高亮颜色方案
+   基于 GitHub 的语法高亮配色
+   ============================================ */
+
+
+
+    /* ============================================
+   特定语言的高亮标签
+   ============================================ */
+
+    /* JavaScript / TypeScript */
+    pre[lang="javascript"]::before,
+    pre[lang="js"]::before,
+    pre[lang="typescript"]::before,
+    pre[lang="ts"]::before {
+        background: linear-gradient(135deg, #f7df1e, #f0db4f);
+        color: #323330;
+        font-weight: 700;
+    }
+
+    pre[lang="javascript"],
+    pre[lang="js"],
+    pre[lang="typescript"],
+    pre[lang="ts"] {
+        border-left: 3px solid #f7df1e;
+    }
+
+    /* Python */
+    pre[lang="python"]::before,
+    pre[lang="py"]::before {
+        background: linear-gradient(135deg, #3776ab, #306998);
+        color: #ffffff;
+    }
+
+    pre[lang="python"],
+    pre[lang="py"] {
+        border-left: 3px solid #3776ab;
+    }
+
+    /* HTML */
+    pre[lang="html"]::before,
+    pre[lang="xml"]::before {
+        background: linear-gradient(135deg, #e34c26, #f06529);
+        color: #ffffff;
+    }
+
+    pre[lang="html"],
+    pre[lang="xml"] {
+        border-left: 3px solid #e34c26;
+    }
+
+    /* CSS */
+    pre[lang="css"]::before {
+        background: linear-gradient(135deg, #264de4, #2965f1);
+        color: #ffffff;
+    }
+
+    pre[lang="css"] {
+        border-left: 3px solid #264de4;
+    }
+
+    /* Java */
+    pre[lang="java"]::before {
+        background: linear-gradient(135deg, #007396, #007396);
+        color: #ffffff;
+    }
+
+    pre[lang="java"] {
+        border-left: 3px solid #007396;
+    }
+
+    /* C/C++ */
+    pre[lang="c"]::before,
+    pre[lang="cpp"]::before,
+    pre[lang="c++"]::before {
+        background: linear-gradient(135deg, #00599c, #004482);
+        color: #ffffff;
+    }
+
+    pre[lang="c"],
+    pre[lang="cpp"],
+    pre[lang="c++"] {
+        border-left: 3px solid #00599c;
+    }
+
+    /* C# */
+    pre[lang="csharp"]::before,
+    pre[lang="cs"]::before {
+        background: linear-gradient(135deg, #239120, #1e7e1b);
+        color: #ffffff;
+    }
+
+    pre[lang="csharp"],
+    pre[lang="cs"] {
+        border-left: 3px solid #239120;
+    }
+
+    /* PHP */
+    pre[lang="php"]::before {
+        background: linear-gradient(135deg, #777bb4, #8892bf);
+        color: #ffffff;
+    }
+
+    pre[lang="php"] {
+        border-left: 3px solid #777bb4;
+    }
+
+    /* Ruby */
+    pre[lang="ruby"]::before,
+    pre[lang="rb"]::before {
+        background: linear-gradient(135deg, #cc342d, #701516);
+        color: #ffffff;
+    }
+
+    pre[lang="ruby"],
+    pre[lang="rb"] {
+        border-left: 3px solid #cc342d;
+    }
+
+    /* Go */
+    pre[lang="go"]::before,
+    pre[lang="golang"]::before {
+        background: linear-gradient(135deg, #00add8, #007d9c);
+        color: #ffffff;
+    }
+
+    pre[lang="go"],
+    pre[lang="golang"] {
+        border-left: 3px solid #00add8;
+    }
+
+    /* Rust */
+    pre[lang="rust"]::before,
+    pre[lang="rs"]::before {
+        background: linear-gradient(135deg, #dea584, #b7410e);
+        color: #ffffff;
+    }
+
+    pre[lang="rust"],
+    pre[lang="rs"] {
+        border-left: 3px solid #dea584;
+    }
+
+    /* Swift */
+    pre[lang="swift"]::before {
+        background: linear-gradient(135deg, #fa7343, #f05138);
+        color: #ffffff;
+    }
+
+    pre[lang="swift"] {
+        border-left: 3px solid #fa7343;
+    }
+
+    /* Kotlin */
+    pre[lang="kotlin"]::before,
+    pre[lang="kt"]::before {
+        background: linear-gradient(135deg, #7f52ff, #6a40c9);
+        color: #ffffff;
+    }
+
+    pre[lang="kotlin"],
+    pre[lang="kt"] {
+        border-left: 3px solid #7f52ff;
+    }
+
+    /* SQL */
+    pre[lang="sql"]::before {
+        background: linear-gradient(135deg, #336791, #4479a1);
+        color: #ffffff;
+    }
+
+    pre[lang="sql"] {
+        border-left: 3px solid #336791;
+    }
+
+    /* Shell/Bash */
+    pre[lang="bash"]::before,
+    pre[lang="sh"]::before,
+    pre[lang="shell"]::before {
+        background: linear-gradient(135deg, #4eaa25, #89e051);
+        color: #1a1a1a;
+        font-weight: 700;
+    }
+
+    pre[lang="bash"],
+    pre[lang="sh"],
+    pre[lang="shell"] {
+        border-left: 3px solid #4eaa25;
+    }
+
+    /* JSON */
+    pre[lang="json"]::before {
+        background: linear-gradient(135deg, #000000, #404040);
+        color: #ffffff;
+    }
+
+    pre[lang="json"] {
+        border-left: 3px solid #000000;
+    }
+
+    /* YAML */
+    pre[lang="yaml"]::before,
+    pre[lang="yml"]::before {
+        background: linear-gradient(135deg, #cb171e, #ff0000);
+        color: #ffffff;
+    }
+
+    pre[lang="yaml"],
+    pre[lang="yml"] {
+        border-left: 3px solid #cb171e;
+    }
+
+    /* Markdown */
+    pre[lang="markdown"]::before,
+    pre[lang="md"]::before {
+        background: linear-gradient(135deg, #083fa1, #0055ff);
+        color: #ffffff;
+    }
+
+    pre[lang="markdown"],
+    pre[lang="md"] {
+        border-left: 3px solid #083fa1;
+    }
+
+    /* Dockerfile */
+    pre[lang="dockerfile"]::before,
+    pre[lang="docker"]::before {
+        background: linear-gradient(135deg, #2496ed, #1d63ed);
+        color: #ffffff;
+    }
+
+    pre[lang="dockerfile"],
+    pre[lang="docker"] {
+        border-left: 3px solid #2496ed;
+    }
+
+    /* 默认（未知语言） */
+    pre[lang]:not([lang=""]):not([lang="javascript"]):not([lang="js"]):not([lang="python"]):not([lang="py"]):not([lang="html"]):not([lang="css"]):not([lang="java"]):not([lang="c"]):not([lang="cpp"]):not([lang="c++"]):not([lang="csharp"]):not([lang="cs"]):not([lang="php"]):not([lang="ruby"]):not([lang="rb"]):not([lang="go"]):not([lang="golang"]):not([lang="rust"]):not([lang="rs"]):not([lang="swift"]):not([lang="kotlin"]):not([lang="kt"]):not([lang="sql"]):not([lang="bash"]):not([lang="sh"]):not([lang="shell"]):not([lang="json"]):not([lang="yaml"]):not([lang="yml"]):not([lang="markdown"]):not([lang="md"]):not([lang="dockerfile"]):not([lang="docker"]):not([lang="typescript"]):not([lang="ts"]):not([lang="xml"])::before {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: #ffffff;
+    }
+
+    /* 代码块行号支持 */
+    pre.code-with-line-numbers {
+        counter-reset: line;
+        padding-left: 3.5em;
+    }
+
+        pre.code-with-line-numbers code {
+            position: relative;
+        }
+
+            pre.code-with-line-numbers code .line::before {
+                counter-increment: line;
+                content: counter(line);
+                position: absolute;
+                left: -3.5em;
+                width: 2.5em;
+                text-align: right;
+                color: #6a737d;
+                user-select: none;
+                padding-right: 1em;
+                border-right: 1px solid #e1e4e8;
+                background: #f6f8fa;
+            }
+
+
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    pre {
+        font-size: 13px;
+        padding: 1em 0.75em 0.75em 0.75em;
+        margin: 1em 0;
+        border-radius: 4px;
+    }
+
+        pre::before {
+            font-size: 11px;
+            padding: 3px 8px;
+        }
+
+        pre:hover::after {
+            right: 60px;
+            font-size: 11px;
+            padding: 3px 8px;
+        }
+}
+
+/* 打印优化 */
+@media print {
+    pre {
+        background: #ffffff;
+        border: 1px solid #cccccc;
+        page-break-inside: avoid;
+    }
+
+        pre::before {
+            background: #f0f0f0;
+            color: #333333;
+            border: 1px solid #cccccc;
+        }
+
+        pre:hover::after {
+            display: none;
+        }
+}

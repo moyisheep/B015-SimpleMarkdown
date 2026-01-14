@@ -1,5 +1,5 @@
 
-#include "MarkdownWindow.h"
+#include "MarkdownFrame.h"
 #include <wx/app.h>
 #include <wx/frame.h>
 #include <filesystem>
@@ -34,37 +34,36 @@ bool MyApp::OnInit()
 {
     auto* dbg_frame = new DebugFrame();
     dbg_frame->Show(true);
-    wxFrame* frame = new wxFrame(nullptr, wxID_ANY, "Simple Markdown", wxDefaultPosition, wxSize(800, 600));
-
-
-
-    MarkdownWindow* container = new MarkdownWindow(frame);
-    frame->Show(true);
-
-    //std::string html = "<html><body><h1>Hello, World!</h1><p>This is a simple HTML page rendered using LiteHtml and wxWidgets.</p></body></html>";
-    //container->set_html(html);
-    container->EnableDragAndDrop(true);
-    container->load_user_css("./resources/markdown.css");
-
-
-
+    MarkdownFrame* frame = new MarkdownFrame(nullptr, wxID_ANY, "Simple Markdown", wxDefaultPosition, wxSize(800, 600));
+    frame->enable_drag_drop(true);
+    frame->load_user_css("./resources/markdown.css");
 
     wxArrayString args = wxAppConsole::argv.GetArguments();
-    if(args.GetCount() > 1)
+    if (args.GetCount() > 1)
     {
         fs::path filePath(args[1].ToStdString());
 
-        container->open_markdown(filePath.generic_string());
+        frame->open_markdown(filePath.generic_string());
     }
     else
     {
         fs::path filePath("./resources/homepage.md");
 
-        container->open_markdown(filePath.generic_string());
+        frame->open_markdown(filePath.generic_string());
     }
-    for (size_t i = 0; i < args.GetCount(); i++) {
-        wxLogMessage("²ÎÊý %zu: %s", i, args[i]);
-    }
+
+    frame->Show(true);
+
+    //std::string html = "<html><body><h1>Hello, World!</h1><p>This is a simple HTML page rendered using LiteHtml and wxWidgets.</p></body></html>";
+    //container->set_html(html);
+    
+
+
+
+
+
+
+
 
     return true;
 }
