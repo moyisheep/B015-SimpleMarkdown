@@ -119,6 +119,9 @@ void MarkdownFrame::ToggleEditMode()
 	{
 		auto sz = GetClientSize();
 		m_view_wnd->SetSize(sz);
+
+		auto text = m_edit_wnd->GetValue();
+		m_view_wnd->set_markdown(std::string(text.ToUTF8()));
 		m_view_wnd->Show();
 		m_edit_wnd->Hide();
 
