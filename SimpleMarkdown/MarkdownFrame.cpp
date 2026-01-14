@@ -12,12 +12,13 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	:wxFrame(parent, id, title, pos, size, style, name)
 {
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);
-	m_view_wnd->SetSize(size);
 	m_edit_wnd = std::make_unique<wxTextCtrl>(this, wxID_ANY, "", 
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-	m_edit_wnd->SetSize(wxSize(100, 20));
-	m_edit_wnd->SetPosition(wxPoint(0, 0));
 	m_edit_wnd->Hide();
+	m_view_wnd->Show();
+
+
+
 	m_mode = MarkdownMode::view;
 	//m_edit_wnd->SetBackgroundColour(wxColour("black"));
 	//m_view_wnd->MoveAfterInTabOrder(m_edit_wnd.get());
@@ -32,7 +33,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 
 	// 绑定菜单/按钮事件
 	Bind(wxEVT_MENU, &MarkdownFrame::OnToggleEditMode, this, ID_TOGGLE_EDIT_MODE);
-	
+
 }
 
 MarkdownFrame::~MarkdownFrame()
@@ -127,6 +128,8 @@ void MarkdownFrame::ToggleEditMode()
 
 		m_view_wnd->SetFocus();
 
+	
+
 
 
 	}
@@ -142,6 +145,8 @@ void MarkdownFrame::ToggleEditMode()
 		m_view_wnd->Hide();
 
 		m_edit_wnd->SetFocus();
+
+
 	
 	}
 }
@@ -149,7 +154,21 @@ void MarkdownFrame::OnToggleEditMode(wxEvent& event)
 {
 	ToggleEditMode();
 }
+
+void MarkdownFrame::OnSize(wxSizeEvent& event)
+{
+	auto sz = GetClientSize();
+	if(m_mode == MarkdownMode::view)
+	{
+		m_view_wnd->SetSize(sz);
+	}
+	if(m_mode == MarkdownMode::edit)
+	{
+		m_edit_wnd->SetSize(sz);
+	}
+}
 wxBEGIN_EVENT_TABLE(MarkdownFrame, wxFrame)
 EVT_DROP_FILES(MarkdownFrame::OnDropFiles)
+EVT_SIZE(MarkdownFrame::OnSize)
 
 wxEND_EVENT_TABLE()

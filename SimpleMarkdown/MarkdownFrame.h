@@ -27,11 +27,13 @@ private:
     void OnDropFiles(wxDropFilesEvent& event);
     void ToggleEditMode();
     void OnToggleEditMode(wxEvent& event);
+    void OnSize(wxSizeEvent& event);
     void OnKeyDown(wxKeyEvent& event);
 private:
 	std::unique_ptr<MarkdownWindow> m_view_wnd;
     std::unique_ptr<wxTextCtrl> m_edit_wnd;
     MarkdownMode m_mode;
+
 
 
     DECLARE_EVENT_TABLE();
