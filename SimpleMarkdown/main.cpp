@@ -58,7 +58,7 @@ bool MyApp::OnInit()
     }
     else
     {
-        fs::path filePath("./test.md");
+        fs::path filePath("./resources/homepage.md");
 
         container->open_markdown(filePath.generic_string());
     }

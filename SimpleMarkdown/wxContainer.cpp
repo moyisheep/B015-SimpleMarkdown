@@ -103,6 +103,7 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
         font.SetStrikethrough(true);
     }
 
+
     // Get font metrics if requested
     if (fm)
     {
@@ -126,7 +127,7 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
 }
 litehtml::pixel_t wxContainer::get_default_font_size() const
 {
-    return 16; // Default font size in pixels
+    return 14; // Default font size in pixels
 }
 
 const char* wxContainer::get_default_font_name() const

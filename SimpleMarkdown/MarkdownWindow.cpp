@@ -1,5 +1,6 @@
 #include "MarkdownWindow.h"
 #include <cmark-gfm.h>
+#include <maddy/parser.h>
 
 std::string md_to_html(const std::string& markdown) {
     std::string html = cmark_markdown_to_html(
@@ -12,12 +13,19 @@ std::string md_to_html(const std::string& markdown) {
     return html;
 }
 
+
+//std::string md_to_html( const std::string& markdown) {
+//    std::stringstream markdownInput(markdown);
+//    std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>();
+//    std::string htmlOutput = parser->Parse(markdownInput);
+//
+//
+//    return htmlOutput;
+//}
 MarkdownWindow::MarkdownWindow(wxWindow* parent)
     :HtmlWindow(parent)
 {
-    m_ctrl = std::make_unique<wxTextCtrl>(this, wxID_ANY);
-    m_ctrl->Hide();
-    SetFocus();
+ 
 }
 
 MarkdownWindow::~MarkdownWindow()
@@ -51,6 +59,7 @@ bool MarkdownWindow::open_markdown(const std::string& path)
                 auto html = md_to_html(md);
                 if(!html.empty())
                 {
+                    wxLogMessage(html);
                     set_html(html);
                     return true;
                 }
@@ -84,18 +93,6 @@ void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
 
 void MarkdownWindow::OnKeyDown(wxKeyEvent& event)
 {
-
-    if (event.GetKeyCode() == WXK_RETURN && event.ControlDown())
-    {
-        
-        auto pos = m_char_boxes[m_cursor_pos];
-        pos.y = pos.y - m_scrollPos;
-        auto sz = GetClientSize();
-        m_ctrl->SetPosition(wxPoint(0, pos.y));
-        m_ctrl->SetSize(wxSize(sz.GetWidth(), pos.height));
-        m_ctrl->SetLabelText("hello world");
-        m_ctrl->Show();
-    }
 
     event.Skip();
 }

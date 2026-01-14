@@ -83,6 +83,8 @@ class SelectionRect
 {
 public:
     SelectionRect() { m_rect.clear(); };
+
+    // m_selection_rect.add(...)
     void add(litehtml::position pos)
     {
         if(!m_rect.empty())
@@ -144,7 +146,7 @@ public:
 
     void set_user_css(const std::string& css);
     void load_user_css(const std::string& path);
-
+    void clear();
     // 滚动相关方法
     void SetupScrollbars();
     void ScrollToPosition(int pos);

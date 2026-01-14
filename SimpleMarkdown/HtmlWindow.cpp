@@ -49,7 +49,7 @@ HtmlWindow::~HtmlWindow()
 void HtmlWindow::set_html(const std::string& html)
 {
 
-
+    clear();
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, 
         m_container.get(), litehtml::master_css, m_user_css);
 
@@ -157,6 +157,16 @@ void HtmlWindow::load_user_css(const std::string& path)
 
 }
 
+void HtmlWindow::clear()
+{
+    ClearSelection();
+    m_scrollPos = 0;
+    m_cursor_pos = -1;
+    m_char_boxes.clear();
+    m_plain_text.clear();
+    m_totalHeight = 0;
+}
+
 
 
 
@@ -185,7 +195,7 @@ void HtmlWindow::ScrollToPosition(int pos)
    
     m_scrollPos = pos;
     SetScrollPos(wxVERTICAL, pos);
-    UpdateSelectionRect();
+    //UpdateSelectionRect();
     Refresh();
 }
 
@@ -269,25 +279,24 @@ void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
 void HtmlWindow::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
-    //DoPrepareDC(dc); // 处理滚动偏移
 
-            // 获取需要重绘的区域
+    // get update rect
     wxRegion updateRegion = GetUpdateRegion();
     wxRect updateRect = updateRegion.GetBox();
 
  
 
-    // 绘制背景
+    // draw background
     dc.SetBrush(*wxWHITE_BRUSH);
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.DrawRectangle(updateRect);
 
 
 
- 
+    // draw doc
     if (m_doc)
     {
-        // 绘制选择区域
+      
         litehtml::position clip{ (float)updateRect.x, 
             (float)updateRect.y, 
             (float)updateRect.width, 
@@ -297,6 +306,7 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
         
     }
 
+    // draw selection 
     if (!m_selection_rect.empty())
     {
 
@@ -304,19 +314,28 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
         dc.SetPen(*wxBLUE_PEN);
         for (auto& rect : m_selection_rect.get_rect())
         {
-            dc.DrawRectangle(rect);
+            rect.y = rect.y - m_scrollPos;
+            if(updateRect.Intersects(rect))
+            {
+                dc.DrawRectangle(rect);
+            }
+     
         }
     }
+
+    // draw cursor
     if(m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
     {
         auto pos = m_char_boxes[m_cursor_pos];
         pos.y = pos.y - m_scrollPos;
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(*wxBLACK_PEN);
-        wxPoint pt1(pos.left(), pos.top());
-        wxPoint pt2(pos.left(), pos.bottom());
+        wxPoint pt1(pos.right(), pos.top());
+        wxPoint pt2(pos.right(), pos.bottom());
         dc.DrawLine(pt1, pt2);
     }
+
+    // draw update rect
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.SetPen(*wxRED_PEN);
     dc.DrawRectangle(updateRect);
@@ -344,8 +363,8 @@ void HtmlWindow::OnMouseWheel(wxMouseEvent& event)
 
     int newPos = m_scrollPos - lines * 20; // 20是滚动步长
     newPos = wxMax(0, wxMin(newPos, m_totalHeight - GetClientSize().GetHeight()));
-    std::string txt = "OnMouseWheel: " + std::to_string(newPos);
-    wxLogInfo(txt);
+    //std::string txt = "OnMouseWheel: " + std::to_string(newPos);
+    //wxLogInfo(txt);
     if (newPos != m_scrollPos)
     {
         ScrollToPosition(newPos);
@@ -485,6 +504,7 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
             auto pos = hit_test(x, y);
             if (pos >= 0)
             {
+                m_cursor_pos = pos;
                 m_selection_end = pos;
                 UpdateSelectionRect();
             }
@@ -559,7 +579,7 @@ void HtmlWindow::UpdateSelectionRect()
     }
 
     // process scroll offset
-    m_selection_rect.scroll(-m_scrollPos);
+    //m_selection_rect.scroll(-m_scrollPos);
 
     // this is get selection text, and convert to utf-8
     if(!m_plain_text.empty() && 
@@ -711,6 +731,6 @@ wxBEGIN_EVENT_TABLE(HtmlWindow, wxScrolled<wxPanel>)
     EVT_LEFT_DOWN(HtmlWindow::OnLeftDown)
     EVT_LEFT_UP(HtmlWindow::OnLeftUp)
     EVT_MOTION(HtmlWindow::OnMouseMove)
-    EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)  // 添加这行
+    EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)  
     EVT_KEY_DOWN(HtmlWindow::OnKeyDown)
 wxEND_EVENT_TABLE()
