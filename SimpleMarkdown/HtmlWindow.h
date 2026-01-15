@@ -228,5 +228,5 @@ private:
 
     bool CopyToClipboard(const wxString& text);
  
-    DECLARE_EVENT_TABLE()
+
 };

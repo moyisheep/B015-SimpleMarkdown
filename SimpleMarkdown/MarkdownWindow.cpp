@@ -40,7 +40,7 @@ std::string md_to_html(const std::string& markdown) {
 MarkdownWindow::MarkdownWindow(wxWindow* parent)
     :HtmlWindow(parent)
 {
-    
+    Bind(wxEVT_DROP_FILES, &MarkdownWindow::OnDropFiles, this);
 }
 
 MarkdownWindow::~MarkdownWindow()
@@ -114,6 +114,3 @@ void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
 }
 
 
-wxBEGIN_EVENT_TABLE(MarkdownWindow, HtmlWindow)
-   EVT_DROP_FILES(MarkdownWindow::OnDropFiles)
-wxEND_EVENT_TABLE()

@@ -22,7 +22,5 @@ private:
 	void OnDropFiles(wxDropFilesEvent& event);
 
 
-	
 
-	DECLARE_EVENT_TABLE();
 };

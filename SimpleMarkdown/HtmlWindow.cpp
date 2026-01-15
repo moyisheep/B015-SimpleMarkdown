@@ -21,7 +21,18 @@
 
 namespace fs = std::filesystem;
 
-
+//wxBEGIN_EVENT_TABLE(HtmlWindow, wxScrolled<wxPanel>)
+//EVT_PAINT(HtmlWindow::OnPaint)
+//EVT_SCROLLWIN(HtmlWindow::OnScroll)
+//EVT_MOUSEWHEEL(HtmlWindow::OnMouseWheel)
+//EVT_SIZE(HtmlWindow::OnSize)
+//EVT_DROP_FILES(HtmlWindow::OnDropFiles)
+//EVT_LEFT_DOWN(HtmlWindow::OnLeftDown)
+//EVT_LEFT_UP(HtmlWindow::OnLeftUp)
+//EVT_MOTION(HtmlWindow::OnMouseMove)
+//EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)
+//EVT_KEY_DOWN(HtmlWindow::OnKeyDown)
+//wxEND_EVENT_TABLE()
 
 HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
@@ -37,6 +48,24 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
 
     m_link_ctrl = std::make_unique<wxStaticText>(this, wxID_ANY, "");
     m_link_ctrl->Hide();
+    
+    Bind(wxEVT_PAINT, &HtmlWindow::OnPaint, this);
+    Bind(wxEVT_SCROLLWIN_BOTTOM, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_LINEDOWN, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_LINEUP, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_PAGEDOWN, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_PAGEUP, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_THUMBRELEASE, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_THUMBTRACK, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_SCROLLWIN_TOP, &HtmlWindow::OnScroll, this);
+    Bind(wxEVT_MOUSEWHEEL, &HtmlWindow::OnMouseWheel, this);
+    Bind(wxEVT_DROP_FILES, &HtmlWindow::OnDropFiles, this);
+    Bind(wxEVT_LEFT_UP, &HtmlWindow::OnLeftUp, this);
+    Bind(wxEVT_LEFT_DOWN, &HtmlWindow::OnLeftDown, this);
+    Bind(wxEVT_MOTION, &HtmlWindow::OnMouseMove, this);
+    Bind(wxEVT_LEAVE_WINDOW, &HtmlWindow::OnMouseLeave, this);
+    Bind(wxEVT_KEY_DOWN, &HtmlWindow::OnKeyDown, this);
+    Bind(wxEVT_SIZE, &HtmlWindow::OnSize, this);
 }
 HtmlWindow::~HtmlWindow()
 {
@@ -732,15 +761,3 @@ int32_t HtmlWindow::hit_test(float x, float y)
     return -1;
 }
 
-wxBEGIN_EVENT_TABLE(HtmlWindow, wxScrolled<wxPanel>)
-    EVT_PAINT(HtmlWindow::OnPaint)
-    EVT_SCROLLWIN(HtmlWindow::OnScroll)
-    EVT_MOUSEWHEEL(HtmlWindow::OnMouseWheel)
-    EVT_SIZE(HtmlWindow::OnSize)
-    EVT_DROP_FILES(HtmlWindow::OnDropFiles)
-    EVT_LEFT_DOWN(HtmlWindow::OnLeftDown)
-    EVT_LEFT_UP(HtmlWindow::OnLeftUp)
-    EVT_MOTION(HtmlWindow::OnMouseMove)
-    EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)  
-    EVT_KEY_DOWN(HtmlWindow::OnKeyDown)
-wxEND_EVENT_TABLE()

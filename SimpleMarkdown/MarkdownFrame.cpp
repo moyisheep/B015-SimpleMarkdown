@@ -35,6 +35,8 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 
 	// 绑定菜单/按钮事件
 	Bind(wxEVT_MENU, &MarkdownFrame::OnToggleEditMode, this, ID_TOGGLE_EDIT_MODE);
+	Bind(wxEVT_DROP_FILES, &MarkdownFrame::OnDropFiles, this);
+	Bind(wxEVT_SIZE, &MarkdownFrame::OnSize, this);
 
 }
 
@@ -164,13 +166,8 @@ void MarkdownFrame::OnSize(wxSizeEvent& event)
 	{
 		m_view_wnd->SetSize(sz);
 	}
-	if(m_mode == MarkdownMode::edit)
+	else if(m_mode == MarkdownMode::edit)
 	{
 		m_edit_wnd->SetSize(sz);
 	}
 }
-wxBEGIN_EVENT_TABLE(MarkdownFrame, wxFrame)
-EVT_DROP_FILES(MarkdownFrame::OnDropFiles)
-EVT_SIZE(MarkdownFrame::OnSize)
-
-wxEND_EVENT_TABLE()
