@@ -4,6 +4,7 @@
 
 #include "MarkdownWindow.h"
 
+class MarkdownTextCtrl;
 enum MarkdownMode{view, edit};
 
 class MarkdownFrame: public wxFrame
@@ -31,7 +32,7 @@ private:
     void OnKeyDown(wxKeyEvent& event);
 private:
 	std::unique_ptr<MarkdownWindow> m_view_wnd;
-    std::unique_ptr<wxTextCtrl> m_edit_wnd;
+    std::unique_ptr<MarkdownTextCtrl> m_edit_wnd;
     MarkdownMode m_mode;
 
 

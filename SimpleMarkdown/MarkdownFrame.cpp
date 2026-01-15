@@ -1,4 +1,5 @@
 #include "MarkdownFrame.h"
+#include "MarkdownTextCtrl.h"
 
 static const int ID_TOGGLE_EDIT_MODE = wxNewId();
 
@@ -12,9 +13,10 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	:wxFrame(parent, id, title, pos, size, style, name)
 {
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);
-	m_edit_wnd = std::make_unique<wxTextCtrl>(this, wxID_ANY, "", 
+	m_edit_wnd = std::make_unique<MarkdownTextCtrl>(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	m_edit_wnd->Hide();
+	m_edit_wnd->EnableLiveHighlighting(true);
 	m_view_wnd->Show();
 
 
@@ -143,7 +145,7 @@ void MarkdownFrame::ToggleEditMode()
 		m_edit_wnd->SetValue(wxString::FromUTF8(text));
 		m_edit_wnd->Show();
 		m_view_wnd->Hide();
-
+		m_edit_wnd->HighlightMarkdown();
 		m_edit_wnd->SetFocus();
 
 

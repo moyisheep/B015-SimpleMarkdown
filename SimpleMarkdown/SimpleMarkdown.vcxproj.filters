@@ -57,6 +57,9 @@
     <ClInclude Include="MarkdownFrame.h">
       <Filter>Markdown</Filter>
     </ClInclude>
+    <ClInclude Include="MarkdownTextCtrl.h">
+      <Filter>Markdown</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -81,6 +84,9 @@
       <Filter>Markdown</Filter>
     </ClCompile>
     <ClCompile Include="MarkdownFrame.cpp">
+      <Filter>Markdown</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkdownTextCtrl.cpp">
       <Filter>Markdown</Filter>
     </ClCompile>
   </ItemGroup>
