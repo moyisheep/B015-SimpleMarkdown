@@ -28,6 +28,9 @@
     <Filter Include="Container">
       <UniqueIdentifier>{056788ed-ef1d-47eb-8462-dcf7bb66e2d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Frame">
+      <UniqueIdentifier>{e7e90365-7883-4336-b457-2972ac22f1df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -51,9 +54,6 @@
     <ClInclude Include="MarkdownWindow.h">
       <Filter>Markdown</Filter>
     </ClInclude>
-    <ClInclude Include="MarkdownFrame.h">
-      <Filter>Markdown</Filter>
-    </ClInclude>
     <ClInclude Include="MarkdownTextCtrl.h">
       <Filter>Markdown</Filter>
     </ClInclude>
@@ -63,11 +63,11 @@
     <ClInclude Include="debug.h">
       <Filter>Debug</Filter>
     </ClInclude>
+    <ClInclude Include="MarkdownFrame.h">
+      <Filter>Frame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="LocalVFS.cpp">
       <Filter>VFS</Filter>
     </ClCompile>
@@ -83,14 +83,17 @@
     <ClCompile Include="MarkdownWindow.cpp">
       <Filter>Markdown</Filter>
     </ClCompile>
-    <ClCompile Include="MarkdownFrame.cpp">
-      <Filter>Markdown</Filter>
-    </ClCompile>
     <ClCompile Include="MarkdownTextCtrl.cpp">
       <Filter>Markdown</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkdownFrame.cpp">
+      <Filter>Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Frame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

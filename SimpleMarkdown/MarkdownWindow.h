@@ -11,7 +11,7 @@ public:
 	~MarkdownWindow();
 
 	bool set_markdown(const std::string& md);
-	bool open_markdown(const std::string& path);
+	bool load_markdown(const std::string& path);
 
 	std::string get_markdown();
 

@@ -62,7 +62,7 @@ bool MarkdownWindow::set_markdown(const std::string& md)
     return false;
 }
 
-bool MarkdownWindow::open_markdown(const std::string& path)
+bool MarkdownWindow::load_markdown(const std::string& path)
 {
     if (m_vfs) 
     { 
@@ -72,14 +72,7 @@ bool MarkdownWindow::open_markdown(const std::string& path)
             auto md = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
             if(!md.empty())
             {
-                m_markdown_text = std::string(md);
-                auto html = md_to_html(md);
-                if(!html.empty())
-                {
-                    //wxLogMessage(wxString::FromUTF8(html));
-                    set_html(html);
-                    return true;
-                }
+                return set_markdown(md);
             }
         }
     }
@@ -105,7 +98,7 @@ void MarkdownWindow::OnDropFiles(wxDropFilesEvent& event)
         wxString file_path = dropped[0];
 
 
-        if (!open_markdown(file_path.ToStdString()))
+        if (!load_markdown(file_path.ToStdString()))
         {
             wxMessageBox("Failed to load Markdown file", "Error", wxICON_ERROR);
         }

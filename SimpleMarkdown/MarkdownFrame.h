@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 
 #include "MarkdownWindow.h"
+#include "LocalVFS.h"
 
 class MarkdownTextCtrl;
 enum MarkdownMode{view, edit};
@@ -20,7 +21,7 @@ public:
 	~MarkdownFrame();
 
     bool set_markdown(const std::string& md);
-    bool open_markdown(const std::string& path);
+    bool load_markdown(const std::string& path);
     bool set_user_css(const std::string& css);
     bool load_user_css(const std::string& path);
     void enable_drag_drop(bool enable = true);
@@ -29,12 +30,13 @@ private:
     void ToggleEditMode();
     void OnToggleEditMode(wxEvent& event);
     void OnSize(wxSizeEvent& event);
-    void OnKeyDown(wxKeyEvent& event);
 private:
 	std::unique_ptr<MarkdownWindow> m_view_wnd;
     std::unique_ptr<MarkdownTextCtrl> m_edit_wnd;
     MarkdownMode m_mode;
-    std::string m_last_text = "";
+    std::string m_text = "";
+    std::shared_ptr<VirtualFileSystem> m_vfs;
+
 
 
 };

@@ -694,94 +694,94 @@ void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::b
     const litehtml::background_layer::linear_gradient& gradient)
 {
     Timer("draw_linear_gradient", 1);
-    //wxPaintDC* dc = (wxPaintDC*)hdc;
-    //if (!dc) return;
+    wxPaintDC* dc = (wxPaintDC*)hdc;
+    if (!dc) return;
 
-    //// 获取边框盒的坐标
-    //int x = layer.border_box.x;
-    //int y = layer.border_box.y;
-    //int width = layer.border_box.width;
-    //int height = layer.border_box.height;
+    // 获取边框盒的坐标
+    int x = layer.border_box.x;
+    int y = layer.border_box.y;
+    int width = layer.border_box.width;
+    int height = layer.border_box.height;
 
-    //// 创建一个临时的内存DC来绘制渐变
-    //wxBitmap bitmap(width, height);
-    //wxMemoryDC memDC(bitmap);
+    // 创建一个临时的内存DC来绘制渐变
+    wxBitmap bitmap(width, height);
+    wxMemoryDC memDC(bitmap);
 
-    //// 计算渐变起点和终点的实际坐标（相对于bitmap）
-    //wxPoint startPoint(
-    //    static_cast<int>(gradient.start.x * width),
-    //    static_cast<int>(gradient.start.y * height)
-    //);
+    // 计算渐变起点和终点的实际坐标（相对于bitmap）
+    wxPoint startPoint(
+        static_cast<int>(gradient.start.x * width),
+        static_cast<int>(gradient.start.y * height)
+    );
 
-    //wxPoint endPoint(
-    //    static_cast<int>(gradient.end.x * width),
-    //    static_cast<int>(gradient.end.y * height)
-    //);
+    wxPoint endPoint(
+        static_cast<int>(gradient.end.x * width),
+        static_cast<int>(gradient.end.y * height)
+    );
 
-    //// 创建颜色数组
-    //std::vector<wxColor> colors;
-    //std::vector<float> positions;
+    // 创建颜色数组
+    std::vector<wxColor> colors;
+    std::vector<float> positions;
 
-    //for (const auto& color_point : gradient.color_points)
-    //{
-    //    litehtml::web_color lite_color = color_point.color;
-    //    wxColor wx_color(
-    //        lite_color.red,
-    //        lite_color.green,
-    //        lite_color.blue,
-    //        lite_color.alpha
-    //    );
+    for (const auto& color_point : gradient.color_points)
+    {
+        litehtml::web_color lite_color = color_point.color;
+        wxColor wx_color(
+            lite_color.red,
+            lite_color.green,
+            lite_color.blue,
+            lite_color.alpha
+        );
 
-    //    colors.push_back(wx_color);
-    //    positions.push_back(color_point.offset);
-    //}
+        colors.push_back(wx_color);
+        positions.push_back(color_point.offset);
+    }
 
-    //if (colors.empty()) return;
+    if (colors.empty()) return;
 
-    //// 绘制渐变到内存DC
-    //if (colors.size() == 1)
-    //{
-    //    // 单色情况
-    //    memDC.SetBrush(wxBrush(colors[0]));
-    //    memDC.SetPen(*wxTRANSPARENT_PEN);
-    //    memDC.DrawRectangle(0, 0, width, height);
-    //}
-    //else
-    //{
-    //    // 多色渐变
-    //    // 创建渐变图像
-    //    wxImage gradientImage(width, height);
-    //    gradientImage.InitAlpha();
+    // 绘制渐变到内存DC
+    if (colors.size() == 1)
+    {
+        // 单色情况
+        memDC.SetBrush(wxBrush(colors[0]));
+        memDC.SetPen(*wxTRANSPARENT_PEN);
+        memDC.DrawRectangle(0, 0, width, height);
+    }
+    else
+    {
+        // 多色渐变
+        // 创建渐变图像
+        wxImage gradientImage(width, height);
+        gradientImage.InitAlpha();
 
-    //    unsigned char* data = gradientImage.GetData();
-    //    unsigned char* alpha = gradientImage.GetAlpha();
+        unsigned char* data = gradientImage.GetData();
+        unsigned char* alpha = gradientImage.GetAlpha();
 
-    //    for (int py = 0; py < height; py++)
-    //    {
-    //        for (int px = 0; px < width; px++)
-    //        {
-    //            // 计算当前像素在渐变线上的位置
-    //            wxPoint current(px, py);
-    //            float t = CalculateLinearGradientPosition(current, startPoint, endPoint);
+        for (int py = 0; py < height; py++)
+        {
+            for (int px = 0; px < width; px++)
+            {
+                // 计算当前像素在渐变线上的位置
+                wxPoint current(px, py);
+                float t = CalculateLinearGradientPosition(current, startPoint, endPoint);
 
-    //            // 插值颜色
-    //            wxColor color = InterpolateColor(colors, positions, t);
+                // 插值颜色
+                wxColor color = InterpolateColor(colors, positions, t);
 
-    //            int idx = (py * width + px) * 3;
-    //            data[idx] = color.Red();
-    //            data[idx + 1] = color.Green();
-    //            data[idx + 2] = color.Blue();
-    //            alpha[py * width + px] = color.Alpha();
-    //        }
-    //    }
+                int idx = (py * width + px) * 3;
+                data[idx] = color.Red();
+                data[idx + 1] = color.Green();
+                data[idx + 2] = color.Blue();
+                alpha[py * width + px] = color.Alpha();
+            }
+        }
 
-    //    // 将渐变图像绘制到内存DC
-    //    wxBitmap gradientBitmap(gradientImage);
-    //    memDC.DrawBitmap(gradientBitmap, 0, 0);
-    //}
+        // 将渐变图像绘制到内存DC
+        wxBitmap gradientBitmap(gradientImage);
+        memDC.DrawBitmap(gradientBitmap, 0, 0);
+    }
 
-    //// 将内存DC的内容绘制到实际DC
-    //dc->Blit(x, y, width, height, &memDC, 0, 0);
+    // 将内存DC的内容绘制到实际DC
+    dc->Blit(x, y, width, height, &memDC, 0, 0);
 }
 
 void wxContainer::draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,

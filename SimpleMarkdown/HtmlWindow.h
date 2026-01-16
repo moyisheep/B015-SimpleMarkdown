@@ -138,25 +138,23 @@ public:
     HtmlWindow(wxWindow* parent);
     ~HtmlWindow();
 
-    // 其他方法
+
     void set_html(const std::string& html);
     void record_char_boxes();
     void record_char_boxes_recursive(litehtml::element::ptr el);
-    bool open_html(const std::string& file_path);
+    bool load_html(const std::string& file_path);
 
     bool set_user_css(const std::string& css);
     bool load_user_css(const std::string& path);
     void clear();
-    // 滚动相关方法
-    void SetupScrollbars();
-    void ScrollToPosition(int pos);
-    int GetScrollPosition() const;
 
-    // 拖拽加载
+    void set_vfs(std::shared_ptr<VirtualFileSystem>& vfs);
+
+    std::string get_html();
+  
     void EnableDragAndDrop(bool enable = true);
 
-    void ShowLinkWindow(std::string link);
-    void HideLinkWindow();
+
 
 protected:
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
@@ -168,6 +166,7 @@ private:
     litehtml::document::ptr m_doc;
 
     std::u32string m_plain_text;
+    std::string m_html = "";
     wxFrame* m_parent;
 
     // 滚动相关变量
@@ -188,9 +187,13 @@ private:
 private:
 
 
+    // 滚动相关方法
+    void SetupScrollbars();
+    void ScrollToPosition(int pos);
+    int GetScrollPosition() const;
 
-
-
+    void ShowLinkWindow(std::string link);
+    void HideLinkWindow();
 
     void RequestRedraw(const litehtml::position::vector& redraw_boxes);
 

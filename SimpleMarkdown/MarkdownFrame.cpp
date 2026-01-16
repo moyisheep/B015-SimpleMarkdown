@@ -12,17 +12,23 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	const wxString& name)
 	:wxFrame(parent, id, title, pos, size, style, name)
 {
+
+	m_vfs = std::make_shared<LocalVFS>();
+
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);
+	m_view_wnd->set_vfs(m_vfs);
+
 	m_edit_wnd = std::make_unique<MarkdownTextCtrl>(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	m_edit_wnd->Hide();
 	m_edit_wnd->EnableLiveHighlighting(true);
+
 	m_view_wnd->Show();
 
 
 
 	m_mode = MarkdownMode::view;
-	m_last_text = "";
+	m_text = "";
 
 
 	
@@ -46,18 +52,36 @@ MarkdownFrame::~MarkdownFrame()
 
 bool MarkdownFrame::set_markdown(const std::string& md)
 {
-	if(m_view_wnd)
+	if(!md.empty())
 	{
-		return m_view_wnd->set_markdown(md);
+		//m_text = std::string(md);
+		if(m_mode == MarkdownMode::view && m_view_wnd)
+		{
+			return m_view_wnd->set_markdown(md);
+		}
+
+		if(m_mode == MarkdownMode::edit && m_edit_wnd)
+		{
+			m_edit_wnd->SetValue(wxString::FromUTF8(md));
+			return true;
+		}
 	}
 	return false;
 }
 
-bool MarkdownFrame::open_markdown(const std::string& path)
+bool MarkdownFrame::load_markdown(const std::string& path)
 {
-	if (m_view_wnd)
+	if (m_view_wnd && m_vfs)
 	{
-		return m_view_wnd->open_markdown(path);
+		auto bin = m_vfs->get_binary(path);
+		if(!bin.empty())
+		{
+			auto md = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
+			if (!md.empty())
+			{
+				return set_markdown(md);
+			}
+		}
 	}
 	return false;
 	
@@ -100,8 +124,8 @@ void MarkdownFrame::OnDropFiles(wxDropFilesEvent& event)
 		wxString* dropped = event.GetFiles();
 		wxString file_path = dropped[0];
 
-
-		if (!open_markdown(file_path.ToStdString()))
+		
+		if (!load_markdown(file_path.ToStdString()))
 		{
 			wxMessageBox("Failed to load Markdown file", "Error", wxICON_ERROR);
 		}
@@ -126,9 +150,9 @@ void MarkdownFrame::ToggleEditMode()
 
 	
 		std::string text = std::string(m_edit_wnd->GetValue().ToUTF8());
-		if (text != m_last_text)
+		if (text != m_text)
 		{
-			m_last_text = text;
+			m_text = text;
 			m_view_wnd->set_markdown(text);
 		}
 			
@@ -140,7 +164,7 @@ void MarkdownFrame::ToggleEditMode()
 
 		m_view_wnd->SetFocus();
 
-	
+		//wxLogInfo(wxString::FromUTF8(m_view_wnd->get_html()));
 
 
 
@@ -152,9 +176,9 @@ void MarkdownFrame::ToggleEditMode()
 		m_edit_wnd->SetSize(sz);
 	
 		auto text = m_view_wnd->get_markdown();
-		if(text != m_last_text)
+		if(text != m_text)
 		{
-			m_last_text = text;
+			m_text = text;
 			m_edit_wnd->SetValue(wxString::FromUTF8(text));
 		}
 

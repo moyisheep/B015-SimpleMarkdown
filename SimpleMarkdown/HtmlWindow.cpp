@@ -69,6 +69,7 @@ void HtmlWindow::set_html(const std::string& html)
 {
     TimerOutput::Instance().start("[createFromString]");
     clear();
+    m_html = std::string(html);
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, 
         m_container.get(), litehtml::master_css, m_user_css);
 
@@ -136,7 +137,7 @@ void HtmlWindow::record_char_boxes_recursive(litehtml::element::ptr el)
     }
 }
 
-bool HtmlWindow::open_html(const std::string &file_path)
+bool HtmlWindow::load_html(const std::string &file_path)
 {
     if (!m_vfs) { return false; }
     
@@ -196,6 +197,23 @@ void HtmlWindow::clear()
     m_char_boxes.clear();
     m_plain_text.clear();
     m_totalHeight = 0;
+}
+
+void HtmlWindow::set_vfs(std::shared_ptr<VirtualFileSystem>& vfs)
+{
+    if(vfs)
+    {
+        m_vfs = vfs;
+        if(m_container)
+        {
+            m_container->set_vfs(vfs);
+        }
+    }
+}
+
+std::string HtmlWindow::get_html()
+{
+    return m_html;
 }
 
 
@@ -279,7 +297,7 @@ void HtmlWindow::OnDropFiles(wxDropFilesEvent& event)
         wxString file_path = dropped[0];
 
 
-        if (!open_html(file_path.ToStdString()))
+        if (!load_html(file_path.ToStdString()))
         {
             wxMessageBox("Failed to load HTML file", "Error", wxICON_ERROR);
         }
@@ -702,37 +720,6 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
     {
         m_cursor_pos = std::clamp( m_cursor_pos + 1, 0, (int32_t)m_char_boxes.size());
         Refresh();
-    }
-    else if (event.GetKeyCode() == WXK_RETURN)
-    {
-        if (m_doc && !m_char_boxes.empty() && m_char_boxes.size() > m_cursor_pos)
-        {
-            auto pos = m_char_boxes[m_cursor_pos];
-            auto root_render = m_doc->root_render();
-            auto el = root_render->get_element_by_point(pos.x, pos.y, 0, 0, nullptr);
-            if (el)
-            {
-                auto color = el->css().get_color();
-                
-                litehtml::web_color green{ 0, 128, 0 };
-                if(color == green)
-                {
-                    el->set_attr("style", "color:red;");
-                }else
-                {
-                    el->set_attr("style", "color:green;");
-                }
-                m_doc->root()->compute_styles();
-                //el->refresh_styles();
-                el->compute_styles();
-                Refresh();
-
-            }
-        }
-    }
-    else if (event.GetKeyCode() == WXK_BACK)
-    {
-
     }
 
     event.Skip();

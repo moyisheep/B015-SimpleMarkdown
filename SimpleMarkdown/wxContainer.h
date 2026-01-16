@@ -72,7 +72,7 @@ public:
     //void import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) override;
 
 
-    void set_vfs(std::shared_ptr<VirtualFileSystem> vfs) { m_vfs = vfs; }
+    void set_vfs(std::shared_ptr<VirtualFileSystem>& vfs) { m_vfs = vfs; }
     std::shared_ptr<VirtualFileSystem> get_vfs() const { return m_vfs; }
 
     std::string get_hover_link() { return m_hover_link;}
