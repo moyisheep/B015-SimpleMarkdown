@@ -99,5 +99,6 @@
   <ItemGroup>
     <CopyFileToFolders Include="resources\markdown.css" />
     <CopyFileToFolders Include="resources\homepage.md" />
+    <CopyFileToFolders Include="resources\markdown-dark.css" />
   </ItemGroup>
 </Project>

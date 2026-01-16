@@ -113,8 +113,8 @@ void MarkdownTextCtrl::InitializeStyles()
     // 清除所有样式
     StyleClearAll();
 
-    //InitializeLightTheme();
-    InitializeDarkTheme();
+    InitializeLightTheme();
+    //InitializeDarkTheme();
 
 
 
@@ -143,10 +143,12 @@ void MarkdownTextCtrl::InitializeLightTheme()
     SetCaretForeground(wxColour(0, 0, 0));  // 白色光标
     SetMarginBackground(1, wxColour(250, 250, 250));
     SetMarginBackground(0, wxColour(250, 250, 250)); // 暗色模式
-    SetFoldMarginColour(true, wxColour(255, 255, 255));
+    SetFoldMarginColour(true, wxColour(250, 250, 250));
     SetFoldMarginHiColour(true, wxColour(255, 255, 255));
-    SetCaretLineBackground(wxColour(248, 250, 252)); // 浅灰当前行
+
     SetEdgeColour(wxColour(250, 250, 250));
+
+    SetCaretLineBackground(wxColour(240, 240, 240)); // 浅灰当前行
     SetCaretWidth(2);
 
 
