@@ -22,8 +22,8 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 
 
 	m_mode = MarkdownMode::view;
-	//m_edit_wnd->SetBackgroundColour(wxColour("black"));
-	//m_view_wnd->MoveAfterInTabOrder(m_edit_wnd.get());
+	m_last_text = "";
+
 
 	
 	// 创建加速器表
@@ -48,7 +48,6 @@ bool MarkdownFrame::set_markdown(const std::string& md)
 {
 	if(m_view_wnd)
 	{
-
 		return m_view_wnd->set_markdown(md);
 	}
 	return false;
@@ -125,8 +124,17 @@ void MarkdownFrame::ToggleEditMode()
 		auto sz = GetClientSize();
 		m_view_wnd->SetSize(sz);
 
-		auto text = m_edit_wnd->GetValue();
-		m_view_wnd->set_markdown(std::string(text.ToUTF8()));
+	
+		std::string text = std::string(m_edit_wnd->GetValue().ToUTF8());
+		if (text != m_last_text)
+		{
+			m_last_text = text;
+			m_view_wnd->set_markdown(text);
+		}
+			
+
+
+		
 		m_view_wnd->Show();
 		m_edit_wnd->Hide();
 
@@ -142,9 +150,14 @@ void MarkdownFrame::ToggleEditMode()
 	
 		auto sz = GetClientSize();
 		m_edit_wnd->SetSize(sz);
-		//m_edit_wnd->SetLabelText(m_markdown_text);
+	
 		auto text = m_view_wnd->get_markdown();
-		m_edit_wnd->SetValue(wxString::FromUTF8(text));
+		if(text != m_last_text)
+		{
+			m_last_text = text;
+			m_edit_wnd->SetValue(wxString::FromUTF8(text));
+		}
+
 		m_edit_wnd->Show();
 		m_view_wnd->Hide();
 		m_edit_wnd->HighlightMarkdown();

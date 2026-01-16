@@ -12,9 +12,9 @@
 class Timer {
 public:
     // 构造函数开始计时
-    Timer(const std::string& name = "Timer");
+    Timer(const std::string& name = "Timer", int level=0);
 
-
+    void end();
     // 析构函数结束计时并输出结果
     ~Timer();
 
@@ -27,8 +27,9 @@ public:
     Timer& operator=(Timer&&) = default;
 
 private:
-    std::string name_;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+    std::string m_name;
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+    int m_level;
 };
 
 
@@ -40,12 +41,24 @@ public:
         static TimerOutput instance;
         return instance;
     }
-    void add(std::string name, uint64_t duration);
+    void add(std::string name, long long duration);
     void print();
 
     void clear();
-    void start(std::string info = "timer") { timer = std::make_unique<Timer>(info); }
-    void end() { if (timer) { timer.reset(); print(); } }
+    void start(std::string name = "timer") 
+    { 
+        m_timer = std::make_unique<Timer>(name);
+        m_start_record = true;
+    }
+    void end() 
+    { 
+        if (m_timer) 
+        {
+        m_timer.reset(); 
+        print(); 
+        }
+        m_start_record = false;
+    }
 private:
     TimerOutput() = default;
     ~TimerOutput() = default;
@@ -56,9 +69,10 @@ private:
     struct data
     {
         std::string name = "";
-        uint64_t duration = 0;
+        long long duration = 0;
         uint64_t times = 0;
     };
-    std::unique_ptr<Timer> timer;
+    std::unique_ptr<Timer> m_timer;
     std::vector<data> m_map;
+    bool m_start_record = false;
 };

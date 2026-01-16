@@ -34,7 +34,7 @@ private:
 	std::unique_ptr<MarkdownWindow> m_view_wnd;
     std::unique_ptr<MarkdownTextCtrl> m_edit_wnd;
     MarkdownMode m_mode;
-
+    std::string m_last_text = "";
 
 
 };

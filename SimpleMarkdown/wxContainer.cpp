@@ -4,6 +4,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include "Timer.h"
+
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
 {
@@ -23,6 +25,7 @@ litehtml::element::ptr wxContainer::create_element(const char* tag_name,
 litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& descr,
     const litehtml::document* doc, litehtml::font_metrics* fm)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("create_font", 1);
     wxFont font;
     //int size = (int)(descr.size * 96.0f / 72.0f); // Convert pt to px
     int size = descr.size;
@@ -122,7 +125,7 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
         dc.GetTextExtent("x", nullptr, &xHeight);
         fm->x_height = xHeight;
     }
-
+    timer.reset();
     return (litehtml::uint_ptr) new wxFont(font);
 }
 litehtml::pixel_t wxContainer::get_default_font_size() const
@@ -137,6 +140,7 @@ const char* wxContainer::get_default_font_name() const
 
 void wxContainer::get_media_features(litehtml::media_features& media) const
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_media_features", 1);
     wxSize sz = m_wnd->GetClientSize();
 
     media.type = litehtml::media_type_screen;
@@ -148,6 +152,7 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
     media.monochrome = 0;
     media.color_index = 256;
     media.resolution = 96;
+    timer.reset();
 }
 
 
@@ -155,6 +160,7 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
 void wxContainer::import_css(litehtml::string& text,
     const litehtml::string& url, litehtml::string& baseurl)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("import_css", 1);
     if (!m_vfs) return;
 
     try
@@ -168,25 +174,28 @@ void wxContainer::import_css(litehtml::string& text,
         {
             // 将二进制数据转换为字符串
             text = litehtml::string(file_data.begin(), file_data.end());
-
+            timer.reset();
             // 更新baseurl为CSS文件所在目录
             
         }
         else
         {
+            timer.reset();
             wxLogWarning("Failed to load CSS file: %s", url);
         }
     }
     catch (const std::exception& e)
     {
+        timer.reset();
         wxLogError("Error importing CSS: %s", e.what());
     }
 }
 
 void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_on_ready)
 {
+    Timer("load_image", 1);
     if (!m_vfs || !src) return;
-
+ 
     //std::string src_str(src);
     //std::string baseurl_str(baseurl ? baseurl : "");
 
@@ -253,10 +262,16 @@ void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_o
 
 void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_image_size", 1);
     sz.width = 0;
     sz.height = 0;
 
-    if (!m_vfs || !src) return;
+    if (!m_vfs || !src) 
+    {
+        timer.reset();
+        return;
+    } 
+  
 
     std::string src_str(src);
     std::string baseurl_str(baseurl ? baseurl : "");
@@ -275,6 +290,7 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
                 sz.width = bitmap.GetWidth();
                 sz.height = bitmap.GetHeight();
             }
+            timer.reset();
             return;
         }
 
@@ -284,6 +300,7 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
         auto file_data = m_vfs->get_binary(wxURL(src).BuildUnescapedURI().ToStdString());;
         if (file_data.empty())
         {
+            timer.reset();
             return;
         }
 
@@ -300,10 +317,11 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
             sz.height = height;
         }
 
-
+        timer.reset();
     }
     catch (const std::exception& e)
     {
+        timer.reset();
         wxLogError("Error getting image size: %s, error: %s", src, e.what());
     }
 }
@@ -311,8 +329,13 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
 void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const std::string& url, const std::string& base_url)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_image", 1);
     wxPaintDC* dc = (wxPaintDC*)hdc;
-    if (!dc || !m_vfs || url.empty()) return;
+    if (!dc || !m_vfs || url.empty())
+    {
+        timer.reset();
+        return;
+    }
 
     try
     {
@@ -326,6 +349,7 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
             auto file_data = m_vfs->get_binary(wxURL(url).BuildUnescapedURI().ToStdString());;
             if (file_data.empty())
             {
+                timer.reset();
                 return;
             }
             int width = 0, height = 0, channels = 0;
@@ -393,14 +417,17 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
                 if (it == m_imageCache.end())
                 {
                     wxLogWarning("Image not loaded: %s", url);
+                    timer.reset();
                     return;
                 }
             }
+            
         }
         const wxBitmap& bitmap = it->second;
         if (!bitmap.IsOk())
         {
             wxLogWarning("Invalid bitmap for: %s", url);
+            timer.reset();
             return;
         }
 
@@ -410,6 +437,7 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
 
         if (img_width <= 0 || img_height <= 0)
         {
+            timer.reset();
             return;
         }
 
@@ -520,9 +548,11 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
             // 注意：wxWidgets没有内置的圆角裁剪，可能需要使用wxGraphicsContext
             // 或者创建路径进行裁剪
         }
+        timer.reset();
     }
     catch (const std::exception& e)
     {
+        timer.reset();
         wxLogError("Error drawing image: %s, error: %s", url, e.what());
     }
 }
@@ -534,18 +564,26 @@ litehtml::pixel_t wxContainer::pt_to_px(float pt) const
 
 litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr hFont)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("text_width", 1);
     wxFont* font = (wxFont*)hFont;
-    if (!font) return 0;
+    if (font) 
+    {
+        wxMemoryDC dc;
+        dc.SetFont(*font);
+        wxCoord width;
+        dc.GetTextExtent(wxString::FromUTF8(text), &width, nullptr);
+        timer.reset();
+        return width;
+    }
+     
+    timer.reset();
+    return 0;
 
-    wxMemoryDC dc;
-    dc.SetFont(*font);
-    wxCoord width;
-    dc.GetTextExtent(wxString::FromUTF8(text), &width, nullptr);
-    return width;
 }
 
 void wxContainer::transform_text(litehtml::string& text, litehtml::text_transform tt)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("transform_text", 1);
     switch (tt)
     {
     case litehtml::text_transform_capitalize:
@@ -560,16 +598,20 @@ void wxContainer::transform_text(litehtml::string& text, litehtml::text_transfor
     default:
         break;
     }
+    timer.reset();
 }
 
 void wxContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("set_clip", 1);
     wxClientDC dc(m_wnd);
     dc.SetClippingRegion(pos.x, pos.y, pos.width, pos.height);
+    timer.reset();
 }
 
 void wxContainer::set_caption(const char* caption)
 {
+    Timer("set_caption", 1);
     if (m_wnd->GetParent())
     {
         m_wnd->GetParent()->SetLabel(wxString::FromUTF8(caption));
@@ -578,6 +620,7 @@ void wxContainer::set_caption(const char* caption)
 
 void wxContainer::get_viewport(litehtml::position& viewport) const
 {
+    Timer("get_viewport", 1);
     wxSize sz = m_wnd->GetClientSize();
     viewport.x = 0;
     viewport.y = 0;
@@ -589,12 +632,15 @@ void wxContainer::get_viewport(litehtml::position& viewport) const
 
 void wxContainer::del_clip()
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("del_clip", 1);
     wxClientDC dc(m_wnd);
     dc.DestroyClippingRegion();
+    timer.reset();
 }
 
 void wxContainer::delete_font(litehtml::uint_ptr hFont)
 {
+    Timer("delete_font", 1);
     wxFont* font = (wxFont*)hFont;
     delete font;
 }
@@ -602,20 +648,23 @@ void wxContainer::delete_font(litehtml::uint_ptr hFont)
 void wxContainer::draw_text(litehtml::uint_ptr hdc, const char* text,
     litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_text", 1);
     wxDC* dc = (wxDC*)hdc;
     wxFont* font = (wxFont*)hFont;
 
-    if (!dc || !font) return;
+    if (dc && font) 
+    {
+        dc->SetFont(*font);
+        dc->SetTextForeground(wxColour(color.red, color.green, color.blue));
+        dc->DrawText(wxString::FromUTF8(text), pos.x, pos.y);
+    } 
 
-    dc->SetFont(*font);
-    dc->SetTextForeground(wxColour(color.red, color.green, color.blue));
-    dc->DrawText(wxString::FromUTF8(text), pos.x, pos.y);
-
- 
+    timer.reset();
 }
 
 void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_list_marker", 1);
     // Basic implementation - just draw a bullet
     if (marker.marker_type == litehtml::list_style_type_disc)
     {
@@ -625,6 +674,7 @@ void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_
             marker.pos.y + marker.pos.height / 2,
             std::min(marker.pos.width, marker.pos.height) / 2);
     }
+    timer.reset();
 }
 
 
@@ -632,15 +682,18 @@ void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_
 void wxContainer::draw_solid_fill(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::web_color& color)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_solid_fill", 1);
     wxDC* dc = (wxDC*)hdc;
     dc->SetBrush(wxBrush(wxColour(color.red, color.green, color.blue, color.alpha)));
     dc->SetPen(*wxTRANSPARENT_PEN);
     dc->DrawRectangle(layer.border_box.x, layer.border_box.y,
         layer.border_box.width, layer.border_box.height);
+    timer.reset();
 }
 void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::linear_gradient& gradient)
 {
+    Timer("draw_linear_gradient", 1);
     //wxPaintDC* dc = (wxPaintDC*)hdc;
     //if (!dc) return;
 
@@ -734,6 +787,7 @@ void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::b
 void wxContainer::draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::radial_gradient& gradient)
 {
+    Timer("draw_radial_gradient", 1);
     //wxPaintDC* dc = (wxPaintDC*)hdc;
     //if (!dc) return;
 
@@ -830,6 +884,7 @@ void wxContainer::draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::b
 void wxContainer::draw_conic_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::conic_gradient& gradient)
 {
+    Timer("draw_conic_gradient", 1);
     //wxPaintDC* dc = (wxPaintDC*)hdc;
     //if (!dc) return;
 
@@ -1021,6 +1076,7 @@ wxColor wxContainer::InterpolateColor(const std::vector<wxColor>& colors,
 void wxContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders,
     const litehtml::position& draw_pos, bool root)
 {
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_borders", 1);
     wxDC* dc = (wxDC*)hdc;
 
     // Draw each border if it exists
@@ -1051,6 +1107,7 @@ void wxContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& 
             borders.left.width));
         dc->DrawLine(draw_pos.left(), draw_pos.top(), draw_pos.left(), draw_pos.bottom());
     }
+    timer.reset();
 }
 
 void wxContainer::set_cursor(const char* cursor)

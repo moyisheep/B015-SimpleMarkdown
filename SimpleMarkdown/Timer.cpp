@@ -5,34 +5,52 @@ void debug_print( std::string info)
     wxLogMessage(info);
 }
 
-Timer::Timer(const std::string& name) :
-    name_(name), start_(std::chrono::high_resolution_clock::now())
+Timer::Timer(const std::string& name, int level) :
+     m_start(std::chrono::high_resolution_clock::now())
 {
-    //std::cout << name_ << " started...\n";
-}
-Timer::~Timer() {
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start_);
-    TimerOutput::Instance().add(name_, duration.count());
-    //std::string txt = name_ + ":" + std::to_string(duration.count() / 1000000.0f) + " s\n";
-    //OutputDebugStringA(txt.c_str());
-    //std::cout << name_ << " ended. Duration: " << duration.count() << " us\n";
-}
+    m_name = "";
 
-void TimerOutput::add(std::string name, uint64_t duration)
-{
-    for (auto& m : m_map)
+
+    if (level)
     {
-        if (m.name == name)
+        m_name += "[" + std::to_string(level) + "]";
+        
+        for (int i = 0; i < level * 4; i++)
         {
-            m.duration += duration;
-            m.times += 1;
-            return;
+            m_name += " ";
         }
 
     }
+    else { m_name += "[*]"; }
+    m_name += name;
 
-    m_map.push_back(data{ name, duration, 1 });
+}
+Timer::~Timer() {
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_start);
+    TimerOutput::Instance().add(m_name, duration.count());
+   
+
+}
+
+void TimerOutput::add(std::string name, long long duration)
+{
+    if(m_start_record)
+    {
+        for (auto& m : m_map)
+        {
+            if (m.name == name)
+            {
+                m.duration += duration;
+                m.times += 1;
+                return;
+            }
+
+        }
+
+        m_map.push_back(data{ name, duration, 1 });
+    }
+
 }
 
 void TimerOutput::print()
@@ -41,8 +59,9 @@ void TimerOutput::print()
     //    {
     //        return a.duration < b.duration;
     //    });
-
-    for (auto& m : m_map)
+    auto map = m_map;
+    clear();
+    for (auto& m : map)
     {
         // 格式化为 9 位小数（纳秒精度）
         std::ostringstream time_oss;
@@ -66,7 +85,7 @@ void TimerOutput::print()
         debug_print(oss.str().c_str());
     }
 
-    clear();
+
 }
 void TimerOutput::clear()
 {

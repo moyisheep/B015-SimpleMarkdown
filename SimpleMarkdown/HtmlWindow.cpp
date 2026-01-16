@@ -17,22 +17,12 @@
 
 #include "HtmlDumper.h"
 #include "debug.h"
+#include "Timer.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-//wxBEGIN_EVENT_TABLE(HtmlWindow, wxScrolled<wxPanel>)
-//EVT_PAINT(HtmlWindow::OnPaint)
-//EVT_SCROLLWIN(HtmlWindow::OnScroll)
-//EVT_MOUSEWHEEL(HtmlWindow::OnMouseWheel)
-//EVT_SIZE(HtmlWindow::OnSize)
-//EVT_DROP_FILES(HtmlWindow::OnDropFiles)
-//EVT_LEFT_DOWN(HtmlWindow::OnLeftDown)
-//EVT_LEFT_UP(HtmlWindow::OnLeftUp)
-//EVT_MOTION(HtmlWindow::OnMouseMove)
-//EVT_LEAVE_WINDOW(HtmlWindow::OnMouseLeave)
-//EVT_KEY_DOWN(HtmlWindow::OnKeyDown)
-//wxEND_EVENT_TABLE()
+
 
 HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
@@ -77,13 +67,14 @@ HtmlWindow::~HtmlWindow()
 
 void HtmlWindow::set_html(const std::string& html)
 {
-
+    TimerOutput::Instance().start("[createFromString]");
     clear();
     m_doc = litehtml::document::createFromString({ html.c_str() , litehtml::encoding::utf_8}, 
         m_container.get(), litehtml::master_css, m_user_css);
 
-
+    TimerOutput::Instance().end();
     
+    TimerOutput::Instance().start("[render]");
     if (m_doc)
     {
         int width = GetClientSize().GetWidth();
@@ -91,6 +82,7 @@ void HtmlWindow::set_html(const std::string& html)
         record_char_boxes();
         SetupScrollbars(); 
     }
+    TimerOutput::Instance().end();
     //debug::print_render_tree(m_doc->root_render());
     //debug::print_element_tree(m_doc->root());
     Refresh();
@@ -335,14 +327,14 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     // draw doc
     if (m_doc)
     {
-      
+        TimerOutput::Instance().start("[draw]");
         litehtml::position clip{ (float)updateRect.x, 
             (float)updateRect.y, 
             (float)updateRect.width, 
             (float)updateRect.height };
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
         m_doc->draw(hdc, 0, -m_scrollPos, &clip);
-        
+        TimerOutput::Instance().end();
     }
 
     // draw selection 
