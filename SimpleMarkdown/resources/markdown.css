@@ -172,39 +172,7 @@ pre {
         z-index: 1;
     }
 
-/* 复制按钮 */
-pre {
-    position: relative;
-}
 
-    pre:hover::after {
-        content: '复制';
-        position: absolute;
-        top: 8px;
-        right: 70px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 500;
-        color: #24292f;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1px solid #e1e4e8;
-        border-radius: 4px;
-        cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        z-index: 2;
-    }
-
-        pre:hover::after:hover {
-            opacity: 1;
-            background: #ffffff;
-        }
-
-    /* ============================================
-   语法高亮颜色方案
-   基于 GitHub 的语法高亮配色
-   ============================================ */
 
 
 

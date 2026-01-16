@@ -109,119 +109,125 @@ void MarkdownTextCtrl::InitializeStyles()
     // 清除所有样式
     StyleClearAll();
 
-    // 设置默认字体
-    wxFont font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    StyleSetFont(wxSTC_STYLE_DEFAULT, font);
-    StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
-    StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+    StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(34, 34, 34));
+    StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(250, 250, 250));
 
-    // 普通文本样式
-    m_styles.clear();
 
     // 标题样式
     MarkdownStyle style;
 
-    // 标题1
+    // 基础正文
+    style.id = STYLE_NORMAL;
+    style.foreground = wxColour(34, 34, 34);     // 深灰黑，比纯黑更柔和
+    style.background = wxColour(250, 250, 250);  // 浅灰背景，护眼
+    style.bold = false;
+    style.italic = false;
+    style.fontSize = 11;                         // 稍大一点更易读
+    style.underline = false;
+    style.fontName = "Microsoft YaHei";          // 微软雅黑，中文更清晰
+    m_styles.push_back(style);
+
+    // 标题1 - 深海蓝，渐变
     style.id = STYLE_HEADER1;
-    style.foreground = wxColour(0, 0, 128); // 深蓝色
-    style.background = *wxWHITE;
+    style.foreground = wxColour(26, 54, 93);     // 深海蓝
+    style.background = wxColour(250, 250, 250);
     style.fontSize = 24;
     style.bold = true;
     m_styles.push_back(style);
 
     // 标题2
     style.id = STYLE_HEADER2;
-    style.foreground = wxColour(0, 0, 160);
+    style.foreground = wxColour(37, 78, 137);    // 稍浅的蓝色
     style.fontSize = 20;
     m_styles.push_back(style);
 
     // 标题3
     style.id = STYLE_HEADER3;
-    style.foreground = wxColour(0, 0, 192);
-    style.fontSize = 16;
+    style.foreground = wxColour(54, 105, 184);   // 天蓝色
+    style.fontSize = 18;
     m_styles.push_back(style);
 
     // 标题4
     style.id = STYLE_HEADER4;
-    style.foreground = wxColour(0, 0, 224);
-    style.fontSize = 14;
+    style.foreground = wxColour(79, 129, 189);   // 浅蓝灰
+    style.fontSize = 16;
     m_styles.push_back(style);
 
     // 标题5
     style.id = STYLE_HEADER5;
-    style.foreground = wxColour(64, 64, 255);
-    style.fontSize = 12;
+    style.foreground = wxColour(102, 153, 204);  // 更浅的蓝
+    style.fontSize = 14;
     m_styles.push_back(style);
 
     // 标题6
     style.id = STYLE_HEADER6;
-    style.foreground = wxColour(128, 128, 255);
-    style.fontSize = 11;
+    style.foreground = wxColour(140, 175, 217);  // 淡蓝色
+    style.fontSize = 13;
     m_styles.push_back(style);
 
-    // 代码样式
+    // 代码样式（行内代码）
     style.id = STYLE_CODE;
-    style.foreground = wxColour(255, 0, 0); // 红色
-    style.background = wxColour(240, 240, 240);
-    style.fontSize = 0; // 使用默认大小
+    style.foreground = wxColour(199, 37, 78);    // 深粉红/品红
+    style.background = wxColour(248, 248, 248);  // 浅灰背景
+    style.fontSize = 0;
     style.bold = false;
-    style.fontName = "Courier New";
+    style.fontName = "Consolas";                 // 更好的等宽字体
     m_styles.push_back(style);
 
     // 代码块样式
     style.id = STYLE_CODEBLOCK;
-    style.foreground = wxColour(0, 128, 0); // 绿色
-    style.background = wxColour(248, 248, 248);
+    style.foreground = wxColour(0, 100, 0);      // 森林绿
+    style.background = wxColour(245, 247, 250);  // 蓝灰背景
     m_styles.push_back(style);
 
     // 链接样式
     style.id = STYLE_LINK;
-    style.foreground = wxColour(0, 0, 255); // 蓝色
-    style.background = *wxWHITE;
+    style.foreground = wxColour(0, 102, 204);    // 中蓝色
+    style.background = wxColour(250, 250, 250);
     style.underline = true;
     m_styles.push_back(style);
 
     // 强调样式（斜体）
     style.id = STYLE_EMPHASIS;
-    style.foreground = *wxBLACK;
-    style.background = *wxWHITE;
+    style.foreground = wxColour(85, 85, 85);     // 深灰色
+    style.background = wxColour(250, 250, 250);
     style.italic = true;
     style.underline = false;
     m_styles.push_back(style);
 
     // 粗体样式
     style.id = STYLE_STRONG;
-    style.foreground = *wxBLACK;
+    style.foreground = wxColour(34, 34, 34);     // 黑色加粗
     style.bold = true;
     style.italic = false;
     m_styles.push_back(style);
 
     // 引用样式
     style.id = STYLE_BLOCKQUOTE;
-    style.foreground = wxColour(64, 64, 64);
-    style.background = wxColour(248, 248, 248);
+    style.foreground = wxColour(102, 102, 102);  // 灰色文字
+    style.background = wxColour(248, 249, 250);  // 浅灰蓝背景
     style.bold = false;
     style.italic = true;
     m_styles.push_back(style);
 
     // 列表样式
     style.id = STYLE_LIST;
-    style.foreground = wxColour(128, 0, 128); // 紫色
-    style.background = *wxWHITE;
+    style.foreground = wxColour(153, 51, 153);   // 紫色偏深
+    style.background = wxColour(250, 250, 250);
     style.italic = false;
     m_styles.push_back(style);
 
     // 分隔线样式
     style.id = STYLE_HR;
-    style.foreground = wxColour(192, 192, 192);
-    style.background = *wxWHITE;
-    style.bold = true;
+    style.foreground = wxColour(220, 223, 228);  // 浅灰分隔线
+    style.background = wxColour(250, 250, 250);
+    style.bold = false;                         // 不需要粗体
     m_styles.push_back(style);
 
     // 删除线样式
     style.id = STYLE_STRIKETHROUGH;
-    style.foreground = wxColour(128, 128, 128);
-    style.background = *wxWHITE;
+    style.foreground = wxColour(153, 153, 153);  // 中灰色
+    style.background = wxColour(250, 250, 250);
     m_styles.push_back(style);
 
     // 应用所有样式
@@ -458,8 +464,8 @@ void MarkdownTextCtrl::ApplyBaseStyle()
     // 设置整个文档为普通样式
     int length = GetTextLength();
     if (length > 0) {
-        StyleSetForeground(STYLE_NORMAL, *wxBLACK);
-        StyleSetBackground(STYLE_NORMAL, *wxWHITE);
+        StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(34, 34, 34));
+        StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(250, 250, 250));
         StartStyling(0);
         SetStyling(length, STYLE_NORMAL);
     }
