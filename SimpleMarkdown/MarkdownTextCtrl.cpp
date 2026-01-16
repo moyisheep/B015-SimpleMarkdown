@@ -23,7 +23,9 @@ enum {
     STYLE_BLOCKQUOTE,
     STYLE_LIST,
     STYLE_HR,
-    STYLE_STRIKETHROUGH
+    STYLE_STRIKETHROUGH, 
+    STYLE_FOOTNOTE_REFERENCE, 
+    STYLE_FOOTNOTE_DEFINITION
 };
 
 
@@ -38,7 +40,7 @@ MarkdownTextCtrl::MarkdownTextCtrl(wxWindow* parent, wxWindowID id,
     m_parser(nullptr)
 {
     // 初始化cmark-gfm解析器
-    m_parser = cmark_parser_new(CMARK_OPT_DEFAULT);
+    m_parser = cmark_parser_new(CMARK_OPT_DEFAULT | CMARK_OPT_FOOTNOTES);
 
     // 启用Github风格Markdown扩展
     cmark_gfm_core_extensions_ensure_registered();
@@ -83,6 +85,8 @@ MarkdownTextCtrl::MarkdownTextCtrl(wxWindow* parent, wxWindowID id,
     AutoCompSetAutoHide(false);
 
     SetWrapMode(wxSTC_WRAP_WHITESPACE);  // 按空白字符换行
+
+    
     // 创建高亮定时器
     m_highlightTimer = new wxTimer(this, wxID_ANY);
 
@@ -109,8 +113,44 @@ void MarkdownTextCtrl::InitializeStyles()
     // 清除所有样式
     StyleClearAll();
 
+    //InitializeLightTheme();
+    InitializeDarkTheme();
+
+
+
+    // 设置代码块的边距
+    SetMarginWidth(1, 16); // 代码块折叠边距
+    SetMarginType(1, wxSTC_MARGIN_SYMBOL);
+    SetMarginMask(1, wxSTC_MASK_FOLDERS);
+    SetMarginSensitive(1, true);
+    SetCaretLineVisible(true);
+    //// 设置折叠
+    //SetProperty("fold", "1");
+    //SetProperty("fold.comment", "1");
+    //SetProperty("fold.compact", "1");
+    //SetProperty("fold.html", "1");
+}
+
+void MarkdownTextCtrl::InitializeLightTheme()
+{
+    m_styles.clear();
     StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(34, 34, 34));
     StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(250, 250, 250));
+
+
+    StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(34, 34, 34));
+    StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(250, 250, 250));
+    SetCaretForeground(wxColour(0, 0, 0));  // 白色光标
+    SetMarginBackground(1, wxColour(250, 250, 250));
+    SetMarginBackground(0, wxColour(250, 250, 250)); // 暗色模式
+    SetFoldMarginColour(true, wxColour(255, 255, 255));
+    SetFoldMarginHiColour(true, wxColour(255, 255, 255));
+    SetCaretLineBackground(wxColour(248, 250, 252)); // 浅灰当前行
+    SetEdgeColour(wxColour(250, 250, 250));
+    SetCaretWidth(2);
+
+
+
 
 
     // 标题样式
@@ -230,6 +270,217 @@ void MarkdownTextCtrl::InitializeStyles()
     style.background = wxColour(250, 250, 250);
     m_styles.push_back(style);
 
+    // 脚注引用标记（正文中的[^1]）
+    style.id = STYLE_FOOTNOTE_REFERENCE;
+    style.foreground = wxColour(196, 26, 22);       // 醒目的红色，与正文区分
+    style.background = wxColour(250, 250, 250);
+    style.bold = true;                              // 加粗显示
+    style.italic = false;
+    style.fontSize = 9;                             // 比正文稍小，作为上标
+    style.underline = false;
+    m_styles.push_back(style);
+
+    // 脚注内容文本
+    style.id = STYLE_FOOTNOTE_DEFINITION;
+    style.foreground = wxColour(102, 102, 102);     // 浅灰色，与正文区分
+    style.background = wxColour(253, 252, 248);     // 淡米色背景，区分正文区域
+    style.bold = false;
+    style.italic = true;                            // 斜体表示引用性质
+    style.fontSize = 10;                            // 比正文稍小
+    style.underline = false;
+    m_styles.push_back(style);
+
+    // 应用所有样式
+    for (const auto& s : m_styles) {
+        StyleSetForeground(s.id, s.foreground);
+        StyleSetBackground(s.id, s.background);
+        if (s.fontSize > 0) {
+            StyleSetSize(s.id, s.fontSize);
+        }
+        if (s.bold) {
+            StyleSetBold(s.id, true);
+        }
+        if (s.italic) {
+            StyleSetItalic(s.id, true);
+        }
+        if (s.underline) {
+            StyleSetUnderline(s.id, true);
+        }
+        if (!s.fontName.IsEmpty()) {
+            wxFont font(s.fontSize > 0 ? s.fontSize : 10,
+                wxFONTFAMILY_MODERN,
+                s.italic ? wxFONTSTYLE_ITALIC : wxFONTSTYLE_NORMAL,
+                s.bold ? wxFONTWEIGHT_BOLD : wxFONTWEIGHT_NORMAL,
+                false,
+                s.fontName);
+            StyleSetFont(s.id, font);
+        }
+    }
+}
+void MarkdownTextCtrl::InitializeDarkTheme()
+{
+
+    // 创建暗色模式样式集合
+    StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(30, 30, 30));
+    StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(220, 220, 220));
+
+
+    // STC_STYLE_LINENUMBER 是行号样式的索引
+    StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(30, 30, 30)); // 深灰色背景
+    StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(200, 200, 220)); // 浅灰色文字
+    SetCaretForeground(wxColour(255, 255, 255));  // 白色光标
+    
+    SetMarginBackground(1, wxColour(30, 30, 30));
+    SetMarginBackground(0, wxColour(40, 42, 48)); // 暗色模式
+    SetFoldMarginColour(true, wxColour(30, 30, 30));
+    SetFoldMarginHiColour(true, wxColour(40, 40, 40));
+    SetEdgeColour(wxColour(40, 42, 48));
+    SetCaretLineBackground( wxColour(45, 50, 55) ); // 浅灰当前行
+    SetCaretWidth(2);
+
+    m_styles.clear();
+
+    // 标题样式
+    MarkdownStyle style;
+
+    // 基础正文 - 浅灰文字，深灰背景
+    style.id = STYLE_NORMAL;
+    style.foreground = wxColour(220, 220, 220);     // 浅灰色文字，减轻眼睛疲劳
+    style.background = wxColour(30, 30, 30);        // 深灰蓝背景，比纯黑柔和
+    style.bold = false;
+    style.italic = false;
+    style.fontSize = 11;
+    style.underline = false;
+    style.fontName = "Microsoft YaHei";
+    m_styles.push_back(style);
+
+    // 标题1 - 冰蓝色渐变
+    style.id = STYLE_HEADER1;
+    style.foreground = wxColour(100, 180, 255);     // 冰蓝色，醒目但不刺眼
+    style.background = wxColour(30, 30, 35);
+    style.fontSize = 24;
+    style.bold = true;
+    m_styles.push_back(style);
+
+    // 标题2
+    style.id = STYLE_HEADER2;
+    style.foreground = wxColour(120, 195, 255);     // 稍浅的冰蓝
+    style.fontSize = 20;
+    m_styles.push_back(style);
+
+    // 标题3
+    style.id = STYLE_HEADER3;
+    style.foreground = wxColour(140, 210, 255);     // 更浅的冰蓝
+    style.fontSize = 18;
+    m_styles.push_back(style);
+
+    // 标题4
+    style.id = STYLE_HEADER4;
+    style.foreground = wxColour(160, 220, 255);     // 淡冰蓝
+    style.fontSize = 16;
+    m_styles.push_back(style);
+
+    // 标题5
+    style.id = STYLE_HEADER5;
+    style.foreground = wxColour(180, 230, 255);     // 很淡的冰蓝
+    style.fontSize = 14;
+    m_styles.push_back(style);
+
+    // 标题6
+    style.id = STYLE_HEADER6;
+    style.foreground = wxColour(200, 240, 255);     // 几乎白色的冰蓝
+    style.fontSize = 13;
+    m_styles.push_back(style);
+
+    // 代码样式（行内代码）- 亮珊瑚色
+    style.id = STYLE_CODE;
+    style.foreground = wxColour(255, 120, 120);     // 亮珊瑚色
+    style.background = wxColour(45, 45, 50);        // 比背景稍亮
+    style.fontSize = 0;
+    style.bold = false;
+    style.fontName = "Consolas";
+    m_styles.push_back(style);
+
+    // 代码块样式 - 薄荷绿
+    style.id = STYLE_CODEBLOCK;
+    style.foreground = wxColour(160, 240, 160);     // 薄荷绿，护眼
+    style.background = wxColour(40, 40, 45);        // 深灰背景
+    style.fontSize = 0;
+    style.bold = false;
+    style.fontName = "Consolas";
+    m_styles.push_back(style);
+
+    // 链接样式 - 淡天蓝色
+    style.id = STYLE_LINK;
+    style.foreground = wxColour(100, 180, 255);     // 天蓝色，与标题1呼应
+    style.background = wxColour(30, 30, 35);
+    style.underline = true;
+    m_styles.push_back(style);
+
+    // 强调样式（斜体）- 浅米色
+    style.id = STYLE_EMPHASIS;
+    style.foreground = wxColour(230, 220, 200);     // 浅米色斜体
+    style.background = wxColour(30, 30, 35);
+    style.italic = true;
+    style.underline = false;
+    m_styles.push_back(style);
+
+    // 粗体样式 - 亮白色
+    style.id = STYLE_STRONG;
+    style.foreground = wxColour(255, 255, 255);     // 纯白粗体，强调
+    style.background = wxColour(30, 30, 35);
+    style.bold = true;
+    style.italic = false;
+    m_styles.push_back(style);
+
+    // 引用样式 - 深灰蓝
+    style.id = STYLE_BLOCKQUOTE;
+    style.foreground = wxColour(180, 195, 210);     // 灰蓝色文字
+    style.background = wxColour(30, 30, 30);        // 稍亮的深灰蓝背景
+    style.bold = false;
+    style.italic = true;
+    m_styles.push_back(style);
+
+    // 列表样式 - 淡紫色
+    style.id = STYLE_LIST;
+    style.foreground = wxColour(200, 160, 255);     // 淡紫色，醒目
+    style.background = wxColour(30, 30, 35);
+    style.italic = false;
+    m_styles.push_back(style);
+
+    // 分隔线样式 - 深灰
+    style.id = STYLE_HR;
+    style.foreground = wxColour(80, 85, 90);        // 深灰分隔线
+    style.background = wxColour(30, 30, 35);
+    style.bold = false;
+    m_styles.push_back(style);
+
+    // 删除线样式 - 中灰
+    style.id = STYLE_STRIKETHROUGH;
+    style.foreground = wxColour(140, 140, 140);     // 中灰色删除线
+    style.background = wxColour(30, 30, 35);
+    m_styles.push_back(style);
+
+    // 脚注引用标记 - 亮橙色
+    style.id = STYLE_FOOTNOTE_REFERENCE;
+    style.foreground = wxColour(255, 160, 80);      // 亮橙色，在暗色中醒目
+    style.background = wxColour(30, 30, 35);
+    style.bold = true;
+    style.italic = false;
+    style.fontSize = 9;
+    style.underline = false;
+    m_styles.push_back(style);
+
+    // 脚注内容文本 - 浅灰绿
+    style.id = STYLE_FOOTNOTE_DEFINITION;
+    style.foreground = wxColour(180, 220, 180);     // 浅灰绿色
+    style.background = wxColour(30, 30, 30);        // 稍亮的背景
+    style.bold = false;
+    style.italic = true;
+    style.fontSize = 10;
+    style.underline = false;
+    m_styles.push_back(style);
+
     // 应用所有样式
     for (const auto& s : m_styles) {
         StyleSetForeground(s.id, s.foreground);
@@ -257,19 +508,7 @@ void MarkdownTextCtrl::InitializeStyles()
         }
     }
 
-    // 设置代码块的边距
-    SetMarginWidth(1, 16); // 代码块折叠边距
-    SetMarginType(1, wxSTC_MARGIN_SYMBOL);
-    SetMarginMask(1, wxSTC_MASK_FOLDERS);
-    SetMarginSensitive(1, true);
-
-    // 设置折叠
-    SetProperty("fold", "1");
-    SetProperty("fold.comment", "1");
-    SetProperty("fold.compact", "1");
-    SetProperty("fold.html", "1");
 }
-
 void MarkdownTextCtrl::EnableLiveHighlighting(bool enable)
 {
     m_liveHighlighting = enable;
@@ -329,11 +568,7 @@ void MarkdownTextCtrl::ParseAndStyle()
         return;
     }
 
-    // 创建新的解析器（替代cmark_parser_reset）
-    cmark_parser* parser = cmark_parser_new(CMARK_OPT_DEFAULT);
-    if (!parser) {
-        return;
-    }
+
 
     // 将wxString转换为char*
     std::string utf8_text = text.ToUTF8().data();
@@ -350,7 +585,7 @@ void MarkdownTextCtrl::ParseAndStyle()
     ClearAllStyling();
 
    
-    ApplyBaseStyle();
+    //ApplyBaseStyle();
 
     // 遍历文档树并应用样式
     cmark_iter* iter = cmark_iter_new(document);
@@ -444,6 +679,12 @@ void MarkdownTextCtrl::ApplyNodeStyle(cmark_node* node, int start_pos, int end_p
         SetStyleRange(start_pos, end_pos, STYLE_HR);
         break;
     }
+    case CMARK_NODE_FOOTNOTE_DEFINITION:
+        SetStyleRange(start_pos, end_pos, STYLE_FOOTNOTE_DEFINITION);
+        break;
+    case CMARK_NODE_FOOTNOTE_REFERENCE:
+        SetStyleRange(start_pos, end_pos, STYLE_FOOTNOTE_REFERENCE);
+        break;
     default:
         break;
     }
@@ -464,8 +705,7 @@ void MarkdownTextCtrl::ApplyBaseStyle()
     // 设置整个文档为普通样式
     int length = GetTextLength();
     if (length > 0) {
-        StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(34, 34, 34));
-        StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(250, 250, 250));
+
         StartStyling(0);
         SetStyling(length, STYLE_NORMAL);
     }
@@ -487,38 +727,7 @@ void MarkdownTextCtrl::SetStyleRange(int start, int end, int style)
     SetStyling(length, style);
 }
 
-wxString MarkdownTextCtrl::GetRenderedHTML()
-{
-    wxString text = GetText();
-    if (text.IsEmpty()) {
-        return wxEmptyString;
-    }
 
-    std::string utf8_text = text.ToUTF8().data();
-
-    // 创建新的解析器（替代cmark_parser_reset）
-    cmark_parser* parser = cmark_parser_new(CMARK_OPT_DEFAULT);
-    if (!parser) {
-        return wxEmptyString;
-    }
-
-    // 解析Markdown
-    cmark_parser_feed(m_parser, utf8_text.c_str(), utf8_text.length());
-    cmark_node* document = cmark_parser_finish(m_parser);
-
-    if (!document) {
-        return wxEmptyString;
-    }
-
-    // 渲染为HTML
-    char* html = cmark_render_html(document, CMARK_OPT_DEFAULT, NULL);
-    wxString result = wxString::FromUTF8(html);
-
-    cmark_node_free(document);
-    free(html);
-
-    return result;
-}
 
 void MarkdownTextCtrl::SetHeaderStyle(int level, const wxColour& color, int fontSize, bool bold)
 {

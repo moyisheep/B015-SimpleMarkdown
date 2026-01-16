@@ -24,14 +24,16 @@ public:
 
     virtual ~MarkdownTextCtrl();
 
+    void InitializeLightTheme();
+    void InitializeDarkTheme();
+
     // 设置是否启用实时语法高亮
     void EnableLiveHighlighting(bool enable = true);
 
     // 手动触发语法高亮
     void HighlightMarkdown();
 
-    // 获取渲染后的HTML
-    wxString GetRenderedHTML();
+
 
     // 设置自定义样式
     void SetHeaderStyle(int level, const wxColour& color, int fontSize = 0, bool bold = true);

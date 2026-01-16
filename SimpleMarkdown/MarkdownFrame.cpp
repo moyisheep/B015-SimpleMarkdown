@@ -43,7 +43,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	Bind(wxEVT_MENU, &MarkdownFrame::OnToggleEditMode, this, ID_TOGGLE_EDIT_MODE);
 	Bind(wxEVT_DROP_FILES, &MarkdownFrame::OnDropFiles, this);
 	Bind(wxEVT_SIZE, &MarkdownFrame::OnSize, this);
-
+	
 }
 
 MarkdownFrame::~MarkdownFrame()
