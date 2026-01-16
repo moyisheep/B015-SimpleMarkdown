@@ -52,8 +52,7 @@ MarkdownFrame::~MarkdownFrame()
 
 bool MarkdownFrame::set_markdown(const std::string& md)
 {
-	if(!md.empty())
-	{
+
 		//m_text = std::string(md);
 		if(m_mode == MarkdownMode::view && m_view_wnd)
 		{
@@ -65,9 +64,10 @@ bool MarkdownFrame::set_markdown(const std::string& md)
 			m_edit_wnd->SetValue(wxString::FromUTF8(md));
 			return true;
 		}
-	}
+
 	return false;
 }
+
 
 bool MarkdownFrame::load_markdown(const std::string& path)
 {
@@ -81,6 +81,10 @@ bool MarkdownFrame::load_markdown(const std::string& path)
 			{
 				return set_markdown(md);
 			}
+		}
+		else
+		{
+			return set_markdown("");
 		}
 	}
 	return false;

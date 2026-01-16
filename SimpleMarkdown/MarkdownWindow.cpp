@@ -58,6 +58,11 @@ bool MarkdownWindow::set_markdown(const std::string& md)
             set_html(html);
             return true;
         }
+    }else
+    {
+        m_markdown_text = "";
+        set_html("");
+        return true;
     }
     return false;
 }
@@ -76,11 +81,6 @@ bool MarkdownWindow::load_markdown(const std::string& path)
             }
         }
     }
-
-
-
-
-   
 
     return false;
 }
