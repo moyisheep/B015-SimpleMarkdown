@@ -649,15 +649,16 @@ void wxContainer::draw_text(litehtml::uint_ptr hdc, const char* text,
     litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 {
     std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_text", 1);
-    wxDC* dc = (wxDC*)hdc;
-    wxFont* font = (wxFont*)hFont;
+    m_cache.add(hFont, text, color, pos);
+    //wxDC* dc = (wxDC*)hdc;
+    //wxFont* font = (wxFont*)hFont;
 
-    if (dc && font) 
-    {
-        dc->SetFont(*font);
-        dc->SetTextForeground(wxColour(color.red, color.green, color.blue));
-        dc->DrawText(wxString::FromUTF8(text), pos.x, pos.y);
-    } 
+    //if (dc && font) 
+    //{
+    //    //dc->SetFont(*font);
+    //    //dc->SetTextForeground(wxColour(color.red, color.green, color.blue));
+    //    //dc->DrawText(wxString::FromUTF8(text), pos.x, pos.y);
+    //} 
 
     timer.reset();
 }
@@ -1169,6 +1170,29 @@ void wxContainer::on_mouse_event(const litehtml::element::ptr& el, litehtml::mou
     {
         m_hover_link = "";
     }
+}
+
+void wxContainer::draw_finished(litehtml::uint_ptr hdc)
+{
+    
+    wxDC* dc = (wxDC*)hdc;
+    if(dc)
+    {
+        for (auto& cache: m_cache.get_cache())
+        {
+            std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
+            wxFont* font = (wxFont*)cache.hFont;
+            if(font)
+            {
+                dc->SetFont(*font);
+                dc->SetTextForeground(wxColour(cache.color.red, cache.color.green, cache.color.blue));
+                dc->DrawText(wxString::FromUTF8(cache.text), cache.pos.x, cache.pos.y);
+            }
+            timer.reset();
+        }
+    }
+    m_cache.clear();
+
 }
 
 

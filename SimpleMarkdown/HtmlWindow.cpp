@@ -352,6 +352,7 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
             (float)updateRect.height };
         litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
         m_doc->draw(hdc, 0, -m_scrollPos, &clip);
+        m_container->draw_finished(hdc);
         TimerOutput::Instance().end();
     }
 

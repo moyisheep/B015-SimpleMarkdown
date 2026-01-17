@@ -15,8 +15,59 @@
 
 #include "VirtualFileSystem.h"
 
+class DrawCache
+{
+public:
+    DrawCache() {};
+    ~DrawCache() {};
+    
+    struct Text
+    {
+        litehtml::uint_ptr hFont;
+        std::string text;
+        litehtml::web_color color;
+        const litehtml::position pos;
+    };
+    void add(litehtml::uint_ptr hFont, 
+        const char* text, 
+        litehtml::web_color color, 
+        const litehtml::position& pos)
+    {
+        if(text)
+        {
+            if(m_cache.empty())
+            {
+                m_cache.push_back(Text{ hFont, std::string(text), color, pos });
+            }
+         
+            else
+            {
+                std::string t(text);
+                auto back = m_cache.back();
+                // merge
+                if(back.hFont == hFont &&
+                    back.color == color &&
+                    back.pos.y == pos.y)
+                
+                {
+                    m_cache.pop_back();
+                    back.text += t;
+                    m_cache.push_back(back);
+                }
+                else
+                {
+                    m_cache.push_back(Text{ hFont, std::string(text), color, pos });
+                }
+            }
+        }
+    }
 
+    std::vector<Text> get_cache() { return m_cache; }
+    void clear() { m_cache.clear(); }
+private:
 
+    std::vector<Text> m_cache;
+};
 class wxContainer : public litehtml::document_container
 {
 public:
@@ -63,7 +114,7 @@ public:
     bool on_element_click(const litehtml::element::ptr& el) override;
     void on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event) override;
 
-
+    void draw_finished(litehtml::uint_ptr hdc) ;
     //void execute_script(const std::string& src,
     //    const std::string& content,
     //    const std::string& type,
@@ -89,7 +140,7 @@ public:
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
     std::unordered_map<std::string, wxBitmap> m_imageCache; // Í¼Æ¬»º´æ
 
-
+    DrawCache m_cache;
 
     // ¸¨Öúº¯Êý
     float CalculateLinearGradientPosition(const wxPoint& point,
