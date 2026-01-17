@@ -568,10 +568,49 @@ litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr h
     wxFont* font = (wxFont*)hFont;
     if (font) 
     {
+        wxString wtext = wxString::FromUTF8(text);
+
+        // text cache
+        //for (auto& cache : m_textWidthCache)
+        //{
+        //    if (cache.hFont == hFont && cache.text == wtext)
+        //    {
+        //        timer.reset();
+        //        return cache.width;
+        //    }
+        //}
+
+        
         wxMemoryDC dc;
         dc.SetFont(*font);
-        wxCoord width;
-        dc.GetTextExtent(wxString::FromUTF8(text), &width, nullptr);
+
+        int width = 0;
+        for(int i=0; i<wtext.length(); i++)
+        {
+            auto ch = wtext[i];
+            bool found = false;
+            // char cache
+            for(auto& cache: m_charWidthCache)
+            {
+                if(cache.hFont == hFont && cache.ch == ch)
+                {
+                    width += cache.width;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)
+            {
+                int w;
+                dc.GetTextExtent(ch, &w, nullptr);
+                width += w;
+                m_charWidthCache.push_back(CharWidthCache{ hFont, ch, w });
+            }
+        }
+
+
+       // m_textWidthCache.push_back(TextWidthCache{ hFont, text, width });
+
         timer.reset();
         return width;
     }

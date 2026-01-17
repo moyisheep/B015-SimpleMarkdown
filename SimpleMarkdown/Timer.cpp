@@ -35,7 +35,7 @@ Timer::~Timer() {
 
 void TimerOutput::add(std::string name, long long duration)
 {
-    if(m_start_record)
+    //if(m_start_record)
     {
         for (auto& m : m_map)
         {

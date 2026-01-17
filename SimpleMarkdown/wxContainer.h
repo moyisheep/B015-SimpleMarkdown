@@ -47,7 +47,7 @@ public:
                 // merge
                 if(back.hFont == hFont &&
                     back.color == color &&
-                    back.pos.y == pos.y)
+                    back.pos.does_intersect(&pos))
                 
                 {
                     m_cache.pop_back();
@@ -67,6 +67,18 @@ public:
 private:
 
     std::vector<Text> m_cache;
+};
+//struct TextWidthCache
+//{
+//    litehtml::uint_ptr hFont;
+//    wxString text;
+//    int width;
+//};
+struct CharWidthCache
+{
+    litehtml::uint_ptr hFont ;
+    wxString ch;
+    int width;
 };
 class wxContainer : public litehtml::document_container
 {
@@ -139,7 +151,8 @@ public:
     wxWindow* m_wnd;
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
     std::unordered_map<std::string, wxBitmap> m_imageCache; // Í¼Æ¬»º´æ
-
+    //std::vector<TextWidthCache> m_textWidthCache;
+    std::vector<CharWidthCache> m_charWidthCache;
     DrawCache m_cache;
 
     // ¸¨Öúº¯Êý
