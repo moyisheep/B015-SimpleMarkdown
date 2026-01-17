@@ -121,6 +121,7 @@ public:
         }
         return rects;
     }
+    std::vector<litehtml::position> get_raw_rect() { return m_rect; }
     bool empty()
     {
         return m_rect.empty();

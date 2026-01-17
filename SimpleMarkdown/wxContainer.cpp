@@ -688,7 +688,7 @@ void wxContainer::draw_text(litehtml::uint_ptr hdc, const char* text,
     litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 {
     std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_text", 1);
-    m_cache.add(hFont, text, color, pos);
+    m_drawTextCache.add(hFont, text, color, pos);
     //wxDC* dc = (wxDC*)hdc;
     //wxFont* font = (wxFont*)hFont;
 
@@ -1217,21 +1217,33 @@ void wxContainer::draw_finished(litehtml::uint_ptr hdc)
     wxDC* dc = (wxDC*)hdc;
     if(dc)
     {
-        for (auto& cache: m_cache.get_cache())
+        auto cache_list = m_drawTextCache.get_cache();
+        m_drawTextCache.clear();
+        for (auto& cache: cache_list)
         {
             std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
             wxFont* font = (wxFont*)cache.hFont;
             if(font)
             {
+                wxString wtext = wxString::FromUTF8(cache.text);
+                //wxLogInfo(wtext);
                 dc->SetFont(*font);
                 dc->SetTextForeground(wxColour(cache.color.red, cache.color.green, cache.color.blue));
-                dc->DrawText(wxString::FromUTF8(cache.text), cache.pos.x, cache.pos.y);
+                dc->DrawText(wtext, cache.pos.x, cache.pos.y);
             }
             timer.reset();
         }
     }
-    m_cache.clear();
+   
 
+}
+
+void wxContainer::clear()
+{
+    m_hover_link = "";
+    m_imageCache.clear();
+    m_charWidthCache.clear();
+    m_drawTextCache.clear();
 }
 
 

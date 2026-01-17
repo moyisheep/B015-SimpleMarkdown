@@ -36,7 +36,7 @@ bool MyApp::OnInit()
     dbg_frame->Show(true);
     MarkdownFrame* frame = new MarkdownFrame(nullptr, wxID_ANY, "Simple Markdown", wxDefaultPosition, wxSize(800, 600));
     frame->enable_drag_drop(true);
-    frame->load_user_css("./resources/markdown-dark.css");
+    frame->load_user_css("./resources/markdown.css");
 
     wxArrayString args = wxAppConsole::argv.GetArguments();
     if (args.GetCount() > 1)

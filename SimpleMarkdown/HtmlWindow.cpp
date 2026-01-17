@@ -197,6 +197,7 @@ void HtmlWindow::clear()
     m_char_boxes.clear();
     m_plain_text.clear();
     m_totalHeight = 0;
+    m_container->clear();
 }
 
 void HtmlWindow::set_vfs(std::shared_ptr<VirtualFileSystem>& vfs)
@@ -502,14 +503,16 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
     if(m_doc)
     {
         //m_selection_rect.clear();
-        auto pos = hit_test(x, y);
-        if(pos >= 0)
+        auto index = hit_test(x, y);
+        if(index >= 0)
         {
             //m_selection_rect.add(m_char_boxes[pos]);
             //m_selection_rect.scroll(-m_scrollPos);
-            m_cursor_pos = pos;
-            
-            Refresh();
+            m_cursor_pos = index;
+            auto pos = m_char_boxes[index];
+            litehtml::position::vector redraw_boxes;
+            redraw_boxes.push_back(pos);
+            RequestRedraw(redraw_boxes);
         }
     }
     //if (m_doc)
@@ -557,12 +560,13 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
                 m_cursor_pos = pos;
                 m_selection_end = pos;
                 UpdateSelectionRect();
+                RequestRedraw(m_selection_rect.get_raw_rect());
             }
         }
 
  
 
-        Refresh();
+   
     }
     if(m_doc)
     {
@@ -599,10 +603,11 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
             {
                 m_selection_end = pos;
                 UpdateSelectionRect();
+                RequestRedraw(m_selection_rect.get_raw_rect());
             }
         }
         m_selection = false;
-        Refresh();
+
     }
 }
 

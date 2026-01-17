@@ -15,18 +15,18 @@
 
 #include "VirtualFileSystem.h"
 
-class DrawCache
+class DrawTextCache
 {
 public:
-    DrawCache() {};
-    ~DrawCache() {};
+    DrawTextCache() {};
+    ~DrawTextCache() {};
     
     struct Text
     {
         litehtml::uint_ptr hFont;
         std::string text;
         litehtml::web_color color;
-        const litehtml::position pos;
+        litehtml::position pos;
     };
     void add(litehtml::uint_ptr hFont, 
         const char* text, 
@@ -47,11 +47,13 @@ public:
                 // merge
                 if(back.hFont == hFont &&
                     back.color == color &&
+                    back.pos.y == pos.y &&
                     back.pos.does_intersect(&pos))
                 
                 {
                     m_cache.pop_back();
                     back.text += t;
+                    back.pos.width += pos.width;
                     m_cache.push_back(back);
                 }
                 else
@@ -63,7 +65,7 @@ public:
     }
 
     std::vector<Text> get_cache() { return m_cache; }
-    void clear() { m_cache.clear(); }
+    void clear() { m_cache = {}; }
 private:
 
     std::vector<Text> m_cache;
@@ -139,6 +141,7 @@ public:
     std::shared_ptr<VirtualFileSystem> get_vfs() const { return m_vfs; }
 
     std::string get_hover_link() { return m_hover_link;}
+    void clear();
  private:
 
     // Add to your existing private section
@@ -153,8 +156,9 @@ public:
     std::unordered_map<std::string, wxBitmap> m_imageCache; // Í¼Æ¬»º´æ
     //std::vector<TextWidthCache> m_textWidthCache;
     std::vector<CharWidthCache> m_charWidthCache;
-    DrawCache m_cache;
+    DrawTextCache m_drawTextCache;
 
+private:
     // ¸¨Öúº¯Êý
     float CalculateLinearGradientPosition(const wxPoint& point,
         const wxPoint& start,
