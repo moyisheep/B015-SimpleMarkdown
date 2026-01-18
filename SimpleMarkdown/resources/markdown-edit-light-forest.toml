@@ -1,0 +1,193 @@
+[default]
+foreground = [45, 55, 45]
+background = [254, 254, 252]
+
+[line_number]
+foreground = [120, 140, 120]
+background = [250, 252, 250]
+
+[caret]
+foreground = [45, 55, 45]
+
+[margin]
+background = [250, 252, 250]
+
+[fold_margin]
+background = [245, 250, 245]
+highlight = [235, 245, 235]
+
+[edge]
+color = [225, 235, 225]
+
+[caret_line]
+background = [248, 252, 248]
+
+[[styles]]
+id = 0  # 正文
+foreground = [45, 55, 45]
+background = [254, 254, 252]
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 1  # 一级标题
+foreground = [30, 102, 98]
+background = [254, 254, 252]
+bold = true
+italic = false
+fontSize = 30
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 2  # 二级标题
+foreground = [36, 130, 124]
+background = [254, 254, 252]
+bold = true
+italic = false
+fontSize = 25
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 3  # 三级标题
+foreground = [42, 157, 143]
+background = [254, 254, 252]
+bold = true
+italic = false
+fontSize = 21
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 4  # 四级标题
+foreground = [64, 185, 170]
+background = [254, 254, 252]
+bold = true
+italic = false
+fontSize = 18
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 5  # 五级标题
+foreground = [86, 213, 197]
+background = [254, 254, 252]
+bold = false
+italic = false
+fontSize = 16
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 6  # 六级标题
+foreground = [128, 237, 220]
+background = [254, 254, 252]
+bold = false
+italic = true
+fontSize = 14
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 7  # 行内代码
+foreground = [203, 64, 66]
+background = [253, 246, 246]
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 8  # 代码块
+foreground = [69, 85, 69]
+background = [250, 252, 250]
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 9  # 链接
+foreground = [14, 112, 199]
+background = [254, 254, 252]
+bold = false
+italic = false
+underline = true
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 10  # 强调（斜体）
+foreground = [104, 85, 63]
+background = [254, 254, 252]
+bold = false
+italic = true
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 11  # 粗体
+foreground = [35, 45, 35]
+background = [254, 254, 252]
+bold = true
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 12  # 引用块
+foreground = [96, 116, 96]
+background = [252, 253, 251]
+bold = false
+italic = true
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 13  # 列表项
+foreground = [178, 91, 36]
+background = [254, 254, 252]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 14  # 水平线
+foreground = [220, 230, 220]
+background = [254, 254, 252]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 15  # 删除线
+foreground = [160, 175, 160]
+background = [254, 254, 252]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 16  # 脚注引用
+foreground = [193, 55, 55]
+background = [254, 254, 252]
+bold = true
+italic = false
+fontSize = 9
+fontName = ""
+
+[[styles]]
+id = 17  # 脚注定义
+foreground = [135, 145, 135]
+background = [253, 253, 252]
+bold = false
+italic = true
+fontSize = 11
+fontName = ""

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <wx/timer.h>
 
+#include <toml++/toml.hpp>
+
 // 样式ID定义
 enum {
     STYLE_NORMAL = 0,
@@ -113,8 +115,8 @@ void MarkdownTextCtrl::InitializeStyles()
     // 清除所有样式
     StyleClearAll();
 
-    InitializeLightTheme();
-    //InitializeDarkTheme();
+    //InitializeLightTheme();
+    InitializeDarkTheme();
 
 
 
@@ -131,6 +133,208 @@ void MarkdownTextCtrl::InitializeStyles()
     //SetProperty("fold.html", "1");
 }
 
+// 在类定义中添加私有方法
+
+
+    // 实现方法
+bool MarkdownTextCtrl::LoadStylesFromFile(const wxString& tomlFile)
+{
+    try {
+        // 读取TOML文件
+        auto data = toml::parse_file(tomlFile.ToStdString());
+
+        // 基础样式
+        auto defaultStyle = data["default"];
+        if (defaultStyle) {
+            auto fg = defaultStyle["foreground"].as_array();
+            auto bg = defaultStyle["background"].as_array();
+            if (fg && bg && fg->size() == 3 && bg->size() == 3) {
+                StyleSetForeground(wxSTC_STYLE_DEFAULT,
+                    wxColour((*fg)[0].as_integer()->get(),
+                        (*fg)[1].as_integer()->get(),
+                        (*fg)[2].as_integer()->get()));
+                StyleSetBackground(wxSTC_STYLE_DEFAULT,
+                    wxColour((*bg)[0].as_integer()->get(),
+                        (*bg)[1].as_integer()->get(),
+                        (*bg)[2].as_integer()->get()));
+            }
+        }
+
+        // 行号样式
+        auto lineNumber = data["line_number"];
+        if (lineNumber) {
+            auto fg = lineNumber["foreground"].as_array();
+            auto bg = lineNumber["background"].as_array();
+            if (fg && bg && fg->size() == 3 && bg->size() == 3) {
+                StyleSetForeground(wxSTC_STYLE_LINENUMBER,
+                    wxColour((*fg)[0].as_integer()->get(),
+                        (*fg)[1].as_integer()->get(),
+                        (*fg)[2].as_integer()->get()));
+                StyleSetBackground(wxSTC_STYLE_LINENUMBER,
+                    wxColour((*bg)[0].as_integer()->get(),
+                        (*bg)[1].as_integer()->get(),
+                        (*bg)[2].as_integer()->get()));
+            }
+        }
+
+        // 光标样式
+        auto caret = data["caret"];
+        if (caret) {
+            auto fg = caret["foreground"].as_array();
+            if (fg && fg->size() == 3) {
+                SetCaretForeground(wxColour((*fg)[0].as_integer()->get(),
+                    (*fg)[1].as_integer()->get(),
+                    (*fg)[2].as_integer()->get()));
+            }
+        }
+
+        // 边距背景
+        auto margin = data["margin"];
+        if (margin) {
+            auto bg = margin["background"].as_array();
+            if (bg && bg->size() == 3) {
+                SetMarginBackground(1, wxColour((*bg)[0].as_integer()->get(),
+                    (*bg)[1].as_integer()->get(),
+                    (*bg)[2].as_integer()->get()));
+                SetMarginBackground(0, wxColour((*bg)[0].as_integer()->get(),
+                    (*bg)[1].as_integer()->get(),
+                    (*bg)[2].as_integer()->get()));
+            }
+        }
+
+        // 折叠边距
+        auto fold = data["fold_margin"];
+        if (fold) {
+            auto bg = fold["background"].as_array();
+            auto hi = fold["highlight"].as_array();
+            if (bg && bg->size() == 3) {
+                SetFoldMarginColour(true, wxColour((*bg)[0].as_integer()->get(),
+                    (*bg)[1].as_integer()->get(),
+                    (*bg)[2].as_integer()->get()));
+            }
+            if (hi && hi->size() == 3) {
+                SetFoldMarginHiColour(true, wxColour((*hi)[0].as_integer()->get(),
+                    (*hi)[1].as_integer()->get(),
+                    (*hi)[2].as_integer()->get()));
+            }
+        }
+
+        // 边缘颜色
+        auto edge = data["edge"];
+        if (edge) {
+            auto color = edge["color"].as_array();
+            if (color && color->size() == 3) {
+                SetEdgeColour(wxColour((*color)[0].as_integer()->get(),
+                    (*color)[1].as_integer()->get(),
+                    (*color)[2].as_integer()->get()));
+            }
+        }
+
+        // 当前行背景
+        auto caretLine = data["caret_line"];
+        if (caretLine) {
+            auto bg = caretLine["background"].as_array();
+            if (bg && bg->size() == 3) {
+                SetCaretLineBackground(wxColour((*bg)[0].as_integer()->get(),
+                    (*bg)[1].as_integer()->get(),
+                    (*bg)[2].as_integer()->get()));
+            }
+            if (caretLine["width"].is_integer()) {
+                SetCaretWidth(caretLine["width"].as_integer()->get());
+            }
+        }
+
+        // 加载所有自定义样式
+        m_styles.clear();
+        auto styles = data["styles"].as_array();
+        if (styles) {
+            for (auto& styleNode : *styles) {
+                auto styleObj = styleNode.as_table();
+                if (!styleObj) continue;
+
+                MarkdownStyle style;
+                style.id = styleObj->get("id")->as_integer()->get();
+
+                // 前景色
+                auto fg = styleObj->get("foreground")->as_array();
+                if (fg && fg->size() == 3) {
+                    style.foreground = wxColour((*fg)[0].as_integer()->get(),
+                        (*fg)[1].as_integer()->get(),
+                        (*fg)[2].as_integer()->get());
+                }
+
+                // 背景色
+                auto bg = styleObj->get("background")->as_array();
+                if (bg && bg->size() == 3) {
+                    style.background = wxColour((*bg)[0].as_integer()->get(),
+                        (*bg)[1].as_integer()->get(),
+                        (*bg)[2].as_integer()->get());
+                }
+
+                // 字体属性
+                if (styleObj->get("bold")) {
+                    style.bold = styleObj->get("bold")->as_boolean()->get();
+                }
+                if (styleObj->get("italic")) {
+                    style.italic = styleObj->get("italic")->as_boolean()->get();
+                }
+                if (styleObj->get("underline")) {
+                    style.underline = styleObj->get("underline")->as_boolean()->get();
+                }
+                if (styleObj->get("fontSize")) {
+                    style.fontSize = styleObj->get("fontSize")->as_integer()->get();
+                }
+                if (styleObj->get("fontName")) {
+                    style.fontName = wxString::FromUTF8(
+                        styleObj->get("fontName")->as_string()->get());
+                }
+
+                m_styles.push_back(style);
+            }
+        }
+
+        // 应用所有样式（使用原有的代码）
+        for (const auto& s : m_styles) {
+            StyleSetForeground(s.id, s.foreground);
+            StyleSetBackground(s.id, s.background);
+            if (s.fontSize > 0) {
+                StyleSetSize(s.id, s.fontSize);
+            }
+            if (s.bold) {
+                StyleSetBold(s.id, true);
+            }
+            if (s.italic) {
+                StyleSetItalic(s.id, true);
+            }
+            if (s.underline) {
+                StyleSetUnderline(s.id, true);
+            }
+            if (!s.fontName.IsEmpty()) {
+                wxFont font(s.fontSize > 0 ? s.fontSize : 10,
+                    wxFONTFAMILY_MODERN,
+                    s.italic ? wxFONTSTYLE_ITALIC : wxFONTSTYLE_NORMAL,
+                    s.bold ? wxFONTWEIGHT_BOLD : wxFONTWEIGHT_NORMAL,
+                    false,
+                    s.fontName);
+                StyleSetFont(s.id, font);
+               
+            }
+        }
+
+        return true;
+
+    }
+    catch (const toml::parse_error& err) {
+        wxLogError("TOML解析错误: %s", err.what());
+        InitializeStyles();
+        return false;
+    }
+    catch (const std::exception& err) {
+        wxLogError("加载主题失败: %s", err.what());
+        InitializeStyles();
+        return false;
+    }
+}
 void MarkdownTextCtrl::InitializeLightTheme()
 {
     m_styles.clear();

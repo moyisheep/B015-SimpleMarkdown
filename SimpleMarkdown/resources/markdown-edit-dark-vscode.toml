@@ -1,0 +1,195 @@
+# Deep Space Blue Theme - VS Code Inspired
+
+[default]
+foreground = [212, 212, 212]    # 浅灰色文字
+background = [30, 30, 30]       # 深灰色背景
+
+[line_number]
+foreground = [106, 153, 85]     # 淡绿色行号
+background = [25, 25, 25]       # 更深的背景
+
+[caret]
+foreground = [212, 212, 212]    # 白色光标
+
+[margin]
+background = [25, 25, 25]       # 边栏深色
+
+[fold_margin]
+background = [20, 20, 20]       # 折叠栏更深色
+highlight = [35, 35, 35]        # 折叠高亮
+
+[edge]
+color = [40, 40, 40]            # 深色边缘线
+
+[caret_line]
+background = [40, 40, 40]       # 当前行深灰
+
+[[styles]]
+id = 0  # 正文
+foreground = [212, 212, 212]    # 浅灰
+background = [30, 30, 30]
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 1  # 一级标题
+foreground = [97, 175, 239]     # 亮蓝色
+background = [30, 30, 30]
+bold = true
+italic = false
+fontSize = 28
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 2  # 二级标题
+foreground = [86, 156, 214]     # 蓝色
+background = [30, 30, 30]
+bold = true
+italic = false
+fontSize = 24
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 3  # 三级标题
+foreground = [75, 137, 189]     # 中蓝色
+background = [30, 30, 30]
+bold = true
+italic = false
+fontSize = 20
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 4  # 四级标题
+foreground = [64, 118, 164]     # 暗蓝色
+background = [30, 30, 30]
+bold = true
+italic = false
+fontSize = 18
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 5  # 五级标题
+foreground = [86, 156, 214]     # 蓝色
+background = [30, 30, 30]
+bold = false
+italic = false
+fontSize = 16
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 6  # 六级标题
+foreground = [100, 166, 224]    # 淡蓝色
+background = [30, 30, 30]
+bold = false
+italic = true
+fontSize = 14
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 7  # 行内代码
+foreground = [215, 186, 125]    # 淡黄色
+background = [45, 45, 45]       # 深灰背景
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 8  # 代码块
+foreground = [220, 220, 170]    # 浅黄色
+background = [25, 25, 25]       # 深色背景
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 9  # 链接
+foreground = [86, 156, 214]     # 蓝色链接
+background = [30, 30, 30]
+bold = false
+italic = false
+underline = true
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 10  # 强调（斜体）
+foreground = [220, 220, 170]    # 浅黄色
+background = [30, 30, 30]
+bold = false
+italic = true
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 11  # 粗体
+foreground = [255, 255, 255]    # 纯白
+background = [30, 30, 30]
+bold = true
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 12  # 引用块
+foreground = [130, 150, 130]    # 绿灰色
+background = [35, 35, 35]       # 深灰背景
+bold = false
+italic = true
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 13  # 列表项
+foreground = [181, 206, 168]    # 淡绿色
+background = [30, 30, 30]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 14  # 水平线
+foreground = [60, 60, 60]       # 深灰
+background = [30, 30, 30]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 15  # 删除线
+foreground = [100, 100, 100]    # 中灰
+background = [30, 30, 30]
+bold = false
+italic = false
+underline = false
+fontSize = 0
+fontName = ""
+
+[[styles]]
+id = 16  # 脚注引用
+foreground = [220, 163, 163]    # 淡红色
+background = [30, 30, 30]
+bold = true
+italic = false
+fontSize = 9
+fontName = ""
+
+[[styles]]
+id = 17  # 脚注定义
+foreground = [150, 150, 150]    # 浅灰色
+background = [35, 35, 35]       # 深灰背景
+bold = false
+italic = true
+fontSize = 11
+fontName = ""

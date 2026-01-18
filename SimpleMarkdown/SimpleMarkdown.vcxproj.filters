@@ -100,5 +100,13 @@
     <CopyFileToFolders Include="resources\markdown.css" />
     <CopyFileToFolders Include="resources\homepage.md" />
     <CopyFileToFolders Include="resources\markdown-dark.css" />
+    <CopyFileToFolders Include="resources\markdown-edit-light.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-light-forest.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-light-modern.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-light-notion.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-dark-vscode.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-dark-onedark.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-dark-dracula.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-dark-classic.toml" />
   </ItemGroup>
 </Project>

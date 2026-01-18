@@ -22,6 +22,8 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	m_edit_wnd->Hide();
 	m_edit_wnd->EnableLiveHighlighting(true);
+	m_edit_wnd->LoadStylesFromFile("./resources/markdown-edit-light-forest.toml");
+
 
 	m_view_wnd->Show();
 

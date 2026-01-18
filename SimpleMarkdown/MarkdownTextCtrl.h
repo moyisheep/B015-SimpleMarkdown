@@ -33,7 +33,7 @@ public:
     // 手动触发语法高亮
     void HighlightMarkdown();
 
-
+    bool LoadStylesFromFile(const wxString& tomlFile);
 
     // 设置自定义样式
     void SetHeaderStyle(int level, const wxColour& color, int fontSize = 0, bool bold = true);
@@ -51,6 +51,8 @@ protected:
 private:
     // 初始化样式
     void InitializeStyles();
+
+
 
     // 解析Markdown并应用样式
     void ParseAndStyle();
