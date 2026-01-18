@@ -242,11 +242,40 @@ void HtmlWindow::SetupScrollbars()
 
 void HtmlWindow::ScrollToPosition(int pos)
 {
-   
+   //.auto delta = pos - m_scrollPos;
+
+    //auto sz = GetClientSize();
+
+
     m_scrollPos = pos;
     SetScrollPos(wxVERTICAL, pos);
     //UpdateSelectionRect();
-    Refresh();
+    //Refresh();
+
+    //if (std::abs(delta) < sz.GetHeight())
+    //{
+ 
+    //    auto bitmap = wxBitmap(m_back_bitmap);
+    //    auto memdc = wxMemoryDC();
+    //    memdc.SelectObject(m_back_bitmap);
+    //    memdc.DrawBitmap(wxNullBitmap, wxPoint(0, 0));
+    //    memdc.SelectObject(wxNullBitmap);
+    //    m_scrolling = true;
+    //    if (delta > 0)
+    //    {
+
+    //        RefreshRect(wxRect{ 0, sz.GetHeight()- delta, m_back_bitmap.GetWidth(), delta });
+    //    }
+    //    else
+    //    {
+
+    //        RefreshRect(wxRect{ 0,  -delta, m_back_bitmap.GetWidth(), -delta });
+    //    }
+    //}
+    //else
+    {
+        Refresh();
+    }
 }
 
 int HtmlWindow::GetScrollPosition() const
@@ -336,55 +365,33 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 
  
 
-    // draw background
-    dc.SetBrush(*wxWHITE_BRUSH);
-    dc.SetPen(*wxTRANSPARENT_PEN);
-    dc.DrawRectangle(updateRect);
+
 
 
 
     // draw doc
     if (m_doc)
     {
+       
+        auto memdc = wxMemoryDC(m_back_bitmap);
+
         TimerOutput::Instance().start("[draw]");
         litehtml::position clip{ (float)updateRect.x, 
             (float)updateRect.y, 
             (float)updateRect.width, 
             (float)updateRect.height };
-        litehtml::uint_ptr hdc = (litehtml::uint_ptr)&dc;
+        litehtml::uint_ptr hdc = (litehtml::uint_ptr)&memdc;
         m_doc->draw(hdc, 0, -m_scrollPos, &clip);
+        DrawSelection(&memdc, updateRect);
         m_container->draw_finished(hdc);
+        DrawCaret(&memdc);
         TimerOutput::Instance().end();
+
+        dc.Blit(0, 0, m_back_bitmap.GetWidth(), m_back_bitmap.GetHeight(), &memdc, 0, 0);
     }
 
-    // draw selection 
-    if (!m_selection_rect.empty())
-    {
 
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.SetPen(*wxBLUE_PEN);
-        for (auto& rect : m_selection_rect.get_rect())
-        {
-            rect.y = rect.y - m_scrollPos;
-            if(updateRect.Intersects(rect))
-            {
-                dc.DrawRectangle(rect);
-            }
-     
-        }
-    }
 
-    // draw cursor
-    if(m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
-    {
-        auto pos = m_char_boxes[m_cursor_pos];
-        pos.y = pos.y - m_scrollPos;
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.SetPen(*wxBLACK_PEN);
-        wxPoint pt1(pos.right(), pos.top());
-        wxPoint pt2(pos.right(), pos.bottom());
-        dc.DrawLine(pt1, pt2);
-    }
 
     // draw update rect
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -392,7 +399,40 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
     dc.DrawRectangle(updateRect);
 }
 
+void HtmlWindow::DrawCaret(wxDC* dc)
+{
+    // draw cursor
+    if (m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
+    {
+        auto pos = m_char_boxes[m_cursor_pos];
+        pos.y = pos.y - m_scrollPos;
+        dc->SetBrush(*wxTRANSPARENT_BRUSH);
+        dc->SetPen(*wxBLACK_PEN);
+        wxPoint pt1(pos.right(), pos.top());
+        wxPoint pt2(pos.right(), pos.bottom());
+        dc->DrawLine(pt1, pt2);
+    }
+}
+void HtmlWindow::DrawSelection(wxDC* dc, wxRect updateRect)
+{
 
+    // draw selection 
+    if (!m_selection_rect.empty())
+    {
+
+        dc->SetBrush(*wxTRANSPARENT_BRUSH);
+        dc->SetPen(*wxBLUE_PEN);
+        for (auto& rect : m_selection_rect.get_rect())
+        {
+            rect.y = rect.y - m_scrollPos;
+            if (updateRect.Intersects(rect))
+            {
+                dc->DrawRectangle(rect);
+            }
+
+        }
+    }
+}
 void HtmlWindow::OnScroll(wxScrollWinEvent& event)
 {
     int newPos = event.GetPosition();
@@ -426,29 +466,24 @@ void HtmlWindow::OnSize(wxSizeEvent& event)
 {
     if (m_doc)
     {
-        int width = GetClientSize().GetWidth();
-        m_doc->render(width);
-        record_char_boxes();
+        
+        auto sz = GetClientSize();
+        int width = sz.GetWidth();
+        int height = sz.GetHeight();
+        if(width > 0 && height > 0)
+        {
+            m_doc->render(width);
+            m_back_bitmap = wxBitmap(width, height);
+            record_char_boxes();
+            m_doc->media_changed();
+            SetupScrollbars();
+            Refresh();
+        }
 
-        m_doc->media_changed();
-        SetupScrollbars();
-        Refresh();
     }
     event.Skip();
 }
-void HtmlWindow::re_render()
-{
-    if (m_doc)
-    {
-        int width = GetClientSize().GetWidth();
-        m_doc->render(width);
-        record_char_boxes();
 
-        //m_doc->media_changed();
-        SetupScrollbars();
-        Refresh();
-    }
-}
 
 void HtmlWindow::ClearSelection()
 {
@@ -484,7 +519,13 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
     if(m_doc)
     {
 
+        auto redraw_boxes = m_selection_rect.get_raw_rect();
         ClearSelection();
+        if(!redraw_boxes.empty())
+        {
+            RequestRedraw(redraw_boxes);
+        }
+
 
         // test whether point inside, returen [m_char_boxes] index
         auto pos = hit_test(x, y);

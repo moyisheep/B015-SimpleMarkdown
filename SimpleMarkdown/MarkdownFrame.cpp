@@ -23,7 +23,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_edit_wnd->Hide();
 	m_edit_wnd->EnableLiveHighlighting(true);
 	m_edit_wnd->LoadStylesFromFile("./resources/markdown-edit-light-forest.toml");
-	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
+	m_view_wnd->load_user_css("./resources/markdown-view-dark.css");
 
 	m_view_wnd->Show();
 

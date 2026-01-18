@@ -169,6 +169,7 @@ private:
     std::u32string m_plain_text;
     std::string m_html = "";
     wxFrame* m_parent;
+    wxBitmap m_back_bitmap;
 
     // 滚动相关变量
     int m_totalHeight;
@@ -176,6 +177,8 @@ private:
     std::string m_base_url;
     std::unique_ptr<wxStaticText> m_link_ctrl;
     bool m_selection = false;
+    bool m_scrolling = false;
+    int m_scrolling_delta = 0;
     std::string m_user_css = "";
     SelectionRect m_selection_rect;
 
@@ -200,11 +203,14 @@ private:
 
 
     void OnPaint(wxPaintEvent& event);
+    
+    void DrawCaret(wxDC* dc);
+
+    void DrawSelection(wxDC* dc, wxRect updateRect);
     void OnScroll(wxScrollWinEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnSize(wxSizeEvent& event);
 
-    void re_render();
 
 
     // Add these event handlers

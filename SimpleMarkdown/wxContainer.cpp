@@ -1226,7 +1226,10 @@ void wxContainer::draw_finished(litehtml::uint_ptr hdc)
             if(font)
             {
                 wxString wtext = wxString::FromUTF8(cache.text);
-                //wxLogInfo(wtext);
+                wxString txt = wtext +": " + 
+                    wxString(std::to_string(cache.pos.x)) + ", " + 
+                    wxString(std::to_string(cache.pos.y));
+                wxLogInfo(txt);
                 dc->SetFont(*font);
                 dc->SetTextForeground(wxColour(cache.color.red, cache.color.green, cache.color.blue));
                 dc->DrawText(wtext, cache.pos.x, cache.pos.y);
