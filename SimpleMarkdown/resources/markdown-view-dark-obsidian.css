@@ -1,0 +1,293 @@
+/* Obsidian Pro Theme - 黑曜石专业主题 */
+/* 适合学术论文、技术白皮书 */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #dcdcdc;
+  background-color: #0d1117;
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  background-image: linear-gradient(to bottom, #0d1117 0%, #151b26 100%);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Times New Roman", serif;
+  font-weight: 700;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.8rem;
+  color: #f0f0f0;
+  margin-top: 0;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid #1f2937;
+  text-align: center;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #e0e0e0;
+  margin-top: 4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #2d3748;
+  position: relative;
+}
+
+h2::before {
+  content: "§";
+  position: absolute;
+  left: -2rem;
+  color: #4a5568;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.6rem;
+  color: #cccccc;
+  margin-top: 3rem;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 1.3rem;
+  color: #b8b8b8;
+  margin-top: 2.5rem;
+  font-style: italic;
+}
+
+p {
+  margin-bottom: 2rem;
+  color: #c9c9c9;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  orphans: 3;
+  widows: 3;
+}
+
+.first-paragraph::first-letter {
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.8em;
+  padding: 0.1em 0.2em 0 0;
+  color: #8b949e;
+  font-weight: bold;
+}
+
+a {
+  color: #8b949e;
+  text-decoration: underline;
+  text-decoration-color: #4a5568;
+  text-decoration-thickness: 1px;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: #c9d1d9;
+  text-decoration-color: #8b949e;
+}
+
+ul, ol {
+  margin-left: 3rem;
+  margin-bottom: 2rem;
+}
+
+li {
+  margin-bottom: 1rem;
+  color: #c9c9c9;
+}
+
+ul li {
+  list-style-type: square;
+}
+
+ol li {
+  list-style-type: decimal;
+}
+
+blockquote {
+  margin: 3rem 2rem;
+  padding: 2.5rem 3rem;
+  background: rgba(31, 41, 55, 0.7);
+  border-left: 5px solid #4a5568;
+  color: #a0a0a0;
+  border-radius: 0;
+  font-style: italic;
+  position: relative;
+  quotes: "“" "”" "‘" "’";
+}
+
+blockquote::before {
+  content: open-quote;
+  position: absolute;
+  top: 0;
+  left: 20px;
+  font-size: 4em;
+  color: rgba(75, 85, 104, 0.2);
+}
+
+blockquote::after {
+  content: close-quote;
+  position: absolute;
+  bottom: -30px;
+  right: 20px;
+  font-size: 4em;
+  color: rgba(75, 85, 104, 0.2);
+}
+
+code {
+  font-family: "Courier New", Courier, monospace;
+}
+
+code:not(pre code) {
+  font-size: 0.9em;
+  background: rgba(31, 41, 55, 0.9);
+  color: #ffa07a;
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+}
+
+pre {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: #1c1c1c;
+  border-radius: 2px;
+  overflow-x: auto;
+  border: 1px solid #2d3748;
+  font-family: "Courier New", monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+pre code {
+  color: #e6e6e6;
+  background: transparent;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 3rem 0;
+  background: rgba(31, 41, 55, 0.7);
+  border: 1px solid #2d3748;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+thead {
+  background: rgba(45, 55, 72, 0.9);
+}
+
+th {
+  font-weight: 700;
+  text-align: left;
+  padding: 1.5rem 2rem;
+  color: #f0f0f0;
+  border-bottom: 2px solid #4a5568;
+  font-family: "Times New Roman", serif;
+  font-size: 1.1em;
+}
+
+td {
+  padding: 1.2rem 2rem;
+  color: #c9c9c9;
+  border-bottom: 1px solid #2d3748;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: rgba(75, 85, 104, 0.1);
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    #4a5568 50%, 
+    transparent 100%);
+  margin: 4rem 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 3rem auto;
+  border-radius: 0;
+  border: 1px solid #2d3748;
+}
+
+.figure {
+  margin: 3rem 0;
+  padding: 1.5rem;
+  background: rgba(31, 41, 55, 0.5);
+  border: 1px solid #2d3748;
+}
+
+.caption {
+  text-align: center;
+  font-style: italic;
+  color: #8b949e;
+  margin-top: 1rem;
+  font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 17px;
+    padding: 40px 25px;
+  }
+  
+  h1 {
+    font-size: 2.2rem;
+  }
+  
+  h2 {
+    font-size: 1.7rem;
+    margin-left: 2rem;
+  }
+  
+  h2::before {
+    left: -1.5rem;
+  }
+  
+  blockquote {
+    margin: 2rem 1rem;
+    padding: 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 30px 20px;
+  }
+  
+  h1 {
+    font-size: 1.9rem;
+  }
+  
+  ul, ol {
+    margin-left: 2rem;
+  }
+}

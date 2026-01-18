@@ -1,0 +1,206 @@
+/* 现代简约风格 - 适合技术文档、博客 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: #1f2937;
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+    min-height: 100vh;
+}
+
+/* 标题优雅样式 */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 2.5rem 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 4rem;
+    height: 2px;
+    background: #2563eb;
+}
+
+h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #e5e7eb;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 1.75rem 0 0.75rem;
+}
+
+/* 段落和链接 */
+p {
+    margin: 1.25rem 0;
+    color: #374151;
+    text-align: justify;
+    hyphens: auto;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    border-bottom-color: #2563eb;
+}
+
+/* 列表增强 */
+ul, ol {
+    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+}
+
+li {
+    margin: 0.5rem 0;
+    position: relative;
+}
+
+ul li {
+    padding-left: 0.5rem;
+}
+
+ul li::before {
+    content: '•';
+    color: #2563eb;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* 引用块卡片效果 */
+blockquote {
+    margin: 1.5rem 0;
+    padding: 1.5rem 2rem;
+    background: #f9fafb;
+    border-left: 4px solid #2563eb;
+    border-radius: 8px;
+    font-style: italic;
+    color: #6b7280;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+/* 代码块 */
+code {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.9em;
+    padding: 0.2em 0.4em;
+    background: #f1f5f9;
+    border-radius: 4px;
+    color: #dc2626;
+}
+
+pre {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow-x: auto;
+    position: relative;
+}
+
+pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #e2e8f0;
+    color: #475569;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 7px;
+}
+
+/* 表格 */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th {
+    background: #f9fafb;
+    font-weight: 600;
+    padding: 0.875rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* 分割线 */
+hr {
+    height: 1px;
+    border: none;
+    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+    margin: 2.5rem 0;
+}
+
+/* 图片 */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem auto;
+    display: block;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    body {
+        padding: 2rem 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    pre {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+}

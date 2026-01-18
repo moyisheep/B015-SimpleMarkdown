@@ -173,7 +173,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="resources\markdown.css">
+    <CopyFileToFolders Include="resources\markdown-view-light.css">
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources;%(DestinationFolders)</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>
@@ -185,7 +185,7 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="resources\markdown-dark.css">
+    <CopyFileToFolders Include="resources\markdown-view-dark.css">
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>
@@ -224,6 +224,41 @@
     </CopyFileToFolders>
     <CopyFileToFolders Include="resources\markdown-edit-dark-vscode.toml">
       <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\markdown-view-dark-prefessional.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-view-light-elegant.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-view-light-modern.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-view-light-tech.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\markdown-view-dark-soft.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-view-light-nature.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-view-light-paper.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\markdown-view-dark-charcoal.css">
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\markdown-view-dark-obsidian.css">
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>

@@ -97,9 +97,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="resources\markdown.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light.css" />
     <CopyFileToFolders Include="resources\homepage.md" />
-    <CopyFileToFolders Include="resources\markdown-dark.css" />
+    <CopyFileToFolders Include="resources\markdown-view-dark.css" />
     <CopyFileToFolders Include="resources\markdown-edit-light.toml" />
     <CopyFileToFolders Include="resources\markdown-edit-light-forest.toml" />
     <CopyFileToFolders Include="resources\markdown-edit-light-modern.toml" />
@@ -108,5 +108,14 @@
     <CopyFileToFolders Include="resources\markdown-edit-dark-onedark.toml" />
     <CopyFileToFolders Include="resources\markdown-edit-dark-dracula.toml" />
     <CopyFileToFolders Include="resources\markdown-edit-dark-classic.toml" />
+    <CopyFileToFolders Include="resources\markdown-view-dark-prefessional.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light-elegant.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light-modern.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light-tech.css" />
+    <CopyFileToFolders Include="resources\markdown-view-dark-soft.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light-nature.css" />
+    <CopyFileToFolders Include="resources\markdown-view-light-paper.css" />
+    <CopyFileToFolders Include="resources\markdown-view-dark-charcoal.css" />
+    <CopyFileToFolders Include="resources\markdown-view-dark-obsidian.css" />
   </ItemGroup>
 </Project>

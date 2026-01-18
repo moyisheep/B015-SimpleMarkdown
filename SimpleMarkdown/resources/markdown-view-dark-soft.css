@@ -1,0 +1,228 @@
+/* 柔和的深色主题 - 低对比度，减少眼睛疲劳 */
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #d1d5db;
+    background-color: #1a1a2e;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(26, 35, 126, 0.15) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(123, 31, 162, 0.1) 0%, transparent 20%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: #e5e7eb;
+    letter-spacing: -0.01em;
+    margin-top: 2.5rem;
+    margin-bottom: 1.2rem;
+}
+
+h1 {
+    font-size: 2.4rem;
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #c7d2fe;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(199, 210, 254, 0.2);
+}
+
+h3 {
+    font-size: 1.4rem;
+    color: #bae6fd;
+}
+
+p {
+    margin-bottom: 1.8rem;
+    color: #d1d5db;
+    opacity: 0.95;
+}
+
+a {
+    color: #93c5fd;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.3);
+    padding-bottom: 1px;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+}
+
+ul, ol {
+    padding-left: 2rem;
+    margin-bottom: 1.8rem;
+}
+
+li {
+    margin-bottom: 0.6rem;
+    color: #d1d5db;
+    position: relative;
+}
+
+li::marker {
+    color: #a78bfa;
+}
+
+blockquote {
+    margin: 2.5rem 0;
+    padding: 1.8rem 2rem;
+    background: rgba(30, 41, 59, 0.7);
+    border-left: 4px solid #8b5cf6;
+    color: #cbd5e1;
+    font-style: italic;
+    border-radius: 0 12px 12px 0;
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    font-size: 0.9em;
+    background: rgba(30, 41, 59, 0.8);
+    color: #f1f5f9;
+    padding: 0.2em 0.5em;
+    border-radius: 5px;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+pre {
+    margin: 2.5rem 0;
+    padding: 1.8rem;
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 12px;
+    overflow-x: auto;
+    border: 1px solid rgba(100, 116, 139, 0.2);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+pre code {
+    background: transparent;
+    color: #e2e8f0;
+    padding: 0;
+    border: none;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+/* 语法高亮颜色 (深色主题优化) */
+pre .keyword { color: #c792ea; }
+pre .function { color: #82aaff; }
+pre .string { color: #c3e88d; }
+pre .comment { color: #7c8493; font-style: italic; }
+pre .number { color: #f78c6c; }
+pre .class { color: #ffcb6b; }
+pre .operator { color: #89ddff; }
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 2.5rem 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+th {
+    background: rgba(51, 65, 85, 0.8);
+    font-weight: 600;
+    text-align: left;
+    padding: 1.2rem;
+    color: #e2e8f0;
+    border-bottom: 2px solid rgba(100, 116, 139, 0.3);
+}
+
+td {
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+    color: #cbd5e1;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background: rgba(51, 65, 85, 0.4);
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.4), transparent);
+    margin: 3.5rem auto;
+    width: 70%;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    margin: 2.5rem auto;
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* 阅读进度指示器 */
+.progress-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, #8b5cf6, #3b82f6);
+    transform-origin: 0%;
+    z-index: 1000;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        font-size: 16px;
+        padding: 1.8rem;
+        line-height: 1.7;
+    }
+    
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.3rem; }
+    
+    pre {
+        padding: 1.2rem;
+        border-radius: 8px;
+    }
+}
+
+/* 夜间阅读模式切换 */
+@media (prefers-color-scheme: dark) {
+    /* 系统级深色模式优化 */
+    body {
+        background-color: #0f172a;
+    }
+}

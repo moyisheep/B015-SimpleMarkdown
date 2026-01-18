@@ -1,0 +1,244 @@
+/* 纸张风格浅色主题 - 模拟真实纸张质感 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-size: 18px;
+    line-height: 1.8;
+    color: #2c3e50;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+    background-color: #fefefe;
+    background-image: linear-gradient(to bottom, rgba(250, 250, 248, 0.9), rgba(252, 252, 250, 0.9)),
+                      repeating-linear-gradient(0deg, transparent, transparent 29px, #e6e8eb 30px);
+    background-size: 100% 30px;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: #1a365d;
+    letter-spacing: -0.015em;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-bottom: 2px solid #e8edf5;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.9rem;
+    border-bottom: 1px solid #e8edf5;
+    padding-bottom: 0.4rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: #2d3748;
+}
+
+p {
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    hyphens: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+a {
+    color: #2b6cb0;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(43, 108, 176, 0.2);
+    padding-bottom: 1px;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: #1a4f8c;
+    border-bottom-color: #2b6cb0;
+}
+
+ul, ol {
+    padding-left: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+
+blockquote {
+    margin: 2rem 0;
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+    border-left: 4px solid #cbd5e0;
+    font-style: italic;
+    color: #4a5568;
+    border-radius: 0 8px 8px 0;
+    position: relative;
+}
+
+blockquote::before {
+    content: "❝";
+    font-size: 2.5rem;
+    color: #cbd5e0;
+    position: absolute;
+    left: 1rem;
+    top: 0.5rem;
+    opacity: 0.5;
+}
+
+code {
+    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", monospace;
+    font-size: 0.9em;
+    background-color: #f1f5f9;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    color: #2d3748;
+    border: 1px solid #e2e8f0;
+}
+
+pre {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #1a202c;
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    color: #e2e8f0;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #a0aec0;
+    background: #2d3748;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 7px;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 2rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+th {
+    background-color: #f7fafc;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #cbd5e0, transparent);
+    margin: 3rem auto;
+    width: 80%;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: 2rem auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 专注模式 - 高亮当前阅读行 */
+.reading-line {
+    position: relative;
+}
+
+.reading-line::after {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    right: -2rem;
+    top: 0;
+    bottom: 0;
+    background: rgba(66, 153, 225, 0.05);
+    border-left: 3px solid #4299e1;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        font-size: 17px;
+        padding: 1.5rem;
+        line-height: 1.7;
+    }
+    
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.3rem; }
+    
+    pre {
+        padding: 1rem;
+        font-size: 0.9em;
+    }
+}
+
+/* 打印优化 */
+@media print {
+    body {
+        background: white;
+        font-size: 12pt;
+        line-height: 1.6;
+        color: black;
+    }
+    
+    pre, blockquote {
+        page-break-inside: avoid;
+    }
+    
+    a {
+        color: black;
+        text-decoration: underline;
+    }
+}

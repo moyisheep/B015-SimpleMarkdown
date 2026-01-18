@@ -1,0 +1,289 @@
+/* 自然绿色主题 - 模拟自然光下的阅读体验 */
+body {
+    font-family: "Merriweather", "Georgia", "Times New Roman", serif;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #2d3737;
+    background-color: #f8f7f2;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem;
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%230a5c36' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    color: #1a3c34;
+    margin-top: 2.8rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: 2.7rem;
+    color: #0a5c36;
+    text-align: center;
+    padding-bottom: 1.2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background: linear-gradient(to right, transparent, #0a5c36, transparent);
+}
+
+h2 {
+    font-size: 1.9rem;
+    color: #1e6b4a;
+    padding-left: 1rem;
+    border-left: 4px solid #38a169;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: #2a7c5e;
+}
+
+p {
+    margin-bottom: 1.8rem;
+    text-indent: 2em;
+    color: #2d3737;
+    text-align: justify;
+    hyphens: auto;
+}
+
+a {
+    color: #2b6cb0;
+    text-decoration: none;
+    background: linear-gradient(to bottom, transparent 90%, rgba(43, 108, 176, 0.2) 90%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: #1a4f8c;
+    background: linear-gradient(to bottom, transparent 90%, rgba(26, 79, 140, 0.3) 90%);
+    background-size: 100% 100%;
+}
+
+ul, ol {
+    padding-left: 2.8rem;
+    margin-bottom: 2rem;
+}
+
+li {
+    margin-bottom: 0.7rem;
+    line-height: 1.8;
+    position: relative;
+}
+
+ul li::before {
+    content: "•";
+    color: #38a169;
+    font-weight: bold;
+    position: absolute;
+    left: -1.5rem;
+}
+
+ol {
+    counter-reset: item;
+}
+
+ol li {
+    counter-increment: item;
+}
+
+ol li::before {
+    content: counter(item) ".";
+    color: #38a169;
+    font-weight: bold;
+    position: absolute;
+    left: -2.5rem;
+    width: 2rem;
+    text-align: right;
+}
+
+blockquote {
+    margin: 2.5rem 0;
+    padding: 2rem 2.5rem;
+    background: #f0f7f4;
+    border-left: 5px solid #38a169;
+    color: #2d4a3a;
+    font-style: italic;
+    border-radius: 0 15px 15px 0;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+blockquote::before {
+    content: "💬";
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    font-size: 1.5rem;
+    background: #f8f7f2;
+    padding: 0 10px;
+}
+
+code {
+    font-family: "Fira Code", "Consolas", "Monaco", monospace;
+    font-size: 0.88em;
+    background: #edf7f2;
+    color: #1a3c34;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
+    border: 1px solid #c6e6d9;
+}
+
+pre {
+    margin: 2.5rem 0;
+    padding: 1.8rem;
+    background: #1a3c34;
+    border-radius: 12px;
+    overflow-x: auto;
+    border: 1px solid #0a5c36;
+    box-shadow: 
+        0 8px 25px rgba(10, 92, 54, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+pre code {
+    background: transparent;
+    color: #e6fffa;
+    padding: 0;
+    border: none;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+/* 自然色语法高亮 */
+pre .keyword { color: #68d391; }
+pre .function { color: #90cdf4; }
+pre .string { color: #fefcbf; }
+pre .comment { color: #a0aec0; font-style: italic; }
+pre .number { color: #fc8181; }
+pre .class { color: #fbd38d; }
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 2.5rem 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8e4;
+}
+
+th {
+    background: linear-gradient(to bottom, #f0f7f4, #e2f0eb);
+    font-weight: 600;
+    text-align: left;
+    padding: 1.2rem;
+    color: #1a3c34;
+    border-bottom: 2px solid #38a169;
+}
+
+td {
+    padding: 1.2rem;
+    border-bottom: 1px solid #e2e8e4;
+    color: #2d3737;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #f8fcf8;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #38a169, transparent);
+    margin: 3.5rem 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    margin: 2.5rem auto;
+    border: 1px solid #e2e8e4;
+    padding: 5px;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 章节分隔装饰 */
+.chapter-break {
+    text-align: center;
+    margin: 4rem 0;
+    color: #38a169;
+    font-size: 1.2rem;
+    letter-spacing: 10px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        font-size: 17px;
+        padding: 2rem 1.5rem;
+        line-height: 1.7;
+    }
+    
+    h1 { 
+        font-size: 2.2rem;
+        text-indent: 0;
+    }
+    
+    h2 { font-size: 1.7rem; }
+    h3 { font-size: 1.4rem; }
+    
+    p {
+        text-indent: 1.5em;
+    }
+    
+    pre {
+        padding: 1.2rem;
+        border-radius: 8px;
+    }
+}
+
+/* 打印优化 */
+@media print {
+    body {
+        background: white;
+        color: black;
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    h1, h2, h3 {
+        color: black;
+    }
+    
+    a {
+        color: black;
+        text-decoration: underline;
+    }
+    
+    pre {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+    }
+}
