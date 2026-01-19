@@ -136,12 +136,11 @@ void MarkdownTextCtrl::InitializeStyles()
 // 在类定义中添加私有方法
 
 
-    // 实现方法
-bool MarkdownTextCtrl::LoadStylesFromFile(const wxString& tomlFile)
+bool MarkdownTextCtrl::set_styles(const std::string& tomlString)
 {
     try {
         // 读取TOML文件
-        auto data = toml::parse_file(tomlFile.ToStdString());
+        auto data = toml::parse(tomlString);
 
         // 基础样式
         auto defaultStyle = data["default"];
@@ -317,7 +316,7 @@ bool MarkdownTextCtrl::LoadStylesFromFile(const wxString& tomlFile)
                     false,
                     s.fontName);
                 StyleSetFont(s.id, font);
-               
+
             }
         }
 
@@ -334,6 +333,39 @@ bool MarkdownTextCtrl::LoadStylesFromFile(const wxString& tomlFile)
         InitializeStyles();
         return false;
     }
+}
+
+// 实现方法
+bool MarkdownTextCtrl::load_styles(const std::string& tomlPath)
+{
+    try
+    {
+        if (m_vfs && !tomlPath.empty())
+        {
+            auto txt = m_vfs->get_string(tomlPath);
+            if (!txt.empty())
+            {
+                set_styles(txt);
+                return true;
+
+            }
+        }
+        return false;
+    }
+    catch (const std::exception& err) {
+        wxLogError("load failed: %s", err.what());
+        InitializeStyles();
+        return false;
+    }
+
+}
+void MarkdownTextCtrl::set_vfs(std::shared_ptr<VirtualFileSystem>& vfs)
+{
+    m_vfs = vfs;
+}
+std::shared_ptr<VirtualFileSystem> MarkdownTextCtrl::get_vfs()
+{
+    return m_vfs;
 }
 void MarkdownTextCtrl::InitializeLightTheme()
 {
@@ -715,15 +747,15 @@ void MarkdownTextCtrl::InitializeDarkTheme()
     }
 
 }
-void MarkdownTextCtrl::EnableLiveHighlighting(bool enable)
+void MarkdownTextCtrl::enable_live_highlighting(bool enable)
 {
     m_liveHighlighting = enable;
     if (enable) {
-        HighlightMarkdown();
+        highlight_markdown();
     }
 }
 
-void MarkdownTextCtrl::HighlightMarkdown()
+void MarkdownTextCtrl::highlight_markdown()
 {
     if (!m_liveHighlighting) return;
 
@@ -746,7 +778,7 @@ void MarkdownTextCtrl::OnTextChanged(wxCommandEvent& event)
     }
     m_lastText = currentText;
 
-    HighlightMarkdown();
+    highlight_markdown();
 }
 
 void MarkdownTextCtrl::OnIdle(wxIdleEvent& event)

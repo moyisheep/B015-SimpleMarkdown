@@ -70,12 +70,22 @@ private:
 
     std::vector<Text> m_cache;
 };
-//struct TextWidthCache
-//{
-//    litehtml::uint_ptr hFont;
-//    wxString text;
-//    int width;
-//};
+enum ImageType { PNG, JPG, BMP, SVG, TIFF, GIF, WEBP, ICO };
+struct ImageCache
+{
+  
+    size_t width = 0;
+    size_t height = 0;
+    size_t channel = 0;
+    std::vector<uint8_t> data;
+    ImageType type;
+
+    bool empty()
+    {
+        return data.empty();
+    }
+
+};
 struct CharWidthCache
 {
     litehtml::uint_ptr hFont ;
@@ -95,6 +105,7 @@ public:
     const char* get_default_font_name() const override;
     void get_media_features(litehtml::media_features& media) const override;
     void import_css(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl)  override;
+
     void load_image(const char* src, const char* baseurl, bool redraw_on_ready) override;
 
     litehtml::pixel_t pt_to_px(float pt) const override;
@@ -106,6 +117,9 @@ public:
 
     void get_viewport(litehtml::position& viewport) const override;
     void get_image_size(const char* src, const char* baseurl, litehtml::size& sz) override;
+
+    wxBitmap create_bitmap(ImageCache& cache);
+
 
     // litehtml::document_container interface
     void del_clip() override;
@@ -139,6 +153,8 @@ public:
     //void import_script(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl) override;
 
 
+    ImageCache create_image_cache(std::string ext, std::vector<uint8_t>& data);
+
     void set_vfs(std::shared_ptr<VirtualFileSystem>& vfs) { m_vfs = vfs; }
     std::shared_ptr<VirtualFileSystem> get_vfs() const { return m_vfs; }
 
@@ -155,19 +171,13 @@ public:
 
     wxWindow* m_wnd;
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
-    std::unordered_map<std::string, wxBitmap> m_imageCache; // Í¼Æ¬»º´æ
+    std::unordered_map<std::string, ImageCache> m_imageCache; // Í¼Æ¬»º´æ
     //std::vector<TextWidthCache> m_textWidthCache;
     std::vector<CharWidthCache> m_charWidthCache;
     DrawTextCache m_drawTextCache;
 
 private:
-    // ¸¨Öúº¯Êý
-    float CalculateLinearGradientPosition(const wxPoint& point,
-        const wxPoint& start,
-        const wxPoint& end);
-    wxColor InterpolateColor(const std::vector<wxColor>& colors,
-        const std::vector<float>& positions,
-        float t);
+
 
 
 

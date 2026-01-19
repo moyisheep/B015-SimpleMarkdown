@@ -192,130 +192,141 @@ void wxContainer::import_css(litehtml::string& text,
     }
 }
 
+ImageCache wxContainer::create_image_cache(std::string ext, std::vector<uint8_t>& data)
+{
+    ImageCache cache{};
+    if (ext == ".png")
+    {
+   
+        int width, height, channel;
+        if(stbi_info_from_memory(reinterpret_cast<const stbi_uc*>(data.data()), 
+            static_cast<int>(data.size()), 
+            &width, &height, &channel))
+        {
+            cache.type = ImageType::PNG;
+            cache.width = width;
+            cache.height = height;
+            cache.channel = channel;
+            cache.data = data;
+        }
+
+
+    }
+    else if(ext == ".jpg" || ext == ".jpeg" || ext == ".jif" || ext == ".jfif")
+    {
+        int width, height, channel;
+        if (stbi_info_from_memory(reinterpret_cast<const stbi_uc*>(data.data()),
+            static_cast<int>(data.size()),
+            &width, &height, &channel))
+        {
+            cache.type = ImageType::JPG;
+            cache.width = width;
+            cache.height = height;
+            cache.channel = channel;
+            cache.data = data;
+        }
+    }
+    else if(ext == ".bmp" || ext == ".dib")
+    {
+        int width, height, channel;
+        if (stbi_info_from_memory(reinterpret_cast<const stbi_uc*>(data.data()),
+            static_cast<int>(data.size()),
+            &width, &height, &channel))
+        {
+            cache.type = ImageType::BMP;
+            cache.width = width;
+            cache.height = height;
+            cache.channel = channel;
+            cache.data = data;
+        }
+    }
+    else if(ext == ".gif")
+    {
+        int width, height, channel;
+        if (stbi_info_from_memory(reinterpret_cast<const stbi_uc*>(data.data()),
+            static_cast<int>(data.size()),
+            &width, &height, &channel))
+        {
+            cache.type = ImageType::GIF;
+            cache.width = width;
+            cache.height = height;
+            cache.channel = channel;
+            cache.data = data;
+        }
+    
+    }
+    else if(ext == ".tif" || ext == ".tiff")
+    {
+    }
+    else if(ext == ".webp")
+    {
+    }
+    else if(ext == ".psd")
+    {}
+    else if(ext == ".heif" || ext == ".heic")
+    { }
+    else if(ext == ".svg")
+    {
+        cache.type = ImageType::SVG;
+        cache.data = data;
+    }
+    
+    return cache;
+}
 void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_on_ready)
 {
-    Timer("load_image", 1);
-    if (!m_vfs || !src) return;
- 
-    //std::string src_str(src);
-    //std::string baseurl_str(baseurl ? baseurl : "");
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("load_image", 1);
 
-    //try
-    //{
-    //    // 检查图片是否已经在缓存中
-    //    std::string cache_key = src_str + "|" + baseurl_str;
-    //    auto it = m_imageCache.find(cache_key);
-    //    if (it != m_imageCache.end())
-    //    {
-    //        // 图片已经在缓存中
-    //        if (redraw_on_ready)
-    //        {
-    //            // 请求重绘
-    //            m_wnd->Refresh();
-    //        }
-    //        return;
-    //    }
+    try
+    {
+        if(m_vfs && src)
+        {
+            std::string url(src);
+            auto it = m_imageCache.find(url);
+            if (it == m_imageCache.end())
+            {
+                auto bin = m_vfs->get_binary(url);
+                if (!bin.empty())
+                {
+                    auto ext = m_vfs->get_extension(url);
+                    auto cache = create_image_cache(ext, bin);
+                    if (!cache.empty())
+                    {
+                        m_imageCache.emplace(url, cache);
+                        timer.reset();
+                        return;
+                    }
+                }
+            }
+        }
+        timer.reset();
+        wxLogError("Error loading image: %s", src);
+    }
+    catch (const std::exception& e)
+    {
+        timer.reset();
+        wxLogError("Error loading image: %s, error: %s", src, e.what());
+    }
 
-    //    // 解析图片路径
-    //    
-
-
-    //    // 获取图片数据
-    //    auto file_data = m_vfs->get_binary(wxURL(src).BuildUnescapedURI().ToStdString());;
-    //    if (file_data.empty())
-    //    {
-    //        wxLogWarning("Failed to load image data: %s", src);
-    //        return;
-    //    }
-
-    //    // 从内存数据创建wxImage
-    //    wxMemoryInputStream mem_stream(file_data.data(), file_data.size());
-    //    wxImage image;
-
-    //    // 根据MIME类型确定格式
-    //    bool image_loaded = false;
-
-
-
-    //    image_loaded = image.LoadFile(mem_stream);
-   
-    //    if (image_loaded && image.IsOk())
-    //    {
-    //        // 缓存图片
-    //        wxBitmap bitmap(image);
-    //        m_imageCache[cache_key] = bitmap;
-
-    //        if (redraw_on_ready)
-    //        {
-    //            m_wnd->Refresh();
-    //        }
-    //    }
-    //    else
-    //    {
-    //        wxLogWarning("Failed to decode image: %s", src);
-    //    }
-    //}
-    //catch (const std::exception& e)
-    //{
-    //    wxLogError("Error loading image: %s, error: %s", src, e.what());
-    //}
 }
 
 void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
 {
     std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_image_size", 1);
-    sz.width = 0;
-    sz.height = 0;
-
-    if (!m_vfs || !src) 
-    {
-        timer.reset();
-        return;
-    } 
-  
-
-    std::string src_str(src);
-    std::string baseurl_str(baseurl ? baseurl : "");
 
     try
     {
-        // 检查图片是否已经在缓存中
-        std::string cache_key = src_str + "|" + baseurl_str;
-        auto it = m_imageCache.find(cache_key);
-        if (it != m_imageCache.end())
+        if(src && !m_imageCache.empty())
         {
-            // 从缓存中获取尺寸
-            const wxBitmap& bitmap = it->second;
-            if (bitmap.IsOk())
+            std::string url(src);
+            auto it = m_imageCache.find(url);
+            if (it != m_imageCache.end())
             {
-                sz.width = bitmap.GetWidth();
-                sz.height = bitmap.GetHeight();
+                sz.width = it->second.width;
+                sz.height = it->second.height;
+                timer.reset();
+                return;
             }
-            timer.reset();
-            return;
-        }
-
- 
-
-        // 尝试只读取图片头信息来获取尺寸（避免加载整个图片）
-        auto file_data = m_vfs->get_binary(wxURL(src).BuildUnescapedURI().ToStdString());;
-        if (file_data.empty())
-        {
-            timer.reset();
-            return;
-        }
-
-        // 使用 stb_image 只获取图片信息（不加载像素数据）
-        int width = 0, height = 0, channels = 0;
-        int success = stbi_info_from_memory(
-            reinterpret_cast<const stbi_uc*>(file_data.data()),
-            static_cast<int>(file_data.size()),
-            &width, &height, &channels);
-
-        if (success && width > 0 && height > 0)
-        {
-            sz.width = width;
-            sz.height = height;
         }
 
         timer.reset();
@@ -327,235 +338,306 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
     }
 }
 
+wxBitmap wxContainer::create_bitmap(ImageCache& cache) {
+    if (cache.empty()) {
+        wxLogWarning("ImageCache is empty");
+        return wxNullBitmap;
+    }
+
+    // 使用 stb_image 解码图像数据
+    int width, height, channels;
+    unsigned char* image_data = stbi_load_from_memory(
+        cache.data.data(),
+        static_cast<int>(cache.data.size()),
+        &width,
+        &height,
+        &channels,
+        0  // 不强制转换，保留原始通道数
+    );
+
+    if (!image_data) {
+        wxLogWarning("stbi_load_from_memory failed: %s", stbi_failure_reason());
+        return wxNullBitmap;
+    }
+
+    // 验证解码后的尺寸
+    if (static_cast<size_t>(width) != cache.width ||
+        static_cast<size_t>(height) != cache.height) {
+        wxLogWarning("Decoded image dimensions don't match cache info");
+        stbi_image_free(image_data);
+        return wxNullBitmap;
+    }
+
+    // 根据实际通道数处理图像数据
+    wxImage img;
+    if (channels == 1) {
+        // 灰度图像
+        img = wxImage(width, height, image_data, nullptr, true);  // 不复制数据
+    }
+    else if (channels == 2) {
+        // 灰度+alpha，需要转换为RGBA
+        unsigned char* rgb_data = new unsigned char[width * height * 3];
+        unsigned char* alpha_data = new unsigned char[width * height];
+
+        for (int i = 0; i < width * height; ++i) {
+            rgb_data[i * 3] = rgb_data[i * 3 + 1] = rgb_data[i * 3 + 2] = image_data[i * 2];
+            alpha_data[i] = image_data[i * 2 + 1];
+        }
+
+        img = wxImage(width, height, rgb_data, alpha_data, true);  // 接管内存
+    }
+    else if (channels == 3) {
+        // RGB图像
+        img = wxImage(width, height, image_data, nullptr, true);  // 不复制数据
+    }
+    else if (channels == 4) {
+        // RGBA图像
+        unsigned char* rgb_data = new unsigned char[width * height * 3];
+        unsigned char* alpha_data = new unsigned char[width * height];
+
+        for (int i = 0; i < width * height; ++i) {
+            rgb_data[i * 3] = image_data[i * 4];
+            rgb_data[i * 3 + 1] = image_data[i * 4 + 1];
+            rgb_data[i * 3 + 2] = image_data[i * 4 + 2];
+            alpha_data[i] = image_data[i * 4 + 3];
+        }
+
+        img = wxImage(width, height, rgb_data, alpha_data, true);  // 接管内存
+        stbi_image_free(image_data);  // 释放原始数据
+    }
+
+    if (!img.IsOk()) {
+        wxLogWarning("Failed to create wxImage from decoded data");
+        stbi_image_free(image_data);
+        return wxNullBitmap;
+    }
+
+    // 创建wxBitmap
+    wxBitmap bitmap(img);
+    if (!bitmap.IsOk()) {
+        wxLogWarning("Failed to create wxBitmap from wxImage");
+    }
+
+    return bitmap;
+}
+//wxBitmap  wxContainer::create_bitmap( ImageCache& cache) {
+//    if (cache.empty()) {
+//        wxLogWarning("ImageCache is empty");
+//        return wxNullBitmap;
+//    }
+//
+//    // 使用 stb_image 解码图像数据
+//    int width, height, channels;
+//    unsigned char* image_data = stbi_load_from_memory(
+//        cache.data.data(),
+//        static_cast<int>(cache.data.size()),
+//        &width,
+//        &height,
+//        &channels,
+//        STBI_rgb_alpha  // 强制转换为RGBA格式
+//    );
+//
+//    if (!image_data) {
+//        wxLogWarning("stbi_load_from_memory failed: %s", stbi_failure_reason());
+//        return wxNullBitmap;
+//    }
+//
+//    // 验证解码后的尺寸是否匹配缓存中的信息
+//    if (static_cast<size_t>(width) != cache.width ||
+//        static_cast<size_t>(height) != cache.height) {
+//        wxLogWarning("Decoded image dimensions don't match cache info");
+//        stbi_image_free(image_data);
+//        return wxNullBitmap;
+//    }
+//
+//    // 创建 wxImage 对象
+//    wxImage img(width, height, image_data, true);  // static_data = true, wxImage不会接管内存
+//
+//    if (!img.IsOk()) {
+//        wxLogWarning("Failed to create wxImage from decoded data");
+//        stbi_image_free(image_data);
+//        return wxNullBitmap;
+//    }
+//
+//    // 设置Alpha通道（如果存在）
+//    if (channels == 4 || cache.channel == 4) {
+//        img.InitAlpha();
+//        unsigned char* alpha = new unsigned char[width * height];
+//
+//        // 提取alpha通道（STBI_rgb_alpha将alpha放在第4个通道）
+//        for (int i = 0; i < width * height; ++i) {
+//            alpha[i] = image_data[i * 4 + 3];
+//        }
+//
+//        img.SetAlpha(alpha, true);  // static_data = true, wxImage会接管内存
+//    }
+//
+//    // 创建wxBitmap
+//    wxBitmap bitmap(img);
+//    if (!bitmap.IsOk()) {
+//        wxLogWarning("Failed to create wxBitmap from wxImage");
+//    }
+//
+//    // 释放stb_image分配的内存
+//    stbi_image_free(image_data);
+//
+//    return bitmap;
+//}
 void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const std::string& url, const std::string& base_url)
 {
     std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_image", 1);
-    //wxPaintDC* dc = (wxPaintDC*)hdc;
-    //if (!dc || !m_vfs || url.empty())
-    //{
-    //    timer.reset();
-    //    return;
-    //}
+    auto* dc = (wxGraphicsContext*)hdc;
+    if (!dc || m_imageCache.empty() || url.empty())
+    {
+        timer.reset();
+        return;
+    }
 
-    //try
-    //{
-    //    // 查找缓存的图片
-    //    std::string cache_key = url + "|" + base_url;
-    //    auto it = m_imageCache.find(cache_key);
-    //    if (it == m_imageCache.end())
-    //    {
-    //        // 图片未加载，尝试加载它（同步方式）
-    //          // 使用 stb_image 解码
-    //        auto file_data = m_vfs->get_binary(wxURL(url).BuildUnescapedURI().ToStdString());;
-    //        if (file_data.empty())
-    //        {
-    //            timer.reset();
-    //            return;
-    //        }
-    //        int width = 0, height = 0, channels = 0;
-    //        stbi_uc* image_data = stbi_load_from_memory(
-    //            reinterpret_cast<const stbi_uc*>(file_data.data()),
-    //            static_cast<int>(file_data.size()),
-    //            &width, &height, &channels, 0);
+    try
+    {
+        // 查找缓存的图片
+        auto it = m_imageCache.find(url);
+        if(it == m_imageCache.end() || it->second.empty())
+        {
+            wxLogWarning("Bitmap not in cache: %s", url);
+            timer.reset();
+            return;
+        }
+        
+        auto bitmap = create_bitmap(it->second);
 
-    //        if (image_data && width > 0 && height > 0)
-    //        {
-    //            // 根据通道数创建 wxImage
-    //            wxImage image(width, height, false); // 不初始化数据
+        if (!bitmap.IsOk())
+        {
+            wxLogWarning("Invalid bitmap for: %s", url);
+            timer.reset();
+            return;
+        }
 
-    //            if (channels == 1) // 灰度图
-    //            {
-    //                // 转换为RGB
-    //                image.Create(width, height);
-    //                unsigned char* rgb_data = image.GetData();
-    //                for (int i = 0; i < width * height; ++i)
-    //                {
-    //                    unsigned char gray = image_data[i];
-    //                    rgb_data[i * 3] = gray;
-    //                    rgb_data[i * 3 + 1] = gray;
-    //                    rgb_data[i * 3 + 2] = gray;
-    //                }
-    //            }
-    //            else if (channels == 3) // RGB
-    //            {
-    //                // 直接复制数据（stb_image 的 RGB 顺序和 wxImage 一致）
-    //                image.Create(width, height);
-    //                memcpy(image.GetData(), image_data, width * height * 3);
-    //            }
-    //            else if (channels == 4) // RGBA
-    //            {
-    //                // 处理带透明度的图片
-    //                image.Create(width, height);
+        // 获取图片原始尺寸
+        int img_width = bitmap.GetWidth();
+        int img_height = bitmap.GetHeight();
 
-    //                // 分配 Alpha 通道数据
-    //                image.InitAlpha();
+        if (img_width <= 0 || img_height <= 0)
+        {
+            timer.reset();
+            return;
+        }
 
-    //                // 复制 RGB 数据并设置 Alpha
-    //                unsigned char* rgb_data = image.GetData();
-    //                unsigned char* alpha_data = image.GetAlpha();
+        // 计算绘制区域
+        int border_x = layer.border_box.x;
+        int border_y = layer.border_box.y;
+        int border_width = layer.border_box.width;
+        int border_height = layer.border_box.height;
 
-    //                for (int i = 0; i < width * height; ++i)
-    //                {
-    //                    rgb_data[i * 3] = image_data[i * 4];       // R
-    //                    rgb_data[i * 3 + 1] = image_data[i * 4 + 1]; // G
-    //                    rgb_data[i * 3 + 2] = image_data[i * 4 + 2]; // B
-    //                    alpha_data[i] = image_data[i * 4 + 3];     // A
-    //                }
-    //            }
+        // 获取origin_box（背景定位参考点）
+        int origin_x = layer.origin_box.x;
+        int origin_y = layer.origin_box.y;
+        int origin_width = layer.origin_box.width;
+        int origin_height = layer.origin_box.height;
 
-    //            // 释放 stb_image 数据
-    //            stbi_image_free(image_data);
+        // 计算背景位置（这里简化处理，实际CSS背景定位更复杂）
+        int bg_x = origin_x;
+        int bg_y = origin_y;
 
-    //            if (image.IsOk())
-    //            {
-    //                // 缓存图片
-    //                wxBitmap bitmap(image);
-    //                m_imageCache[cache_key] = bitmap;
+        // 处理background-repeat
+        int draw_width = img_width;
+        int draw_height = img_height;
 
-    //            }
-    //            it = m_imageCache.find(cache_key);
-    //            if (it == m_imageCache.end())
-    //            {
-    //                wxLogWarning("Image not loaded: %s", url);
-    //                timer.reset();
-    //                return;
-    //            }
-    //        }
-    //        
-    //    }
-    //    const wxBitmap& bitmap = it->second;
-    //    if (!bitmap.IsOk())
-    //    {
-    //        wxLogWarning("Invalid bitmap for: %s", url);
-    //        timer.reset();
-    //        return;
-    //    }
+        switch (layer.repeat)
+        {
+        case litehtml::background_repeat_repeat:
+            // 平铺（默认）
+            // 计算需要绘制的次数
+            for (int y = bg_y; y < border_y + border_height; y += draw_height)
+            {
+                for (int x = bg_x; x < border_x + border_width; x += draw_width)
+                {
+                    dc->DrawBitmap(bitmap, x, y, draw_width, draw_height);
+                }
+            }
+            break;
 
-    //    // 获取图片原始尺寸
-    //    int img_width = bitmap.GetWidth();
-    //    int img_height = bitmap.GetHeight();
+        case litehtml::background_repeat_repeat_x:
+            // 水平平铺
+            for (int x = bg_x; x < border_x + border_width; x += draw_width)
+            {
+                dc->DrawBitmap(bitmap, x, bg_y, draw_width, draw_height);
+            }
+            break;
 
-    //    if (img_width <= 0 || img_height <= 0)
-    //    {
-    //        timer.reset();
-    //        return;
-    //    }
+        case litehtml::background_repeat_repeat_y:
+            // 垂直平铺
+            for (int y = bg_y; y < border_y + border_height; y += draw_height)
+            {
+                dc->DrawBitmap(bitmap, bg_x, y, draw_width, draw_height);
+            }
+            break;
 
-    //    // 计算绘制区域
-    //    int border_x = layer.border_box.x;
-    //    int border_y = layer.border_box.y;
-    //    int border_width = layer.border_box.width;
-    //    int border_height = layer.border_box.height;
+        case litehtml::background_repeat_no_repeat:
+        default:
+            // 不平铺，只绘制一次
+        {
+            // 确保图片在边框区域内
+            if (bg_x + draw_width > border_x + border_width)
+            {
+                draw_width = border_x + border_width - bg_x;
+            }
+            if (bg_y + draw_height > border_y + border_height)
+            {
+                draw_height = border_y + border_height - bg_y;
+            }
+            if (draw_width > 0 && draw_height > 0)
+            {
+                // 如果尺寸不匹配，需要创建缩放后的位图
+                if (draw_width != img_width || draw_height != img_height)
+                {
+                    wxImage img = bitmap.ConvertToImage();
+                    if (img.IsOk())
+                    {
+                        img.Rescale(draw_width, draw_height, wxIMAGE_QUALITY_HIGH);
+                        wxBitmap scaled_bitmap(img);
+                        dc->DrawBitmap(scaled_bitmap, bg_x, bg_y, draw_width, draw_height);
+                    }
+                }
+                else
+                {
+                    dc->DrawBitmap(bitmap, bg_x, bg_y, draw_width, draw_height);
+                }
+            }
+        }
+        break;
+        }
 
-    //    // 获取origin_box（背景定位参考点）
-    //    int origin_x = layer.origin_box.x;
-    //    int origin_y = layer.origin_box.y;
-    //    int origin_width = layer.origin_box.width;
-    //    int origin_height = layer.origin_box.height;
+        // 处理background-attachment（这里简化处理，实际需要处理滚动）
+        // background_attachment_fixed: 相对于视口固定
+        // background_attachment_scroll: 随内容滚动（默认）
+        // 在实际的浏览器中，这需要根据滚动位置调整绘制位置
 
-    //    // 计算背景位置（这里简化处理，实际CSS背景定位更复杂）
-    //    int bg_x = origin_x;
-    //    int bg_y = origin_y;
+        // 应用裁剪区域
+        //if (layer.clip_box.width > 0 && layer.clip_box.height > 0)
+        //{
+        //    // 注意：wxWidgets的裁剪是叠加的，所以需要先清除之前的裁剪
+        //    dc->DestroyClippingRegion();
+        //    dc->SetClippingRegion(layer.clip_box.x, layer.clip_box.y,
+        //        layer.clip_box.width, layer.clip_box.height);
+        //}
 
-    //    // 处理background-repeat
-    //    int draw_width = img_width;
-    //    int draw_height = img_height;
-
-    //    switch (layer.repeat)
-    //    {
-    //    case litehtml::background_repeat_repeat:
-    //        // 平铺（默认）
-    //        // 计算需要绘制的次数
-    //        for (int y = bg_y; y < border_y + border_height; y += draw_height)
-    //        {
-    //            for (int x = bg_x; x < border_x + border_width; x += draw_width)
-    //            {
-    //                dc->DrawBitmap(bitmap, x, y, true);
-    //            }
-    //        }
-    //        break;
-
-    //    case litehtml::background_repeat_repeat_x:
-    //        // 水平平铺
-    //        for (int x = bg_x; x < border_x + border_width; x += draw_width)
-    //        {
-    //            dc->DrawBitmap(bitmap, x, bg_y, true);
-    //        }
-    //        break;
-
-    //    case litehtml::background_repeat_repeat_y:
-    //        // 垂直平铺
-    //        for (int y = bg_y; y < border_y + border_height; y += draw_height)
-    //        {
-    //            dc->DrawBitmap(bitmap, bg_x, y, true);
-    //        }
-    //        break;
-
-    //    case litehtml::background_repeat_no_repeat:
-    //    default:
-    //        // 不平铺，只绘制一次
-    //    {
-    //        // 确保图片在边框区域内
-    //        if (bg_x + draw_width > border_x + border_width)
-    //        {
-    //            draw_width = border_x + border_width - bg_x;
-    //        }
-    //        if (bg_y + draw_height > border_y + border_height)
-    //        {
-    //            draw_height = border_y + border_height - bg_y;
-    //        }
-    //        if (draw_width > 0 && draw_height > 0)
-    //        {
-    //            // 如果尺寸不匹配，需要创建缩放后的位图
-    //            if (draw_width != img_width || draw_height != img_height)
-    //            {
-    //                wxImage img = bitmap.ConvertToImage();
-    //                if (img.IsOk())
-    //                {
-    //                    img.Rescale(draw_width, draw_height, wxIMAGE_QUALITY_HIGH);
-    //                    wxBitmap scaled_bitmap(img);
-    //                    dc->DrawBitmap(scaled_bitmap, bg_x, bg_y, true);
-    //                }
-    //            }
-    //            else
-    //            {
-    //                dc->DrawBitmap(bitmap, bg_x, bg_y, true);
-    //            }
-    //        }
-    //    }
-    //    break;
-    //    }
-
-    //    // 处理background-attachment（这里简化处理，实际需要处理滚动）
-    //    // background_attachment_fixed: 相对于视口固定
-    //    // background_attachment_scroll: 随内容滚动（默认）
-    //    // 在实际的浏览器中，这需要根据滚动位置调整绘制位置
-
-    //    // 应用裁剪区域
-    //    if (layer.clip_box.width > 0 && layer.clip_box.height > 0)
-    //    {
-    //        // 注意：wxWidgets的裁剪是叠加的，所以需要先清除之前的裁剪
-    //        dc->DestroyClippingRegion();
-    //        dc->SetClippingRegion(layer.clip_box.x, layer.clip_box.y,
-    //            layer.clip_box.width, layer.clip_box.height);
-    //    }
-
-    //    // 处理border-radius（如果有的话）
-    //    if (layer.border_radius.top_left_x > 0 || layer.border_radius.top_right_x > 0 ||
-    //        layer.border_radius.bottom_left_x > 0 || layer.border_radius.bottom_right_x > 0)
-    //    {
-    //        // 这里可以添加圆角裁剪逻辑
-    //        // 注意：wxWidgets没有内置的圆角裁剪，可能需要使用wxGraphicsContext
-    //        // 或者创建路径进行裁剪
-    //    }
-    //    timer.reset();
-    //}
-    //catch (const std::exception& e)
-    //{
-    //    timer.reset();
-    //    wxLogError("Error drawing image: %s, error: %s", url, e.what());
-    //}
+        //// 处理border-radius（如果有的话）
+        //if (layer.border_radius.top_left_x > 0 || layer.border_radius.top_right_x > 0 ||
+        //    layer.border_radius.bottom_left_x > 0 || layer.border_radius.bottom_right_x > 0)
+        //{
+        //    // 这里可以添加圆角裁剪逻辑
+        //    // 注意：wxWidgets没有内置的圆角裁剪，可能需要使用wxGraphicsContext
+        //    // 或者创建路径进行裁剪
+        //}
+        timer.reset();
+    }
+    catch (const std::exception& e)
+    {
+        timer.reset();
+        wxLogError("Error drawing image: %s, error: %s", url, e.what());
+    }
 }
 
 litehtml::pixel_t wxContainer::pt_to_px(float pt) const

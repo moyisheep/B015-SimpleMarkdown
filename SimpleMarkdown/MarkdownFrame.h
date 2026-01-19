@@ -20,6 +20,8 @@ public:
         const wxString& name = wxASCII_STR(wxFrameNameStr));
 	~MarkdownFrame();
 
+    wxString GetExecutablePath();
+
     bool set_markdown(const std::string& md);
     bool set_html(const std::string& html);
     bool is_supported_format(std::string format);
@@ -40,6 +42,7 @@ private:
     MarkdownMode m_mode;
     std::string m_text = "";
     std::shared_ptr<VirtualFileSystem> m_vfs;
+    std::string m_exe_dir = "";
 
 
 

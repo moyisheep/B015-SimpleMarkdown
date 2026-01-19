@@ -45,12 +45,7 @@ bool MyApp::OnInit()
 
         frame->load_markdown(filePath.generic_string());
     }
-    else
-    {
-        fs::path filePath("./resources/homepage.md");
 
-        frame->load_markdown(filePath.generic_string());
-    }
 
     frame->Show(true);
 

@@ -2,6 +2,7 @@
 #include "MarkdownTextCtrl.h"
 
 #include <set>
+#include <wx/stdpaths.h>
 
 static const int ID_TOGGLE_EDIT_MODE = wxNewId();
 
@@ -20,13 +21,20 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);
 	m_view_wnd->set_vfs(m_vfs);
 
+
 	m_edit_wnd = std::make_unique<MarkdownTextCtrl>(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	m_edit_wnd->enable_live_highlighting(true);
+	m_edit_wnd->set_vfs(m_vfs);
 	m_edit_wnd->Hide();
-	m_edit_wnd->EnableLiveHighlighting(true);
-	m_edit_wnd->LoadStylesFromFile("./resources/markdown-edit-light-forest.toml");
-	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
 
+	m_exe_dir = std::string(GetExecutablePath().ToUTF8());
+	m_vfs->set_current_path(m_exe_dir);
+	
+	
+	m_edit_wnd->load_styles("./resources/markdown-edit-light-forest.toml");
+	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
+	m_view_wnd->load_markdown("./resources/homepage.md");
 	m_view_wnd->Show();
 
 
@@ -53,7 +61,13 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 MarkdownFrame::~MarkdownFrame()
 {
 }
+wxString MarkdownFrame::GetExecutablePath() {
+	// 获取可执行文件完整路径
+	wxString exePath = wxStandardPaths::Get().GetExecutablePath();
 
+	// 提取目录部分
+	return wxPathOnly(exePath);
+}
 bool MarkdownFrame::set_markdown(const std::string& md)
 {
 
@@ -112,7 +126,11 @@ bool MarkdownFrame::load_markdown(const std::string& path)
 	if (m_view_wnd && m_vfs && is_supported_format(ext))
 	{
 
-		
+		auto parent_path = m_vfs->get_parent_path(path);
+		if(!parent_path.empty())
+		{
+			m_vfs->set_current_path(parent_path);
+		}
 		auto bin = m_vfs->get_binary(path);
 		if(!bin.empty())
 		{
@@ -237,7 +255,7 @@ void MarkdownFrame::ToggleEditMode()
 
 		m_edit_wnd->Show();
 		m_view_wnd->Hide();
-		m_edit_wnd->HighlightMarkdown();
+		m_edit_wnd->highlight_markdown();
 		m_edit_wnd->SetFocus();
 
 

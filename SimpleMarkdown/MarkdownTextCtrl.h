@@ -8,6 +8,8 @@
 #include <vector>
 #include <memory>
 
+#include "VirtualFileSystem.h"
+
 // 前向声明
 struct cmark_parser;
 struct cmark_node;
@@ -24,18 +26,19 @@ public:
 
     virtual ~MarkdownTextCtrl();
 
-    void InitializeLightTheme();
-    void InitializeDarkTheme();
+
 
     // 设置是否启用实时语法高亮
-    void EnableLiveHighlighting(bool enable = true);
+    void enable_live_highlighting(bool enable = true);
 
     // 手动触发语法高亮
-    void HighlightMarkdown();
+    void highlight_markdown();
 
-    bool LoadStylesFromFile(const wxString& tomlFile);
+    bool set_styles(const std::string& tomlString);
+    bool load_styles(const std::string& tomlPath);
 
-
+    void set_vfs(std::shared_ptr<VirtualFileSystem>& vfs);
+    std::shared_ptr<VirtualFileSystem> get_vfs();
 
 protected:
     // 事件处理
@@ -47,7 +50,8 @@ protected:
 private:
     // 初始化样式
     void InitializeStyles();
-
+    void InitializeLightTheme();
+    void InitializeDarkTheme();
 
 
     // 解析Markdown并应用样式
@@ -94,6 +98,7 @@ private:
     cmark_syntax_extension* m_autolinkExtension;
 
 
+    std::shared_ptr<VirtualFileSystem> m_vfs;
 };
 
 #endif // MARKDOWNTEXTCTRL_H

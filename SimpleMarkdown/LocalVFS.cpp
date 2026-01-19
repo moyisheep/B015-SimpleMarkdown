@@ -38,6 +38,19 @@ std::vector<uint8_t> LocalVFS::get_binary(const std::string& src)
     return std::vector<uint8_t>();
 }
 
+std::string LocalVFS::get_string(const std::string& path)
+{
+    if(!path.empty())
+    {
+        auto bin = get_binary(path);
+        if(!bin.empty())
+        {
+            return std::string(bin.begin(), bin.end());
+        }
+    }
+    return std::string();
+}
+
 std::string LocalVFS::get_extension(const std::string& path)
 {
     auto ext = fs::path(path).extension().generic_string();
@@ -48,4 +61,28 @@ std::string LocalVFS::get_extension(const std::string& path)
 
     return ext;
  
+}
+
+bool LocalVFS::set_current_path(const std::string& path)
+{
+    try
+    {
+        fs::current_path(path);
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        return false;
+    }
+ 
+}
+
+std::string LocalVFS::get_parent_path(const std::string& path)
+{
+    return fs::path(path).parent_path().generic_string();
+}
+
+std::string LocalVFS::get_current_path()
+{
+    return fs::current_path().generic_string();
 }
