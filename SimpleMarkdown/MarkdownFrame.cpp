@@ -1,6 +1,8 @@
 #include "MarkdownFrame.h"
 #include "MarkdownTextCtrl.h"
 
+#include <set>
+
 static const int ID_TOGGLE_EDIT_MODE = wxNewId();
 
 MarkdownFrame::MarkdownFrame(wxWindow* parent, 
@@ -23,7 +25,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_edit_wnd->Hide();
 	m_edit_wnd->EnableLiveHighlighting(true);
 	m_edit_wnd->LoadStylesFromFile("./resources/markdown-edit-light-forest.toml");
-	m_view_wnd->load_user_css("./resources/markdown-view-dark.css");
+	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
 
 	m_view_wnd->Show();
 
@@ -69,19 +71,64 @@ bool MarkdownFrame::set_markdown(const std::string& md)
 
 	return false;
 }
+bool MarkdownFrame::set_html(const std::string& html)
+{
+	if (m_mode == MarkdownMode::view && m_view_wnd)
+	{
+		m_view_wnd->set_user_css(" ");
+		m_view_wnd->set_html(html);
+		return true;
+	}
 
+	if (m_mode == MarkdownMode::edit && m_edit_wnd)
+	{
+		m_edit_wnd->SetValue(wxString::FromUTF8(html));
+		return true;
+	}
 
+	return false;
+}
+
+bool MarkdownFrame::is_supported_format(std::string format)
+{
+	return is_markdown_format(format) || is_html_format(format);
+}
+
+bool MarkdownFrame::is_markdown_format(std::string format)
+{
+	static std::set<std::string> markdown_format =
+	{ ".md", ".markdown", ".txt"};
+	return markdown_format.count(format) == 1;
+}
+bool MarkdownFrame::is_html_format(std::string format)
+{
+	static std::set<std::string> html_format =
+	{ ".html", ".xhtml" };
+	return html_format.count(format) == 1;
+}
 bool MarkdownFrame::load_markdown(const std::string& path)
 {
-	if (m_view_wnd && m_vfs)
+	auto ext = m_vfs->get_extension(path);
+	if (m_view_wnd && m_vfs && is_supported_format(ext))
 	{
+
+		
 		auto bin = m_vfs->get_binary(path);
 		if(!bin.empty())
 		{
-			auto md = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
-			if (!md.empty())
+
+			auto txt = std::string(reinterpret_cast<char*> (bin.data()), bin.size());
+			if (!txt.empty())
 			{
-				return set_markdown(md);
+				if(is_markdown_format(ext))
+				{
+					return set_markdown(txt);
+				}
+				else if(is_html_format(ext))
+				{
+					return set_html(txt);
+				}
+				
 			}
 		}
 		else

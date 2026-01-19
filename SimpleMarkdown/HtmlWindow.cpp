@@ -6,8 +6,8 @@
 #include <wx/uri.h>
 #include <wx/dataobj.h>
 #include <wx/clipbrd.h>
-#include <wx/graphics.h>
-#include <wx/dcgraph.h>
+#include <wx/dcbuffer.h>
+
 
 
 #include <algorithm>
@@ -359,44 +359,64 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
 
-    // get update rect
-    wxRegion updateRegion = GetUpdateRegion();
-    wxRect updateRect = updateRegion.GetBox();
+    wxGraphicsContext* gc = wxGraphicsContext::Create(dc);
 
+    if(gc && m_doc)
+    {
+        // get update rect
+        wxRegion updateRegion = GetUpdateRegion();
+        wxRect updateRect = updateRegion.GetBox();
+     
+
+
+
+        TimerOutput::Instance().start("[draw]");
+
+        // clear background
+        gc->SetBrush(*wxWHITE_BRUSH);
+        gc->DrawRectangle(wxRect2DDouble(updateRect));
+
+        // clip rectangle
+        litehtml::position clip{ (float)updateRect.x,
+            (float)updateRect.y,
+            (float)updateRect.width,
+            (float)updateRect.height };
+
+        // draw 
+        litehtml::uint_ptr hdc = (litehtml::uint_ptr)gc;
+        if(hdc)
+        {
+            m_doc->draw(hdc, 0, -m_scrollPos, &clip);
+        }
+ 
+
+        // draw selection
+        DrawSelection(gc, updateRect);
+
+        // draw merged text
+        m_container->draw_finished(hdc, clip);
+
+        //DrawCaret(&memdc);
+        TimerOutput::Instance().end();
+
+
+
+
+
+        // draw update rect
+        gc->SetBrush(*wxTRANSPARENT_BRUSH);
+        gc->SetPen(*wxRED_PEN);
+        gc->DrawRectangle(wxRect2DDouble(updateRect));
+    }
+
+    delete gc;
  
 
 
 
 
 
-    // draw doc
-    if (m_doc)
-    {
-       
-        auto memdc = wxMemoryDC(m_back_bitmap);
 
-        TimerOutput::Instance().start("[draw]");
-        litehtml::position clip{ (float)updateRect.x, 
-            (float)updateRect.y, 
-            (float)updateRect.width, 
-            (float)updateRect.height };
-        litehtml::uint_ptr hdc = (litehtml::uint_ptr)&memdc;
-        m_doc->draw(hdc, 0, -m_scrollPos, &clip);
-        DrawSelection(&memdc, updateRect);
-        m_container->draw_finished(hdc);
-        DrawCaret(&memdc);
-        TimerOutput::Instance().end();
-
-        dc.Blit(0, 0, m_back_bitmap.GetWidth(), m_back_bitmap.GetHeight(), &memdc, 0, 0);
-    }
-
-
-
-
-    // draw update rect
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(*wxRED_PEN);
-    dc.DrawRectangle(updateRect);
 }
 
 void HtmlWindow::DrawCaret(wxDC* dc)
@@ -413,21 +433,21 @@ void HtmlWindow::DrawCaret(wxDC* dc)
         dc->DrawLine(pt1, pt2);
     }
 }
-void HtmlWindow::DrawSelection(wxDC* dc, wxRect updateRect)
+void HtmlWindow::DrawSelection(wxGraphicsContext* dc, wxRect updateRect)
 {
 
     // draw selection 
     if (!m_selection_rect.empty())
     {
-
-        dc->SetBrush(*wxTRANSPARENT_BRUSH);
-        dc->SetPen(*wxBLUE_PEN);
+        
+        dc->SetBrush(wxBrush(wxColor(128, 128, 128, 255)));
+        dc->SetPen(*wxTRANSPARENT_PEN);
         for (auto& rect : m_selection_rect.get_rect())
         {
             rect.y = rect.y - m_scrollPos;
             if (updateRect.Intersects(rect))
             {
-                dc->DrawRectangle(rect);
+                dc->DrawRectangle(wxRect2DDouble(rect));
             }
 
         }
@@ -543,12 +563,11 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
 
     if(m_doc)
     {
-        //m_selection_rect.clear();
+
         auto index = hit_test(x, y);
         if(index >= 0)
         {
-            //m_selection_rect.add(m_char_boxes[pos]);
-            //m_selection_rect.scroll(-m_scrollPos);
+
             m_cursor_pos = index;
             auto pos = m_char_boxes[index];
             litehtml::position::vector redraw_boxes;
@@ -556,13 +575,7 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
             RequestRedraw(redraw_boxes);
         }
     }
-    //if (m_doc)
-    //{
-    //    auto sel = GetSelectionChar(pt.x, pt.y + m_scrollPos);
-    //    m_selection_rect.add(sel.position());
 
-    //}
-    //event.Skip();
 }
 
 void HtmlWindow::OnMouseMove(wxMouseEvent& event)
@@ -647,9 +660,10 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
                 RequestRedraw(m_selection_rect.get_raw_rect());
             }
         }
-        m_selection = false;
+     
 
     }
+    m_selection = false;
 }
 
 void HtmlWindow::UpdateSelectionRect()

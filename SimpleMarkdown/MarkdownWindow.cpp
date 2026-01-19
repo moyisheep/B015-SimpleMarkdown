@@ -55,6 +55,7 @@ bool MarkdownWindow::set_markdown(const std::string& md)
         auto html = md_to_html(md);
         if (!html.empty())
         {
+            //wxLogInfo(wxString::FromUTF8(html));
             set_html(html);
             return true;
         }

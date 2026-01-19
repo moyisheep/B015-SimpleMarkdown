@@ -37,3 +37,15 @@ std::vector<uint8_t> LocalVFS::get_binary(const std::string& src)
 
     return std::vector<uint8_t>();
 }
+
+std::string LocalVFS::get_extension(const std::string& path)
+{
+    auto ext = fs::path(path).extension().generic_string();
+    if(!ext.empty())
+    {
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    }
+
+    return ext;
+ 
+}

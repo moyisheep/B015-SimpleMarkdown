@@ -20,7 +20,7 @@
 #include <vector>
 #include <string>
 #include <cctype>
-
+#include <wx/dcgraph.h>
 
 
 #include "LocalVFS.h"
@@ -206,7 +206,7 @@ private:
     
     void DrawCaret(wxDC* dc);
 
-    void DrawSelection(wxDC* dc, wxRect updateRect);
+    void DrawSelection(wxGraphicsContext* dc, wxRect updateRect);
     void OnScroll(wxScrollWinEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnSize(wxSizeEvent& event);

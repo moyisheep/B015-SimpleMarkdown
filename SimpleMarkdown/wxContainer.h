@@ -128,7 +128,9 @@ public:
     bool on_element_click(const litehtml::element::ptr& el) override;
     void on_mouse_event(const litehtml::element::ptr& el, litehtml::mouse_event event) override;
 
-    void draw_finished(litehtml::uint_ptr hdc) ;
+    void draw_finished(litehtml::uint_ptr hdc, litehtml::position updateRect);
+
+
     //void execute_script(const std::string& src,
     //    const std::string& content,
     //    const std::string& type,
