@@ -906,16 +906,6 @@ void MarkdownTextCtrl::ClearAllStyling()
     }
 }
 
-void MarkdownTextCtrl::ApplyBaseStyle()
-{
-    // 设置整个文档为普通样式
-    int length = GetTextLength();
-    if (length > 0) {
-
-        StartStyling(0);
-        SetStyling(length, STYLE_NORMAL);
-    }
-}
 
 
 
@@ -935,34 +925,3 @@ void MarkdownTextCtrl::SetStyleRange(int start, int end, int style)
 
 
 
-void MarkdownTextCtrl::SetHeaderStyle(int level, const wxColour& color, int fontSize, bool bold)
-{
-    if (level < 1 || level > 6) return;
-
-    int style_id = STYLE_HEADER1 + (level - 1);
-    StyleSetForeground(style_id, color);
-    if (fontSize > 0) {
-        StyleSetSize(style_id, fontSize);
-    }
-    StyleSetBold(style_id, bold);
-}
-
-void MarkdownTextCtrl::SetCodeStyle(const wxColour& background, const wxColour& textColor)
-{
-    StyleSetBackground(STYLE_CODE, background);
-    StyleSetForeground(STYLE_CODE, textColor);
-    StyleSetBackground(STYLE_CODEBLOCK, background);
-    StyleSetForeground(STYLE_CODEBLOCK, textColor);
-}
-
-void MarkdownTextCtrl::SetLinkStyle(const wxColour& color, bool underline)
-{
-    StyleSetForeground(STYLE_LINK, color);
-    StyleSetUnderline(STYLE_LINK, underline);
-}
-
-void MarkdownTextCtrl::SetQuoteStyle(const wxColour& color, const wxColour& background)
-{
-    StyleSetForeground(STYLE_BLOCKQUOTE, color);
-    StyleSetBackground(STYLE_BLOCKQUOTE, background);
-}

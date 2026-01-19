@@ -862,7 +862,8 @@ void wxContainer::on_mouse_event(const litehtml::element::ptr& el, litehtml::mou
 
 void wxContainer::draw_finished(litehtml::uint_ptr hdc, litehtml::position updateRect)
 {
-    
+    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
+
     auto* dc = (wxGraphicsContext*)hdc;
     if(dc)
     {
@@ -872,7 +873,7 @@ void wxContainer::draw_finished(litehtml::uint_ptr hdc, litehtml::position updat
         {
             if(updateRect.does_intersect(&cache.pos))
             {
-                std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
+                //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
                 wxFont* font = (wxFont*)cache.hFont;
                 if (font)
                 {
@@ -887,12 +888,13 @@ void wxContainer::draw_finished(litehtml::uint_ptr hdc, litehtml::position updat
                     //dc->SetTextForeground(wxColour(cache.color.red, cache.color.green, cache.color.blue));
                     dc->DrawText(wtext, cache.pos.x, cache.pos.y);
                 }
-                timer.reset();
+                //timer.reset();
             }
 
         }
     }
    
+    timer.reset();
 
 }
 

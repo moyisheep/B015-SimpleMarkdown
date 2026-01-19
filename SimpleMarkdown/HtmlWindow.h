@@ -160,7 +160,7 @@ public:
 protected:
     std::shared_ptr<VirtualFileSystem> m_vfs = nullptr;
 private:
-    int32_t m_cursor_pos = -1;
+    //int32_t m_cursor_pos = -1;
     std::vector<litehtml::position> m_char_boxes;
     int m_scrollPos;
     std::unique_ptr<wxContainer> m_container;

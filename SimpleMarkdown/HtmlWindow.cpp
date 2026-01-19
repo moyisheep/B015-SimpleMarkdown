@@ -193,7 +193,7 @@ void HtmlWindow::clear()
 {
     ClearSelection();
     m_scrollPos = 0;
-    m_cursor_pos = -1;
+    //m_cursor_pos = -1;
     m_char_boxes.clear();
     m_plain_text.clear();
     m_totalHeight = 0;
@@ -242,40 +242,12 @@ void HtmlWindow::SetupScrollbars()
 
 void HtmlWindow::ScrollToPosition(int pos)
 {
-   //.auto delta = pos - m_scrollPos;
-
-    //auto sz = GetClientSize();
-
 
     m_scrollPos = pos;
     SetScrollPos(wxVERTICAL, pos);
-    //UpdateSelectionRect();
-    //Refresh();
 
-    //if (std::abs(delta) < sz.GetHeight())
-    //{
- 
-    //    auto bitmap = wxBitmap(m_back_bitmap);
-    //    auto memdc = wxMemoryDC();
-    //    memdc.SelectObject(m_back_bitmap);
-    //    memdc.DrawBitmap(wxNullBitmap, wxPoint(0, 0));
-    //    memdc.SelectObject(wxNullBitmap);
-    //    m_scrolling = true;
-    //    if (delta > 0)
-    //    {
-
-    //        RefreshRect(wxRect{ 0, sz.GetHeight()- delta, m_back_bitmap.GetWidth(), delta });
-    //    }
-    //    else
-    //    {
-
-    //        RefreshRect(wxRect{ 0,  -delta, m_back_bitmap.GetWidth(), -delta });
-    //    }
-    //}
-    //else
-    {
-        Refresh();
-    }
+    Refresh(true);
+    
 }
 
 int HtmlWindow::GetScrollPosition() const
@@ -404,9 +376,9 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 
 
         // draw update rect
-        gc->SetBrush(*wxTRANSPARENT_BRUSH);
-        gc->SetPen(*wxRED_PEN);
-        gc->DrawRectangle(wxRect2DDouble(updateRect));
+        //gc->SetBrush(*wxTRANSPARENT_BRUSH);
+        //gc->SetPen(*wxRED_PEN);
+        //gc->DrawRectangle(wxRect2DDouble(updateRect));
     }
 
     delete gc;
@@ -419,20 +391,20 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 
 }
 
-void HtmlWindow::DrawCaret(wxDC* dc)
-{
-    // draw cursor
-    if (m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
-    {
-        auto pos = m_char_boxes[m_cursor_pos];
-        pos.y = pos.y - m_scrollPos;
-        dc->SetBrush(*wxTRANSPARENT_BRUSH);
-        dc->SetPen(*wxBLACK_PEN);
-        wxPoint pt1(pos.right(), pos.top());
-        wxPoint pt2(pos.right(), pos.bottom());
-        dc->DrawLine(pt1, pt2);
-    }
-}
+//void HtmlWindow::DrawCaret(wxDC* dc)
+//{
+//    // draw cursor
+//    if (m_cursor_pos >= 0 && m_cursor_pos < m_char_boxes.size())
+//    {
+//        auto pos = m_char_boxes[m_cursor_pos];
+//        pos.y = pos.y - m_scrollPos;
+//        dc->SetBrush(*wxTRANSPARENT_BRUSH);
+//        dc->SetPen(*wxBLACK_PEN);
+//        wxPoint pt1(pos.right(), pos.top());
+//        wxPoint pt2(pos.right(), pos.bottom());
+//        dc->DrawLine(pt1, pt2);
+//    }
+//}
 void HtmlWindow::DrawSelection(wxGraphicsContext* dc, wxRect updateRect)
 {
 
@@ -555,26 +527,27 @@ void HtmlWindow::OnLeftDown(wxMouseEvent& event)
            
             m_selection_start = pos;
             m_selection_end = pos;
+            m_selection = true;
         }
 
-        m_selection = true;
+   
 
     }
 
-    if(m_doc)
-    {
+    //if(m_doc)
+    //{
 
-        auto index = hit_test(x, y);
-        if(index >= 0)
-        {
+    //    auto index = hit_test(x, y);
+    //    if(index >= 0)
+    //    {
 
-            m_cursor_pos = index;
-            auto pos = m_char_boxes[index];
-            litehtml::position::vector redraw_boxes;
-            redraw_boxes.push_back(pos);
-            RequestRedraw(redraw_boxes);
-        }
-    }
+    //        m_cursor_pos = index;
+    //        auto pos = m_char_boxes[index];
+    //        litehtml::position::vector redraw_boxes;
+    //        redraw_boxes.push_back(pos);
+    //        RequestRedraw(redraw_boxes);
+    //    }
+    //}
 
 }
 
@@ -597,29 +570,15 @@ void HtmlWindow::OnMouseMove(wxMouseEvent& event)
     }
     if (m_doc && m_selection)
     {
-        if(m_selection_start < 0)
-        {
-            auto pos = hit_test(x, y);
-            if (pos >= 0) 
-            { 
-                m_selection_start = pos;
-                m_selection_end = pos;
-            }
-        }
-        if(m_selection_end > 0)
-        {
-            auto pos = hit_test(x, y);
-            if (pos >= 0)
-            {
-                m_cursor_pos = pos;
-                m_selection_end = pos;
-                UpdateSelectionRect();
-                RequestRedraw(m_selection_rect.get_raw_rect());
-            }
-        }
 
- 
-
+        auto pos = hit_test(x, y);
+        if (pos >= 0)
+        {
+            //m_cursor_pos = pos;
+            m_selection_end = pos;
+            UpdateSelectionRect();
+            RequestRedraw(m_selection_rect.get_raw_rect());
+        }
    
     }
     if(m_doc)
@@ -650,7 +609,7 @@ void HtmlWindow::OnLeftUp(wxMouseEvent& event)
 
     if (m_doc && m_selection)
     {
-        if (m_selection_end >= 0)
+        if (m_selection_end >= 0 && m_selection_end != m_selection_start)
         {
             auto pos = hit_test(x, y);
             if (pos >= 0)
@@ -772,16 +731,16 @@ void HtmlWindow::OnKeyDown(wxKeyEvent& event)
             CopyToClipboard(wxString::FromUTF8(m_selection_text));
         }
     }
-    else if(event.GetKeyCode() == WXK_LEFT)
-    {
-        m_cursor_pos = std::max(0, m_cursor_pos - 1);
-        Refresh();
-    }
-    else if (event.GetKeyCode() == WXK_RIGHT)
-    {
-        m_cursor_pos = std::clamp( m_cursor_pos + 1, 0, (int32_t)m_char_boxes.size());
-        Refresh();
-    }
+    //else if(event.GetKeyCode() == WXK_LEFT)
+    //{
+    //    m_cursor_pos = std::max(0, m_cursor_pos - 1);
+    //    Refresh();
+    //}
+    //else if (event.GetKeyCode() == WXK_RIGHT)
+    //{
+    //    m_cursor_pos = std::clamp( m_cursor_pos + 1, 0, (int32_t)m_char_boxes.size());
+    //    Refresh();
+    //}
 
     event.Skip();
 }
