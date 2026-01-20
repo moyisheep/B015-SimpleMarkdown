@@ -155,6 +155,7 @@
     <ClInclude Include="MarkdownWindow.h" />
     <ClInclude Include="MarkdownFrame.h" />
     <ClInclude Include="MarkdownTextCtrl.h" />
+    <ClInclude Include="el_scripts.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HtmlDumper.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="MarkdownWindow.cpp" />
     <ClCompile Include="MarkdownFrame.cpp" />
     <ClCompile Include="MarkdownTextCtrl.cpp" />
+    <ClCompile Include="el_scripts.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\litehtml\litehtml.vcxproj">

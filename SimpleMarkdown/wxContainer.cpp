@@ -337,8 +337,8 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
         wxLogError("Error getting image size: %s, error: %s", src, e.what());
     }
 }
-
-wxBitmap wxContainer::create_bitmap(ImageCache& cache) {
+wxBitmap wxContainer::create_bitmap_with_stb(ImageCache& cache)
+{
     if (cache.empty()) {
         wxLogWarning("ImageCache is empty");
         return wxNullBitmap;
@@ -420,69 +420,23 @@ wxBitmap wxContainer::create_bitmap(ImageCache& cache) {
 
     return bitmap;
 }
-//wxBitmap  wxContainer::create_bitmap( ImageCache& cache) {
-//    if (cache.empty()) {
-//        wxLogWarning("ImageCache is empty");
-//        return wxNullBitmap;
-//    }
-//
-//    // 使用 stb_image 解码图像数据
-//    int width, height, channels;
-//    unsigned char* image_data = stbi_load_from_memory(
-//        cache.data.data(),
-//        static_cast<int>(cache.data.size()),
-//        &width,
-//        &height,
-//        &channels,
-//        STBI_rgb_alpha  // 强制转换为RGBA格式
-//    );
-//
-//    if (!image_data) {
-//        wxLogWarning("stbi_load_from_memory failed: %s", stbi_failure_reason());
-//        return wxNullBitmap;
-//    }
-//
-//    // 验证解码后的尺寸是否匹配缓存中的信息
-//    if (static_cast<size_t>(width) != cache.width ||
-//        static_cast<size_t>(height) != cache.height) {
-//        wxLogWarning("Decoded image dimensions don't match cache info");
-//        stbi_image_free(image_data);
-//        return wxNullBitmap;
-//    }
-//
-//    // 创建 wxImage 对象
-//    wxImage img(width, height, image_data, true);  // static_data = true, wxImage不会接管内存
-//
-//    if (!img.IsOk()) {
-//        wxLogWarning("Failed to create wxImage from decoded data");
-//        stbi_image_free(image_data);
-//        return wxNullBitmap;
-//    }
-//
-//    // 设置Alpha通道（如果存在）
-//    if (channels == 4 || cache.channel == 4) {
-//        img.InitAlpha();
-//        unsigned char* alpha = new unsigned char[width * height];
-//
-//        // 提取alpha通道（STBI_rgb_alpha将alpha放在第4个通道）
-//        for (int i = 0; i < width * height; ++i) {
-//            alpha[i] = image_data[i * 4 + 3];
-//        }
-//
-//        img.SetAlpha(alpha, true);  // static_data = true, wxImage会接管内存
-//    }
-//
-//    // 创建wxBitmap
-//    wxBitmap bitmap(img);
-//    if (!bitmap.IsOk()) {
-//        wxLogWarning("Failed to create wxBitmap from wxImage");
-//    }
-//
-//    // 释放stb_image分配的内存
-//    stbi_image_free(image_data);
-//
-//    return bitmap;
-//}
+wxBitmap wxContainer::create_bitmap(ImageCache& cache) 
+{
+    wxBitmap bitmap{};
+  switch(cache.type)
+  {
+  case ImageType::PNG:
+  case ImageType::BMP:
+  case ImageType::JPG:
+  case ImageType::GIF:
+      bitmap = create_bitmap_with_stb(cache);
+      break;
+  case ImageType::SVG:
+      break;
+  }
+  return bitmap;
+}
+
 void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const std::string& url, const std::string& base_url)
 {

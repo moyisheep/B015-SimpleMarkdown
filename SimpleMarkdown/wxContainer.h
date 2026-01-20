@@ -118,6 +118,8 @@ public:
     void get_viewport(litehtml::position& viewport) const override;
     void get_image_size(const char* src, const char* baseurl, litehtml::size& sz) override;
 
+    wxBitmap create_bitmap_with_stb(ImageCache& cache);
+
     wxBitmap create_bitmap(ImageCache& cache);
 
 

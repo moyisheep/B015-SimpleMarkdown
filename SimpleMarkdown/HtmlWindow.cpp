@@ -80,7 +80,7 @@ void HtmlWindow::set_html(const std::string& html)
     {
         int width = GetClientSize().GetWidth();
         m_doc->render(width);
-        record_char_boxes();
+        //record_char_boxes();
         SetupScrollbars(); 
     }
     TimerOutput::Instance().end();
@@ -100,6 +100,7 @@ void HtmlWindow::record_char_boxes()
     record_char_boxes_recursive(m_doc->root());
 
 }
+
 void HtmlWindow::record_char_boxes_recursive(litehtml::element::ptr el)
 {
     for(auto child: el->children())
@@ -342,7 +343,7 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
 
 
 
-        TimerOutput::Instance().start("[draw]");
+        //TimerOutput::Instance().start("[draw]");
 
         // clear background
         gc->SetBrush(*wxWHITE_BRUSH);
@@ -369,7 +370,7 @@ void HtmlWindow::OnPaint(wxPaintEvent& event)
         m_container->draw_finished(hdc, clip);
 
         //DrawCaret(&memdc);
-        TimerOutput::Instance().end();
+        //TimerOutput::Instance().end();
 
 
 
@@ -760,3 +761,99 @@ int32_t HtmlWindow::hit_test(float x, float y)
     return -1;
 }
 
+
+void Selection::start(litehtml::document::ptr doc, float x, float y)
+{
+    m_doc = doc;
+}
+
+void Selection::on_move(float x, float y)
+{
+}
+
+void Selection::end(float x, float y)
+{
+}
+
+
+
+litehtml::position::vector Selection::get_rect()
+{
+    return m_rect;
+}
+
+std::string Selection::get_text()
+{
+    return m_text;
+}
+
+void Selection::add_rect(litehtml::position pos)
+{
+    if (!m_rect.empty())
+    {
+        auto back = m_rect.back();
+        if (back.y == pos.y)
+        {
+            m_rect.pop_back();
+            back.width += pos.width;
+            m_rect.push_back(back);
+            return;
+        }
+    }
+
+    m_rect.push_back(pos);
+}
+litehtml::position Selection::get_char_rect(int x, int y)
+{
+    if(m_doc)
+    {
+        auto root_render = m_doc->root_render();
+        if (root_render)
+        {
+            auto el = root_render->get_element_by_point(x, y, 0, 0, nullptr);
+            if(el)
+            {
+                return get_char_rect_recursive(el);
+            }
+        }
+    }
+
+
+    return litehtml::position{};
+}
+
+litehtml::position Selection::get_char_rect_recursive(litehtml::element::ptr el)
+{
+    //for (auto child : el->children())
+    //{
+    //    // if it's el_text node, start record
+    //    if (child->is_text())
+    //    {
+    //        std::string txt = "";
+    //        auto pos = child->get_placement();
+    //        child->get_text(txt);
+    //        std::u32string u32txt = (const char32_t*)litehtml::utf8_to_utf32(txt);
+
+    //        auto hfont = child->parent()->css().get_font();
+    //        float x = pos.left();
+
+    //        // split every word -> character, and record
+    //        for (auto c : u32txt)
+    //        {
+    //            std::string ch = litehtml::utf32_to_utf8(c);
+    //         
+    //            auto ch_width = m_container->text_width(, hfont);
+
+    //            litehtml::position char_pos{ x, pos.y, ch_width, pos.height };
+    //            add_rect(char_pos);
+    //            x += ch_width;
+
+    //        }
+
+    //    }
+    //    else
+    //    {
+    //        get_char_rect_recursive(child);
+    //    }
+    //}
+}

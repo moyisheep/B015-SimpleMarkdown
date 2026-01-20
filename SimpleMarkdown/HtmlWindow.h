@@ -28,57 +28,21 @@
 class Selection
 {
 public:
-    Selection(litehtml::element::ptr el = nullptr, size_t index=0, litehtml::position pos = litehtml::position{})
-    {
-        m_el = el;
-        m_pos = pos;
-        m_index = index;
-    }
-    size_t index() { return m_index; }
-    bool empty()
-    {
-        if (!m_el || m_pos.empty()) { return true; }
-        return false;
-    }
-    bool is_same_element(const Selection& val) { return m_el == val.m_el; }
-    litehtml::position position() { return m_pos; }
-    litehtml::element::ptr element() { return m_el; }
-    void clear()
-    {
-        m_el = nullptr;
-        m_index = 0;
-        m_pos.clear();
-    }
-    bool operator==(const Selection& val)
-    {
-        return ((m_el == val.m_el) && (m_index = val.m_index) && (m_pos == val.m_pos));
-    }
+    void start(litehtml::document::ptr doc, float x, float y);
+    void on_move(float x, float y);
+    void end(float x, float y);
+
+    litehtml::position::vector get_rect();
+    std::string get_text();
 private:
-    litehtml::element::ptr m_el = nullptr;
-    size_t m_index = 0;
-    litehtml::position m_pos{};
-
+    void add_rect(litehtml::position pos);
+    litehtml::position get_char_rect(int x, int y);
+    litehtml::position get_char_rect_recursive(litehtml::element::ptr el);
+    std::vector<litehtml::position> m_rect;
+    std::string m_text;
+    litehtml::document::ptr m_doc;
 };
-struct Point
-{
-    float x = 0;
-    float y = 0;
-    void clear()
-    {
-        x = 0;
-        y = 0;
-    }
-    bool empty()
-    {
-        return (x == 0) && (y == 0);
-    }
-    bool operator==(const Point& val)
-    {
-        return (x == val.x) && (y == val.y);
-    }
 
-
-};
 class SelectionRect
 {
 public:
@@ -87,10 +51,10 @@ public:
     // m_selection_rect.add(...)
     void add(litehtml::position pos)
     {
-        if(!m_rect.empty())
+        if (!m_rect.empty())
         {
             auto back = m_rect.back();
-            if(back.y == pos.y)
+            if (back.y == pos.y)
             {
                 m_rect.pop_back();
                 back.width += pos.width;
@@ -98,15 +62,15 @@ public:
                 return;
             }
         }
-  
-         m_rect.push_back(pos);
+
+        m_rect.push_back(pos);
 
     }
 
 
     void scroll(float delta)
     {
-        for (auto& rect: m_rect)
+        for (auto& rect : m_rect)
         {
             rect.y = rect.y + delta;
         }

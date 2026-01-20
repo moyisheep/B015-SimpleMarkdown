@@ -31,6 +31,9 @@
     <Filter Include="Frame">
       <UniqueIdentifier>{e7e90365-7883-4336-b457-2972ac22f1df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{7c2772c7-08de-4d8b-abd1-813bda327d01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -66,6 +69,9 @@
     <ClInclude Include="MarkdownFrame.h">
       <Filter>Frame</Filter>
     </ClInclude>
+    <ClInclude Include="el_scripts.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LocalVFS.cpp">
@@ -94,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="el_scripts.cpp">
+      <Filter>Scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
