@@ -27,6 +27,8 @@ namespace fs = std::filesystem;
 HtmlWindow::HtmlWindow(wxWindow* parent)
     : wxScrolled<wxPanel>(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
 {
+  
+
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     m_totalHeight = 0;
     m_scrollPos = 0;
@@ -38,6 +40,7 @@ HtmlWindow::HtmlWindow(wxWindow* parent)
 
     m_link_ctrl = std::make_unique<wxStaticText>(this, wxID_ANY, "");
     m_link_ctrl->Hide();
+    
     
     Bind(wxEVT_PAINT, &HtmlWindow::OnPaint, this);
     Bind(wxEVT_SCROLLWIN_BOTTOM, &HtmlWindow::OnScroll, this);

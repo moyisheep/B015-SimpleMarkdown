@@ -10,6 +10,7 @@
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
 {
+    m_memdc = std::make_unique<wxMemoryDC>();
     m_hover_link = "";
 }
 
@@ -111,10 +112,10 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
     // Get font metrics if requested
     if (fm)
     {
-        wxMemoryDC dc;
-        dc.SetFont(font);
+       
+        m_memdc->SetFont(font);
         wxCoord height, descent, externalLeading;
-        dc.GetTextExtent("x", nullptr, &height, &descent, &externalLeading);
+        m_memdc->GetTextExtent("x", nullptr, &height, &descent, &externalLeading);
 
         fm->font_size = descr.size;
         fm->ascent = height - descent;
@@ -123,7 +124,7 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
 
         // Better approximation for x-height
         wxCoord xHeight;
-        dc.GetTextExtent("x", nullptr, &xHeight);
+        m_memdc->GetTextExtent("x", nullptr, &xHeight);
         fm->x_height = xHeight;
     }
     timer.reset();
@@ -609,8 +610,8 @@ litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr h
 
 
         
-        wxMemoryDC dc;
-        dc.SetFont(*font);
+        
+        m_memdc->SetFont(*font);
 
         int width = 0;
         for(int i=0; i<wtext.length(); i++)
@@ -630,7 +631,7 @@ litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr h
             if(!found)
             {
                 int w;
-                dc.GetTextExtent(ch, &w, nullptr);
+                m_memdc->GetTextExtent(ch, &w, nullptr);
                 width += w;
                 m_charWidthCache.push_back(CharWidthCache{ hFont, ch, w });
             }

@@ -152,6 +152,7 @@ private:
     std::string m_selection_text = "";
 
     std::string m_hover_link = "";
+ 
 private:
 
 

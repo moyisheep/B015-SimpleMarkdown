@@ -177,7 +177,7 @@ public:
     //std::vector<TextWidthCache> m_textWidthCache;
     std::vector<CharWidthCache> m_charWidthCache;
     DrawTextCache m_drawTextCache;
-
+    std::unique_ptr<wxMemoryDC> m_memdc;
 private:
 
 
