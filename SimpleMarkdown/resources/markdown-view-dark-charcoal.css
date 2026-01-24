@@ -98,18 +98,6 @@ a:hover {
   color: #8a8aff;
 }
 
-a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  transform: scaleX(0);
-  height: 1px;
-  bottom: -2px;
-  left: 0;
-  background-color: #6d6dff;
-  transform-origin: bottom right;
-  transition: transform 0.3s ease-out;
-}
 
 a:hover::after {
   transform: scaleX(1);
