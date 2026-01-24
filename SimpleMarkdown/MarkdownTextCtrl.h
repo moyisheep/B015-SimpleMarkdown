@@ -92,7 +92,8 @@ private:
     std::vector<MarkdownStyle> m_styles;
 
     // 缓存上次文本用于比较
-    wxString m_lastText;
+
+    wxString m_text;
 
     // cmark-gfm解析器
     cmark_parser* m_parser;
