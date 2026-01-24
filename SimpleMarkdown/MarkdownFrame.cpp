@@ -21,10 +21,10 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	CreateStatusBar();
 
 	// 设置状态栏文本
-	SetStatusText("Ready");
+	SetStatusText("就绪");
 
 
-
+	
 	// 设置状态栏字段数量
 	SetStatusBarPane(-1); // 单个面板
 	m_vfs = std::make_shared<LocalVFS>();
@@ -43,7 +43,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_vfs->set_current_path(m_exe_dir);
 	
 	
-	m_edit_wnd->load_styles("./resources/markdown-edit-light-forest.toml");
+	m_edit_wnd->load_styles("./resources/markdown-edit-dark-classic.toml");
 	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
 	m_view_wnd->load_markdown("./resources/homepage.md");
 	m_view_wnd->Show();
@@ -90,7 +90,7 @@ bool MarkdownFrame::set_markdown(const std::string& md)
 
 		if(m_mode == MarkdownMode::edit && m_edit_wnd)
 		{
-			m_edit_wnd->SetValue(wxString::FromUTF8(md));
+			m_edit_wnd->set_text(md);
 			return true;
 		}
 
@@ -107,7 +107,7 @@ bool MarkdownFrame::set_html(const std::string& html)
 
 	if (m_mode == MarkdownMode::edit && m_edit_wnd)
 	{
-		m_edit_wnd->SetValue(wxString::FromUTF8(html));
+		m_edit_wnd->set_text(html);
 		return true;
 	}
 
@@ -231,14 +231,13 @@ void MarkdownFrame::ToggleEditMode()
 		m_view_wnd->SetSize(sz);
 
 	
-		std::string text = std::string(m_edit_wnd->GetValue().ToUTF8());
+		std::string text = m_edit_wnd->get_text();
 		if (text != m_text)
 		{
 			m_text = text;
 			m_view_wnd->set_markdown(text);
 		}
 			
-
 
 		
 		m_view_wnd->Show();
@@ -261,12 +260,11 @@ void MarkdownFrame::ToggleEditMode()
 		if(text != m_text)
 		{
 			m_text = text;
-			m_edit_wnd->SetValue(wxString::FromUTF8(text));
+			m_edit_wnd->set_text(m_text);
 		}
 
 		m_edit_wnd->Show();
 		m_view_wnd->Hide();
-		m_edit_wnd->highlight_markdown();
 		m_edit_wnd->SetFocus();
 
 

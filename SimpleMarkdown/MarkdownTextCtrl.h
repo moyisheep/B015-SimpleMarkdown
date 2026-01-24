@@ -36,10 +36,13 @@ public:
 
     bool set_styles(const std::string& tomlString);
     bool load_styles(const std::string& tomlPath);
+    void set_text(const std::string& text);
+    std::string get_text();
 
     void set_vfs(std::shared_ptr<VirtualFileSystem>& vfs);
     std::shared_ptr<VirtualFileSystem> get_vfs();
 
+ 
 protected:
     // 事件处理
     void OnTextChanged(wxCommandEvent& event);
@@ -99,6 +102,7 @@ private:
 
 
     std::shared_ptr<VirtualFileSystem> m_vfs;
+    bool m_text_changed;
 };
 
 #endif // MARKDOWNTEXTCTRL_H

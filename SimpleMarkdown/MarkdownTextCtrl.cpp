@@ -91,6 +91,7 @@ MarkdownTextCtrl::MarkdownTextCtrl(wxWindow* parent, wxWindowID id,
     
     // 创建高亮定时器
     m_highlightTimer = new wxTimer(this, wxID_ANY);
+    m_text_changed = false;
 
 
     // 修改这里：使用Bind方法替代Connect
@@ -358,6 +359,22 @@ bool MarkdownTextCtrl::load_styles(const std::string& tomlPath)
         return false;
     }
 
+}
+void MarkdownTextCtrl::set_text(const std::string& text)
+{
+    m_text_changed = false;
+    m_lastText = "";
+    m_lastText = wxString::FromUTF8(text);
+    SetValue(m_lastText);
+    highlight_markdown();
+}
+std::string MarkdownTextCtrl::get_text()
+{
+    if(m_text_changed)
+    {
+        wxMessageBox("文件未保存，是否继续？");
+    }
+    return std::string(GetValue().ToUTF8());
 }
 void MarkdownTextCtrl::set_vfs(std::shared_ptr<VirtualFileSystem>& vfs)
 {
@@ -777,7 +794,9 @@ void MarkdownTextCtrl::OnTextChanged(wxCommandEvent& event)
         return;
     }
     m_lastText = currentText;
-
+    m_text_changed = true;
+    auto label = GetParent()->GetLabel();
+    GetParent()->SetLabel("* " + label);
     highlight_markdown();
 }
 
