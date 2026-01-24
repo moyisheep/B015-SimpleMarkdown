@@ -34,6 +34,9 @@
     <Filter Include="Scripts">
       <UniqueIdentifier>{7c2772c7-08de-4d8b-abd1-813bda327d01}</UniqueIdentifier>
     </Filter>
+    <Filter Include="StatusBar">
+      <UniqueIdentifier>{478e3eeb-ce44-4ffb-9768-587975655f5e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -166,5 +169,6 @@
     <CopyFileToFolders Include="resources\markdown-view-light-tech.css">
       <Filter>资源文件</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\markdown-edit-dark-charcoal.toml" />
   </ItemGroup>
 </Project>

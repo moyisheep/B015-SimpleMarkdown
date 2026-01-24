@@ -1,0 +1,274 @@
+# 炭黑优雅主题 - 优化版
+# 适配不支持叠加背景色的编辑器
+
+# 基础颜色设置 - 保持统一背景色
+[default]
+foreground = [232, 234, 237]# 浅灰白，对应CSS中的 #e8eaed
+background = [26, 26, 26]# 炭黑背景，对应 #1a1a1a
+
+# 行号栏
+[line_number]
+foreground = [160, 160, 160]# 中灰色行号
+background = [26, 26, 26]# 与主背景一致
+
+# 光标设置
+[caret]
+foreground = [109, 109, 255]# 主题蓝色光标，对应 #6d6dff
+
+# 边距设置
+[margin]
+background = [26, 26, 26]# 与主背景一致
+
+# 折叠栏
+[fold_margin]
+background = [26, 26, 26]# 与主背景一致
+highlight = [51, 51, 51]# 折叠高亮色
+
+# 边缘线
+[edge]
+color = [51, 51, 51]# 深灰边缘线，对应CSS中的 #333333
+
+# 当前行高亮
+[caret_line]
+background = [36, 36, 54]# 带蓝色调的深灰
+
+# ==================== 样式定义 ====================
+
+[[styles]]
+id = 0# 正文文本
+foreground = [209, 209, 209]# 对应CSS中的 #d1d1d1
+background = [26, 26, 26]# 炭黑背景
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 1# 一级标题
+foreground = [255, 255, 255]# 纯白色，对应CSS中h1颜色
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 28
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 2# 二级标题
+foreground = [224, 224, 224]# 亮白，对应 #e0e0e0
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 24
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 3# 三级标题
+foreground = [204, 204, 204]# 亮灰，对应 #cccccc
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 20
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 4# 四级标题
+foreground = [179, 179, 179]# 浅灰，对应 #b3b3b3
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 18
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 5# 五级标题
+foreground = [160, 160, 160]# 中灰色
+background = [26, 26, 26]
+bold = false
+italic = false
+fontSize = 16
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 6# 六级标题
+foreground = [140, 140, 140]# 深灰色
+background = [26, 26, 26]
+bold = false
+italic = true
+fontSize = 14
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 7# 行内代码
+foreground = [255, 153, 102]# 橙色，对应CSS中的 #ff9966
+background = [26, 26, 26]# 使用统一背景色
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 8# 代码块 - 唯一有独立背景色的元素
+foreground = [232, 234, 237]# 浅灰白，对应CSS中的 #e8eaed
+background = [15, 15, 15]# 深黑背景，对应 #0f0f0f
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 9# 链接
+foreground = [109, 109, 255]# 主题蓝色，对应 #6d6dff
+background = [26, 26, 26]
+bold = false
+italic = false
+underline = true
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 10# 强调（斜体）
+foreground = [184, 184, 184]# 浅灰，对应CSS引用块颜色
+background = [26, 26, 26]
+bold = false
+italic = true
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 11# 粗体
+foreground = [255, 255, 255]# 纯白色
+background = [26, 26, 26]
+bold = true
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 12# 引用块 - 用前景色模拟CSS效果
+foreground = [184, 184, 184]# 浅灰，对应CSS中blockquote的 #b8b8b8
+background = [26, 26, 26]
+bold = false
+italic = true
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 13# 列表项
+foreground = [224, 224, 224]# 亮白色，匹配CSS中li的强调色
+background = [26, 26, 26]
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 14# 水平线
+foreground = [51, 51, 51]# 深灰线，对应CSS中 #333333
+background = [26, 26, 26]
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 15# 删除线
+foreground = [160, 160, 160]# 中灰色
+background = [26, 26, 26]
+bold = false
+italic = false
+underline = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 16# 脚注引用
+foreground = [138, 138, 255]# 亮蓝色，对应链接悬停色 #8a8aff
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 11
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 17# 脚注定义
+foreground = [179, 179, 179]# 浅灰色
+background = [26, 26, 26]
+bold = false
+italic = true
+fontSize = 11
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 18# 表格单元格
+foreground = [209, 209, 209]# 浅灰色，对应CSS中td的 #d1d1d1
+background = [26, 26, 26]
+bold = false
+italic = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 19# 表格标题
+foreground = [255, 255, 255]# 纯白色
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+[[styles]]
+id = 20# 强调卡片 - 用较浅的前景色模拟
+foreground = [235, 235, 235]# 更亮的白色，模拟卡片效果
+background = [26, 26, 26]
+bold = false
+italic = false
+fontSize = 13
+fontName = "Microsoft YaHei UI"
+
+# 特殊语法高亮（如果编辑器支持）
+[[styles]]
+id = 21# 字符串
+foreground = [150, 200, 150]# 淡绿色
+background = [26, 26, 26]
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 22# 数字
+foreground = [255, 100, 100]# 淡红色
+background = [26, 26, 26]
+bold = false
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 23# 关键字
+foreground = [109, 109, 255]# 主题蓝色
+background = [26, 26, 26]
+bold = true
+italic = false
+fontSize = 12
+fontName = "Consolas"
+
+[[styles]]
+id = 24# 注释
+foreground = [100, 100, 100]# 深灰色
+background = [26, 26, 26]
+bold = false
+italic = true
+fontSize = 11
+fontName = "Consolas"
+
+# 重要提醒：
+# 由于该编辑器不支持叠加背景色，所有样式使用统一背景色 [26, 26, 26]
+# 只有代码块(id=8)有独立的深色背景，这是唯一允许设置不同背景色的地方
+# 通过精细调整前景色来区分不同元素，保持整体配色和谐

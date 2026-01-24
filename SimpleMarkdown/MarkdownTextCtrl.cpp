@@ -873,7 +873,17 @@ void MarkdownTextCtrl::ParseAndStyle()
 
 
 }
+void MarkdownTextCtrl::SetLineBackground(int line, const wxColour& color) {
+    // 方法1：使用标记
+    static int highlightMarker = 10;
 
+    MarkerDefine(highlightMarker, wxSTC_MARK_BACKGROUND);
+    MarkerSetBackground(highlightMarker, color);
+    MarkerSetForeground(highlightMarker, color);
+
+    // 添加标记到指定行
+    MarkerAdd(line, highlightMarker);
+}
 void MarkdownTextCtrl::ApplyNodeStyle(cmark_node* node, int start_pos, int end_pos)
 {
     cmark_node_type node_type = cmark_node_get_type(node);
@@ -881,8 +891,17 @@ void MarkdownTextCtrl::ApplyNodeStyle(cmark_node* node, int start_pos, int end_p
     switch (node_type) {
 
     case CMARK_NODE_CODE_BLOCK:
+    {
+        auto start = cmark_node_get_start_line(node);
+        auto end = cmark_node_get_end_line(node);
+        auto color = StyleGetBackground(STYLE_CODEBLOCK);
+        for(int i=start; i<end; i++)
+        {
+            SetLineBackground(i, color);
+        }
         SetStyleRange(start_pos, end_pos, STYLE_CODEBLOCK);
         break;
+    }
     case CMARK_NODE_CODE:
     {
         SetStyleRange(start_pos, end_pos, STYLE_CODEBLOCK);

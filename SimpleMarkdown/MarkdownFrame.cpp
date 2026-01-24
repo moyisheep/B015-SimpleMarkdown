@@ -48,7 +48,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_vfs->set_current_path(m_exe_dir);
 	
 	
-	m_edit_wnd->load_styles("./resources/markdown-edit-dark-classic.toml");
+	m_edit_wnd->load_styles("./resources/markdown-edit-dark-charcoal.toml");
 	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
 	m_view_wnd->load_markdown("./resources/homepage.md");
 

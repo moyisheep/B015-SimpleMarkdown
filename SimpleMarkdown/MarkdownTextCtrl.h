@@ -60,6 +60,8 @@ private:
     // 解析Markdown并应用样式
     void ParseAndStyle();
 
+    void SetLineBackground(int line, const wxColour& color);
+
     // 应用节点样式
     void ApplyNodeStyle(cmark_node* node, int start_pos, int end_pos);
 
