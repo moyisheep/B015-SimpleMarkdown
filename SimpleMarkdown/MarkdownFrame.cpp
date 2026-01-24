@@ -3,6 +3,7 @@
 
 #include <set>
 #include <wx/stdpaths.h>
+#include <wx/statusbr.h>
 
 static const int ID_TOGGLE_EDIT_MODE = wxNewId();
 
@@ -16,6 +17,16 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	:wxFrame(parent, id, title, pos, size, style, name)
 {
 
+	// 创建状态栏（一行，默认在窗口底部）
+	CreateStatusBar();
+
+	// 设置状态栏文本
+	SetStatusText("Ready");
+
+
+
+	// 设置状态栏字段数量
+	SetStatusBarPane(-1); // 单个面板
 	m_vfs = std::make_shared<LocalVFS>();
 
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);

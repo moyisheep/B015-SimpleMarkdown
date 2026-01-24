@@ -3,6 +3,7 @@
 #include <wx/app.h>
 #include <wx/frame.h>
 #include <filesystem>
+#include <wx/sysopt.h>
 
 namespace fs = std::filesystem;
 
@@ -32,6 +33,8 @@ public:
 
 bool MyApp::OnInit()
 {
+    SetAppearance(Appearance::Dark);
+
     auto* dbg_frame = new DebugFrame();
     dbg_frame->Show(true);
     MarkdownFrame* frame = new MarkdownFrame(nullptr, wxID_ANY, "Simple Markdown", wxDefaultPosition, wxSize(800, 600));
