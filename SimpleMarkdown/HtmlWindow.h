@@ -167,6 +167,8 @@ private:
     void RequestRedraw(const litehtml::position::vector& redraw_boxes);
 
 
+
+
     void OnPaint(wxPaintEvent& event);
     
     void DrawCaret(wxDC* dc);

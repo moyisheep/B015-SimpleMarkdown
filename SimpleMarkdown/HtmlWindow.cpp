@@ -68,6 +68,7 @@ HtmlWindow::~HtmlWindow()
     }
 }
 
+
 void HtmlWindow::set_html(const std::string& html)
 {
     TimerOutput::Instance().start("[createFromString]");
@@ -329,7 +330,6 @@ void HtmlWindow::RequestRedraw(const litehtml::position::vector& redraw_boxes)
 }
 
 
-// =============事件处理======================
 
 void HtmlWindow::OnPaint(wxPaintEvent& event)
 {

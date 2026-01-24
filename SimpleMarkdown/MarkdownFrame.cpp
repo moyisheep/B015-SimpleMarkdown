@@ -17,6 +17,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	:wxFrame(parent, id, title, pos, size, style, name)
 {
 
+
 	// 创建状态栏（一行，默认在窗口底部）
 	CreateStatusBar();
 
@@ -30,23 +31,30 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_vfs = std::make_shared<LocalVFS>();
 
 	m_view_wnd = std::make_unique<MarkdownWindow>(this);
-	m_view_wnd->set_vfs(m_vfs);
+
 
 
 	m_edit_wnd = std::make_unique<MarkdownTextCtrl>(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
 	m_edit_wnd->enable_live_highlighting(true);
+	
 	m_edit_wnd->set_vfs(m_vfs);
+	m_view_wnd->set_vfs(m_vfs);
+	
 	m_edit_wnd->Hide();
+
 
 	m_exe_dir = std::string(GetExecutablePath().ToUTF8());
 	m_vfs->set_current_path(m_exe_dir);
 	
 	
-	m_edit_wnd->load_styles("./resources/markdown-edit-dark-onedark.toml");
+	m_edit_wnd->load_styles("./resources/markdown-edit-dark-classic.toml");
 	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
 	m_view_wnd->load_markdown("./resources/homepage.md");
-	m_view_wnd->Show();
+
+    // fix loading white screen
+	m_view_wnd->SetSize({0, 0});
+
 
 
 
@@ -66,6 +74,7 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	Bind(wxEVT_MENU, &MarkdownFrame::OnToggleEditMode, this, ID_TOGGLE_EDIT_MODE);
 	Bind(wxEVT_DROP_FILES, &MarkdownFrame::OnDropFiles, this);
 	Bind(wxEVT_SIZE, &MarkdownFrame::OnSize, this);
+
 	
 }
 
@@ -82,10 +91,14 @@ wxString MarkdownFrame::GetExecutablePath() {
 bool MarkdownFrame::set_markdown(const std::string& md)
 {
 
+		
 		//m_text = std::string(md);
 		if(m_mode == MarkdownMode::view && m_view_wnd)
 		{
-			return m_view_wnd->set_markdown(md);
+			if(m_view_wnd->set_markdown(md))
+			{
+				return true;
+			}
 		}
 
 		if(m_mode == MarkdownMode::edit && m_edit_wnd)
