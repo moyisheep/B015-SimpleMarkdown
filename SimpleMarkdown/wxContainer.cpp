@@ -374,6 +374,7 @@ wxBitmap wxContainer::create_bitmap_with_stb(ImageCache& cache)
     if (channels == 1) {
         // 灰度图像
         img = wxImage(width, height, image_data, nullptr, true);  // 不复制数据
+        stbi_image_free(image_data);  // 释放原始数据
     }
     else if (channels == 2) {
         // 灰度+alpha，需要转换为RGBA
@@ -386,10 +387,14 @@ wxBitmap wxContainer::create_bitmap_with_stb(ImageCache& cache)
         }
 
         img = wxImage(width, height, rgb_data, alpha_data, true);  // 接管内存
+        stbi_image_free(rgb_data);
+        stbi_image_free(alpha_data);
+        stbi_image_free(image_data);  // 释放原始数据
     }
     else if (channels == 3) {
         // RGB图像
         img = wxImage(width, height, image_data, nullptr, true);  // 不复制数据
+        stbi_image_free(image_data);  // 释放原始数据
     }
     else if (channels == 4) {
         // RGBA图像
@@ -404,12 +409,13 @@ wxBitmap wxContainer::create_bitmap_with_stb(ImageCache& cache)
         }
 
         img = wxImage(width, height, rgb_data, alpha_data, true);  // 接管内存
+        stbi_image_free(rgb_data);
+        stbi_image_free(alpha_data);
         stbi_image_free(image_data);  // 释放原始数据
     }
 
     if (!img.IsOk()) {
         wxLogWarning("Failed to create wxImage from decoded data");
-        stbi_image_free(image_data);
         return wxNullBitmap;
     }
 
