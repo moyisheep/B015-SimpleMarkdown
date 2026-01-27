@@ -37,6 +37,9 @@
     <Filter Include="StatusBar">
       <UniqueIdentifier>{478e3eeb-ce44-4ffb-9768-587975655f5e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Mathml">
+      <UniqueIdentifier>{02adf790-736d-4455-bc55-c3e762345c8e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -75,6 +78,39 @@
     <ClInclude Include="el_scripts.h">
       <Filter>Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="mathml\el_math.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mfrac.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mi.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mn.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mo.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mroot.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mrow.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_msqrt.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_msub.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_msubsup.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_msup.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LocalVFS.cpp">
@@ -106,6 +142,39 @@
     </ClCompile>
     <ClCompile Include="el_scripts.cpp">
       <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_math.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mfrac.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mi.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mn.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mo.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mroot.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mrow.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_msqrt.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_msub.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_msubsup.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_msup.cpp">
+      <Filter>Mathml</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

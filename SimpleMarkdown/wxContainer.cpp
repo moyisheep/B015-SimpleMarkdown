@@ -7,6 +7,8 @@
 
 #include "Timer.h"
 
+#include "mathml/el_math.h"
+
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
 {
@@ -21,7 +23,15 @@ wxContainer::~wxContainer()
 litehtml::element::ptr wxContainer::create_element(const char* tag_name,
     const litehtml::string_map& attributes, const std::shared_ptr<litehtml::document>& doc)
 {
-    return nullptr;
+    litehtml::element::ptr new_tag;
+    if(tag_name)
+    {
+        if(strcmp(tag_name, "math") == 0)
+        {
+            new_tag = std::make_shared<litehtml::el_math>(doc);
+        }
+    }
+    return new_tag;
 }
 
 litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& descr,
