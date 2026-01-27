@@ -10,6 +10,7 @@
 #include "mathml/el_math.h"
 #include "mathml/el_mrow.h"
 #include "mathml/el_mi.h"
+#include "mathml/el_mn.h"
 
 
 wxContainer::wxContainer(wxWindow* window)
@@ -40,6 +41,10 @@ litehtml::element::ptr wxContainer::create_element(const char* tag_name,
         else if(strcmp(tag_name, "mi") == 0)
         {
             new_tag = std::make_shared<litehtml::el_mi>(doc);
+        }
+        else if (strcmp(tag_name, "mn") == 0)
+        {
+            new_tag = std::make_shared<litehtml::el_mn>(doc);
         }
 
     }
