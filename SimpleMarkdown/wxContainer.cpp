@@ -8,6 +8,9 @@
 #include "Timer.h"
 
 #include "mathml/el_math.h"
+#include "mathml/el_mrow.h"
+#include "mathml/el_mi.h"
+
 
 wxContainer::wxContainer(wxWindow* window)
     :m_wnd(window)
@@ -30,6 +33,15 @@ litehtml::element::ptr wxContainer::create_element(const char* tag_name,
         {
             new_tag = std::make_shared<litehtml::el_math>(doc);
         }
+        else if(strcmp(tag_name, "mrow") == 0)
+        {
+            new_tag = std::make_shared<litehtml::el_mrow>(doc);
+        }
+        else if(strcmp(tag_name, "mi") == 0)
+        {
+            new_tag = std::make_shared<litehtml::el_mi>(doc);
+        }
+
     }
     return new_tag;
 }

@@ -13,27 +13,29 @@ namespace litehtml
     void el_math::parse_attributes()
     {
         // https://www.w3.org/TR/MathML3/chapter2.html#interf.toplevel
-        // Handle common math attributes if needed  
+        // Parse MathML display attribute (block vs inline)  
         const char* str = get_attr("display");
-        if (str)
-        {
-            // Map display attribute to CSS display property  
-            if (strcmp(str, "block") == 0)
-            {
-                m_style.add_property(_display_, "block");
+        if (str) {
+            if (strcmp(str, "block") == 0) {
+                m_css.set_display(display_block);
             }
-            else if (strcmp(str, "inline") == 0)
-            {
-                m_style.add_property(_display_, "inline");
-            }
-            else if (strcmp(str, "inline-block") == 0)
-            {
-                m_style.add_property(_display_, "inline-block");
+            else {
+                m_css.set_display(display_inline_block);
             }
         }
 
+        // Parse MathML mode attribute (display vs inline math)  
+        str = get_attr("maxwidth");
+        if (str) {
+            map_to_dimension_property_ignoring_zero(_max_width_, str);
+        }
 
-        // Call parent implementation to handle standard attributes  
+
+
+
+
+
+        // Call parent implementation to handle standard attributes    
         html_tag::parse_attributes();
     }
 
