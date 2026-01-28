@@ -31,7 +31,17 @@ namespace litehtml
         }
 
 
+        // https://www.w3.org/TR/MathML3/chapter3.html#presm.presatt 
+        const char* mathcolor = get_attr("mathcolor");
+        if (mathcolor) {
+            m_style.add_property(_color_, mathcolor, "", false, get_document()->container());
+        }
 
+        // https://www.w3.org/TR/MathML3/chapter3.html#presm.presatt
+        const char* mathbackground = get_attr("mathbackground");
+        if (mathbackground) {
+            m_style.add_property(_background_color_, mathbackground, "", false, get_document()->container());
+        }
 
 
 

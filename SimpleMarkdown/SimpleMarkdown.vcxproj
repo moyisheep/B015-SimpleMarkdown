@@ -154,10 +154,13 @@
     <ClInclude Include="mathml\el_mo.h" />
     <ClInclude Include="mathml\el_mroot.h" />
     <ClInclude Include="mathml\el_mrow.h" />
+    <ClInclude Include="mathml\el_ms.h" />
+    <ClInclude Include="mathml\el_mspace.h" />
     <ClInclude Include="mathml\el_msqrt.h" />
     <ClInclude Include="mathml\el_msub.h" />
     <ClInclude Include="mathml\el_msubsup.h" />
     <ClInclude Include="mathml\el_msup.h" />
+    <ClInclude Include="mathml\el_math_token.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="VirtualFileSystem.h" />
     <ClInclude Include="main.h" />
@@ -167,6 +170,7 @@
     <ClInclude Include="MarkdownFrame.h" />
     <ClInclude Include="MarkdownTextCtrl.h" />
     <ClInclude Include="el_scripts.h" />
+    <ClInclude Include="mathml\el_mtext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HtmlDumper.cpp" />
@@ -179,10 +183,13 @@
     <ClCompile Include="mathml\el_mo.cpp" />
     <ClCompile Include="mathml\el_mroot.cpp" />
     <ClCompile Include="mathml\el_mrow.cpp" />
+    <ClCompile Include="mathml\el_ms.cpp" />
     <ClCompile Include="mathml\el_msqrt.cpp" />
     <ClCompile Include="mathml\el_msub.cpp" />
     <ClCompile Include="mathml\el_msubsup.cpp" />
     <ClCompile Include="mathml\el_msup.cpp" />
+    <ClCompile Include="mathml\el_math_token.cpp" />
+    <ClCompile Include="mathml\el_mspace.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="HtmlWindow.cpp" />
@@ -190,6 +197,7 @@
     <ClCompile Include="MarkdownFrame.cpp" />
     <ClCompile Include="MarkdownTextCtrl.cpp" />
     <ClCompile Include="el_scripts.cpp" />
+    <ClCompile Include="mathml\el_mtext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\litehtml\litehtml.vcxproj">

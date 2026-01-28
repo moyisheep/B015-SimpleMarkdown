@@ -111,6 +111,18 @@
     <ClInclude Include="mathml\el_msup.h">
       <Filter>Mathml</Filter>
     </ClInclude>
+    <ClInclude Include="mathml\el_mtext.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_math_token.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_mspace.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_ms.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LocalVFS.cpp">
@@ -175,6 +187,18 @@
     </ClCompile>
     <ClCompile Include="mathml\el_msup.cpp">
       <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mtext.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_math_token.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_mspace.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mathml\el_ms.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

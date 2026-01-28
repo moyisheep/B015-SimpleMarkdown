@@ -11,6 +11,7 @@
 #include "mathml/el_mrow.h"
 #include "mathml/el_mi.h"
 #include "mathml/el_mn.h"
+#include "mathml/el_msup.h"
 
 
 wxContainer::wxContainer(wxWindow* window)
@@ -46,7 +47,10 @@ litehtml::element::ptr wxContainer::create_element(const char* tag_name,
         {
             new_tag = std::make_shared<litehtml::el_mn>(doc);
         }
-
+        else if (strcmp(tag_name, "msup") == 0)
+        {
+            new_tag = std::make_shared<litehtml::el_msup>(doc);
+        }
     }
     return new_tag;
 }
