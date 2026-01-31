@@ -7,7 +7,7 @@ namespace litehtml
     el_math::el_math(const std::shared_ptr<document>& doc) : html_tag(doc)
     {
         // Set default display for math elements  
-        m_css.set_display(display_inline_block);
+        css_w().set_display(display_inline_block);
     }
 
     void el_math::parse_attributes()
@@ -17,10 +17,10 @@ namespace litehtml
         const char* str = get_attr("display");
         if (str) {
             if (strcmp(str, "block") == 0) {
-                m_css.set_display(display_block);
+                css_w().set_display(display_block);
             }
             else {
-                m_css.set_display(display_inline_block);
+                css_w().set_display(display_inline_block);
             }
         }
 

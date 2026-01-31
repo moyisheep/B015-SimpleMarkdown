@@ -324,12 +324,12 @@ bool MarkdownTextCtrl::set_styles(const std::string& tomlString)
 
     }
     catch (const toml::parse_error& err) {
-        wxLogError("TOML解析错误: %s", err.what());
+        wxLogInfo("TOML解析错误: %s", err.what());
         InitializeStyles();
         return false;
     }
     catch (const std::exception& err) {
-        wxLogError("加载主题失败: %s", err.what());
+        wxLogInfo("加载主题失败: %s", err.what());
         InitializeStyles();
         return false;
     }
@@ -353,7 +353,7 @@ bool MarkdownTextCtrl::load_styles(const std::string& tomlPath)
         return false;
     }
     catch (const std::exception& err) {
-        wxLogError("load failed: %s", err.what());
+        wxLogInfo("load failed: %s", err.what());
         InitializeStyles();
         return false;
     }

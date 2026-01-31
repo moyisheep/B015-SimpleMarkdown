@@ -25,23 +25,7 @@
 
 #include "LocalVFS.h"
 
-class Selection
-{
-public:
-    void start(litehtml::document::ptr doc, float x, float y);
-    void on_move(float x, float y);
-    void end(float x, float y);
 
-    litehtml::position::vector get_rect();
-    std::string get_text();
-private:
-    void add_rect(litehtml::position pos);
-    litehtml::position get_char_rect(int x, int y);
-    litehtml::position get_char_rect_recursive(litehtml::element::ptr el);
-    std::vector<litehtml::position> m_rect;
-    std::string m_text;
-    litehtml::document::ptr m_doc;
-};
 
 class SelectionRect
 {

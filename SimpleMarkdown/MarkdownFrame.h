@@ -28,6 +28,7 @@ public:
     bool is_markdown_format(std::string format);
     bool is_html_format(std::string format);
     bool load_markdown(const std::string& path);
+    void update_style();
     bool set_user_css(const std::string& css);
     bool load_user_css(const std::string& path);
     void enable_drag_drop(bool enable = true);

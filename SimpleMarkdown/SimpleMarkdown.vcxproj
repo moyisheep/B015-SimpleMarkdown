@@ -133,6 +133,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)litehtml\include\litehtml;$(SolutionDir)litehtml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,6 +162,7 @@
     <ClInclude Include="mathml\el_msubsup.h" />
     <ClInclude Include="mathml\el_msup.h" />
     <ClInclude Include="mathml\el_math_token.h" />
+    <ClInclude Include="Selection.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="VirtualFileSystem.h" />
     <ClInclude Include="main.h" />
@@ -190,6 +192,7 @@
     <ClCompile Include="mathml\el_msup.cpp" />
     <ClCompile Include="mathml\el_math_token.cpp" />
     <ClCompile Include="mathml\el_mspace.cpp" />
+    <ClCompile Include="Selection.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="wxContainer.cpp" />
     <ClCompile Include="HtmlWindow.cpp" />
@@ -297,6 +300,11 @@
   <ItemGroup>
     <CopyFileToFolders Include="resources\markdown-edit-dark-charcoal.toml">
       <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\app.png">
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)resources</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>

@@ -44,12 +44,10 @@ MarkdownFrame::MarkdownFrame(wxWindow* parent,
 	m_edit_wnd->Hide();
 
 
-	m_exe_dir = std::string(GetExecutablePath().ToUTF8());
-	m_vfs->set_current_path(m_exe_dir);
+
 	
 	
-	m_edit_wnd->load_styles("./resources/markdown-edit-dark-charcoal.toml");
-	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
+	update_style();
 	m_view_wnd->load_markdown("./resources/homepage.md");
 
     // fix loading white screen
@@ -182,6 +180,13 @@ bool MarkdownFrame::load_markdown(const std::string& path)
 	
 }
 
+void MarkdownFrame::update_style()
+{
+	m_exe_dir = GetExecutablePath().ToStdString();
+	m_vfs->set_current_path(m_exe_dir);
+	m_edit_wnd->load_styles("./resources/markdown-edit-dark-charcoal.toml");
+	m_view_wnd->load_user_css("./resources/markdown-view-dark-charcoal.css");
+}
 bool MarkdownFrame::set_user_css(const std::string& css)
 {
 	if (m_view_wnd)

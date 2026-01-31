@@ -40,6 +40,9 @@
     <Filter Include="Mathml">
       <UniqueIdentifier>{02adf790-736d-4455-bc55-c3e762345c8e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Selection">
+      <UniqueIdentifier>{38f0e7c4-68d1-44a1-8489-4d60f874521d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -114,14 +117,17 @@
     <ClInclude Include="mathml\el_mtext.h">
       <Filter>Mathml</Filter>
     </ClInclude>
-    <ClInclude Include="mathml\el_math_token.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="mathml\el_mspace.h">
-      <Filter>头文件</Filter>
+      <Filter>Mathml</Filter>
     </ClInclude>
     <ClInclude Include="mathml\el_ms.h">
-      <Filter>头文件</Filter>
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="mathml\el_math_token.h">
+      <Filter>Mathml</Filter>
+    </ClInclude>
+    <ClInclude Include="Selection.h">
+      <Filter>Selection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -191,14 +197,17 @@
     <ClCompile Include="mathml\el_mtext.cpp">
       <Filter>Mathml</Filter>
     </ClCompile>
-    <ClCompile Include="mathml\el_math_token.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="mathml\el_ms.cpp">
+      <Filter>Mathml</Filter>
     </ClCompile>
     <ClCompile Include="mathml\el_mspace.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Mathml</Filter>
     </ClCompile>
-    <ClCompile Include="mathml\el_ms.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="mathml\el_math_token.cpp">
+      <Filter>Mathml</Filter>
+    </ClCompile>
+    <ClCompile Include="Selection.cpp">
+      <Filter>Selection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -262,6 +271,11 @@
     <CopyFileToFolders Include="resources\markdown-view-light-tech.css">
       <Filter>资源文件</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="resources\markdown-edit-dark-charcoal.toml" />
+    <CopyFileToFolders Include="resources\markdown-edit-dark-charcoal.toml">
+      <Filter>资源文件</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\app.png">
+      <Filter>资源文件</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

@@ -28,37 +28,38 @@ wxContainer::~wxContainer()
 litehtml::element::ptr wxContainer::create_element(const char* tag_name,
     const litehtml::string_map& attributes, const std::shared_ptr<litehtml::document>& doc)
 {
-    litehtml::element::ptr new_tag;
-    if(tag_name)
-    {
-        if(strcmp(tag_name, "math") == 0)
-        {
-            new_tag = std::make_shared<litehtml::el_math>(doc);
-        }
-        else if(strcmp(tag_name, "mrow") == 0)
-        {
-            new_tag = std::make_shared<litehtml::el_mrow>(doc);
-        }
-        else if(strcmp(tag_name, "mi") == 0)
-        {
-            new_tag = std::make_shared<litehtml::el_mi>(doc);
-        }
-        else if (strcmp(tag_name, "mn") == 0)
-        {
-            new_tag = std::make_shared<litehtml::el_mn>(doc);
-        }
-        else if (strcmp(tag_name, "msup") == 0)
-        {
-            new_tag = std::make_shared<litehtml::el_msup>(doc);
-        }
-    }
-    return new_tag;
+    //litehtml::element::ptr new_tag;
+    //if(tag_name)
+    //{
+    //    if(strcmp(tag_name, "math") == 0)
+    //    {
+    //        new_tag = std::make_shared<litehtml::el_math>(doc);
+    //    }
+    //    else if(strcmp(tag_name, "mrow") == 0)
+    //    {
+    //        new_tag = std::make_shared<litehtml::el_mrow>(doc);
+    //    }
+    //    else if(strcmp(tag_name, "mi") == 0)
+    //    {
+    //        new_tag = std::make_shared<litehtml::el_mi>(doc);
+    //    }
+    //    else if (strcmp(tag_name, "mn") == 0)
+    //    {
+    //        new_tag = std::make_shared<litehtml::el_mn>(doc);
+    //    }
+    //    else if (strcmp(tag_name, "msup") == 0)
+    //    {
+    //        new_tag = std::make_shared<litehtml::el_msup>(doc);
+    //    }
+    //}
+    //return new_tag;
+    return nullptr;
 }
 
 litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& descr,
     const litehtml::document* doc, litehtml::font_metrics* fm)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("create_font", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("create_font", 1);
     wxFont font;
     //int size = (int)(descr.size * 96.0f / 72.0f); // Convert pt to px
     int size = descr.size;
@@ -158,7 +159,7 @@ litehtml::uint_ptr wxContainer::create_font(const litehtml::font_description& de
         m_memdc->GetTextExtent("x", nullptr, &xHeight);
         fm->x_height = xHeight;
     }
-    timer.reset();
+    //timer.reset();
     return (litehtml::uint_ptr) new wxFont(font);
 }
 litehtml::pixel_t wxContainer::get_default_font_size() const
@@ -173,7 +174,7 @@ const char* wxContainer::get_default_font_name() const
 
 void wxContainer::get_media_features(litehtml::media_features& media) const
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_media_features", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_media_features", 1);
     wxSize sz = m_wnd->GetClientSize();
 
     media.type = litehtml::media_type_screen;
@@ -185,7 +186,7 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
     media.monochrome = 0;
     media.color_index = 256;
     media.resolution = 96;
-    timer.reset();
+    //timer.reset();
 }
 
 
@@ -193,7 +194,7 @@ void wxContainer::get_media_features(litehtml::media_features& media) const
 void wxContainer::import_css(litehtml::string& text,
     const litehtml::string& url, litehtml::string& baseurl)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("import_css", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("import_css", 1);
     if (!m_vfs) return;
 
     try
@@ -207,20 +208,20 @@ void wxContainer::import_css(litehtml::string& text,
         {
             // 将二进制数据转换为字符串
             text = litehtml::string(file_data.begin(), file_data.end());
-            timer.reset();
+            //timer.reset();
             // 更新baseurl为CSS文件所在目录
             
         }
         else
         {
-            timer.reset();
+            //timer.reset();
             wxLogWarning("Failed to load CSS file: %s", url);
         }
     }
     catch (const std::exception& e)
     {
-        timer.reset();
-        wxLogError("Error importing CSS: %s", e.what());
+        //timer.reset();
+        wxLogInfo("Error importing CSS: %s", e.what());
     }
 }
 
@@ -307,7 +308,7 @@ ImageCache wxContainer::create_image_cache(std::string ext, std::vector<uint8_t>
 }
 void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_on_ready)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("load_image", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("load_image", 1);
 
     try
     {
@@ -325,26 +326,26 @@ void wxContainer::load_image(const char* src, const char* baseurl, bool redraw_o
                     if (!cache.empty())
                     {
                         m_imageCache.emplace(url, cache);
-                        timer.reset();
+                        //timer.reset();
                         return;
                     }
                 }
             }
         }
-        timer.reset();
-        wxLogError("Error loading image: %s", src);
+        //timer.reset();
+        wxLogInfo("Error loading image: %s", src);
     }
     catch (const std::exception& e)
     {
-        timer.reset();
-        wxLogError("Error loading image: %s, error: %s", src, e.what());
+        //timer.reset();
+        wxLogInfo("Error loading image: %s, error: %s", src, e.what());
     }
 
 }
 
 void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml::size& sz)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_image_size", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("get_image_size", 1);
 
     try
     {
@@ -356,17 +357,17 @@ void wxContainer::get_image_size(const char* src, const char* baseurl, litehtml:
             {
                 sz.width = it->second.width;
                 sz.height = it->second.height;
-                timer.reset();
+                //timer.reset();
                 return;
             }
         }
 
-        timer.reset();
+        //timer.reset();
     }
     catch (const std::exception& e)
     {
-        timer.reset();
-        wxLogError("Error getting image size: %s, error: %s", src, e.what());
+        //timer.reset();
+        wxLogInfo("Error getting image size: %s, error: %s", src, e.what());
     }
 }
 wxBitmap wxContainer::create_bitmap_with_stb(ImageCache& cache)
@@ -478,11 +479,11 @@ wxBitmap wxContainer::create_bitmap(ImageCache& cache)
 void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const std::string& url, const std::string& base_url)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_image", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_image", 1);
     auto* dc = (wxGraphicsContext*)hdc;
     if (!dc || m_imageCache.empty() || url.empty())
     {
-        timer.reset();
+        //timer.reset();
         return;
     }
 
@@ -493,7 +494,7 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
         if(it == m_imageCache.end() || it->second.empty())
         {
             wxLogWarning("Bitmap not in cache: %s", url);
-            timer.reset();
+            //timer.reset();
             return;
         }
         
@@ -502,7 +503,7 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
         if (!bitmap.IsOk())
         {
             wxLogWarning("Invalid bitmap for: %s", url);
-            timer.reset();
+            //timer.reset();
             return;
         }
 
@@ -512,7 +513,7 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
 
         if (img_width <= 0 || img_height <= 0)
         {
-            timer.reset();
+            //timer.reset();
             return;
         }
 
@@ -623,12 +624,12 @@ void wxContainer::draw_image(litehtml::uint_ptr hdc, const litehtml::background_
         //    // 注意：wxWidgets没有内置的圆角裁剪，可能需要使用wxGraphicsContext
         //    // 或者创建路径进行裁剪
         //}
-        timer.reset();
+        //timer.reset();
     }
     catch (const std::exception& e)
     {
-        timer.reset();
-        wxLogError("Error drawing image: %s, error: %s", url, e.what());
+        //timer.reset();
+        wxLogInfo("Error drawing image: %s, error: %s", url, e.what());
     }
 }
 
@@ -639,7 +640,7 @@ litehtml::pixel_t wxContainer::pt_to_px(float pt) const
 
 litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr hFont)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("text_width", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("text_width", 1);
     wxFont* font = (wxFont*)hFont;
     if (font) 
     {
@@ -675,18 +676,18 @@ litehtml::pixel_t wxContainer::text_width(const char* text, litehtml::uint_ptr h
         }
 
 
-        timer.reset();
+        //timer.reset();
         return width;
     }
      
-    timer.reset();
+    //timer.reset();
     return 0;
 
 }
 
 void wxContainer::transform_text(litehtml::string& text, litehtml::text_transform tt)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("transform_text", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("transform_text", 1);
     switch (tt)
     {
     case litehtml::text_transform_capitalize:
@@ -701,7 +702,7 @@ void wxContainer::transform_text(litehtml::string& text, litehtml::text_transfor
     default:
         break;
     }
-    timer.reset();
+    //timer.reset();
 }
 
 void wxContainer::set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius)
@@ -714,7 +715,7 @@ void wxContainer::set_clip(const litehtml::position& pos, const litehtml::border
 
 void wxContainer::set_caption(const char* caption)
 {
-    Timer("set_caption", 1);
+    //Timer("set_caption", 1);
     if (m_wnd->GetParent())
     {
         m_wnd->GetParent()->SetLabel(wxString::FromUTF8(caption));
@@ -723,7 +724,7 @@ void wxContainer::set_caption(const char* caption)
 
 void wxContainer::get_viewport(litehtml::position& viewport) const
 {
-    Timer("get_viewport", 1);
+    //Timer("get_viewport", 1);
     wxSize sz = m_wnd->GetClientSize();
     viewport.x = 0;
     viewport.y = 0;
@@ -743,7 +744,7 @@ void wxContainer::del_clip()
 
 void wxContainer::delete_font(litehtml::uint_ptr hFont)
 {
-    Timer("delete_font", 1);
+    //Timer("delete_font", 1);
     wxFont* font = (wxFont*)hFont;
     delete font;
 }
@@ -751,14 +752,14 @@ void wxContainer::delete_font(litehtml::uint_ptr hFont)
 void wxContainer::draw_text(litehtml::uint_ptr hdc, const char* text,
     litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_text", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_text", 1);
     m_drawTextCache.add(hFont, text, color, pos);
-    timer.reset();
+    //timer.reset();
 }
 
 void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker& marker)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_list_marker", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_list_marker", 1);
     // Basic implementation - just draw a bullet
     if (marker.marker_type == litehtml::list_style_type_disc)
     {
@@ -769,7 +770,7 @@ void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_
             marker.pos.y + marker.pos.height / 2,
             marker.pos.width, marker.pos.height);
     }
-    timer.reset();
+    //timer.reset();
 }
 
 
@@ -777,23 +778,23 @@ void wxContainer::draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_
 void wxContainer::draw_solid_fill(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::web_color& color)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_solid_fill", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_solid_fill", 1);
     wxGraphicsContext* dc = (wxGraphicsContext*)hdc;
     dc->SetBrush(wxBrush(wxColour(color.red, color.green, color.blue, color.alpha)));
     dc->SetPen(*wxTRANSPARENT_PEN);
     dc->DrawRectangle(layer.border_box.x, layer.border_box.y,
         layer.border_box.width, layer.border_box.height);
-    timer.reset();
+    //timer.reset();
 }
 void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
     const litehtml::background_layer::linear_gradient& gradient)
 {
 
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_linear_gradient", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_linear_gradient", 1);
     auto* dc = (wxGraphicsContext*)hdc;
     if (!dc) 
     {
-        wxLogError("draw_linear_gradient: null graphics context");
+        wxLogInfo("draw_linear_gradient: null graphics context");
         return; 
     }
     
@@ -814,7 +815,7 @@ void wxContainer::draw_linear_gradient(litehtml::uint_ptr hdc, const litehtml::b
         wxDouble(layer.border_box.height), 1);
 
 
-    timer.reset();
+    //timer.reset();
 }
 
 void wxContainer::draw_radial_gradient(litehtml::uint_ptr hdc, const litehtml::background_layer& layer,
@@ -832,7 +833,7 @@ void wxContainer::draw_conic_gradient(litehtml::uint_ptr hdc, const litehtml::ba
 void wxContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders,
     const litehtml::position& draw_pos, bool root)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_borders", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_borders", 1);
     auto* dc = (wxGraphicsContext*)hdc;
 
     // Draw each border if it exists
@@ -870,7 +871,7 @@ void wxContainer::draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& 
         dc->StrokeLine(draw_pos.left(), draw_pos.top(), draw_pos.left(), draw_pos.bottom());
 
     }
-    timer.reset();
+    //timer.reset();
 }
 
 void wxContainer::set_cursor(const char* cursor)
@@ -936,7 +937,7 @@ void wxContainer::on_mouse_event(const litehtml::element::ptr& el, litehtml::mou
 
 void wxContainer::draw_finished(litehtml::uint_ptr hdc, litehtml::position updateRect)
 {
-    std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
+    //std::unique_ptr<Timer> timer = std::make_unique<Timer>("draw_finished", 1);
 
     auto* dc = (wxGraphicsContext*)hdc;
     if(dc)
@@ -968,7 +969,7 @@ void wxContainer::draw_finished(litehtml::uint_ptr hdc, litehtml::position updat
         }
     }
    
-    timer.reset();
+    //timer.reset();
 
 }
 
